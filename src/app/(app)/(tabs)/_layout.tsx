@@ -23,7 +23,7 @@ const Layout = () => {
             <Tabs.Screen name='workout' options={{
                 headerShown: false, title: 'Workout',
                 tabBarIcon: ({ color, size }) => (
-                    <AntDesign name='pluscircle' color={color} size={size} />
+                    <AntDesign name='plus' color={color} size={size} />
                 )
             }} />
 
@@ -37,7 +37,7 @@ const Layout = () => {
             <Tabs.Screen name='history' options={{
                 headerShown: false, title: 'History',
                 tabBarIcon: ({ color, size }) => (
-                    <AntDesign name='clockcircleo' color={color} size={size} />
+                    <AntDesign name='lock' color={color} size={size} />
                 )
             }} />
 

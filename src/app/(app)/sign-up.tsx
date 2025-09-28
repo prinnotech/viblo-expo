@@ -1,10 +1,13 @@
-import { Alert, StyleSheet, View, AppState, TextInput, Text, TouchableOpacity, ActivityIndicator, KeyboardAvoidingView } from 'react-native'
+import { Alert, Image, View, AppState, TextInput, Text, TouchableOpacity, ActivityIndicator, KeyboardAvoidingView } from 'react-native'
 import React, { useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { Button } from 'react-native'
 import { supabase } from '@/lib/supabase'
 import { Link } from 'expo-router'
 import PasswordInput from '@/components/PasswordInput'
+
+const imageFavicon = require('@/../assets/favicon.png')
+
 
 // Tells Supabase Auth to continuously refresh the session automatically if
 // the app is in the foreground. When this is added, you will continue to receive
@@ -44,7 +47,17 @@ const SignUp = () => {
         <SafeAreaView className="flex-1 justify-center bg-gray-100 p-4">
             <KeyboardAvoidingView>
                 <View className="p-8 mx-auto w-full max-w-sm bg-white rounded-xl shadow-lg">
-                    <Text className="text-3xl font-bold text-center text-gray-800 mb-6">Welcome Back</Text>
+
+                    {/* Logo */}
+                    <View>
+                        <Image
+                            source={imageFavicon}
+                            className="w-20 h-20 mx-auto mb-4"
+                            resizeMode="contain"
+                        />
+                    </View>
+
+                    <Text className="text-3xl font-bold text-center text-gray-800 mb-6">Welcome!</Text>
 
                     {/* Email Input */}
                     <TextInput
