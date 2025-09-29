@@ -22,7 +22,7 @@ export const AuthProvider = ({ children }) => {
         supabase.auth.getSession().then(async ({ data: { session } }) => {
             setSession(session);
             setUser(session?.user ?? null);
-            setIsLoading(false);
+            
 
             // If a user is logged in, fetch their profile data
             if (session?.user) {
@@ -35,8 +35,10 @@ export const AuthProvider = ({ children }) => {
                 if (error && error.code !== 'PGRST116') {
                     console.error("Error fetching initial profile:", error.message);
                     setProfile(null);
+                    setIsLoading(false);
                 } else {
                     setProfile(data);
+                    setIsLoading(false);
                 }
             }
 
@@ -47,7 +49,7 @@ export const AuthProvider = ({ children }) => {
         const { data: authListener } = supabase.auth.onAuthStateChange(async (_event, session) => {
             setSession(session);
             setUser(session?.user ?? null);
-            setIsLoading(false);
+            
 
             // If a user is logged in, fetch their profile data
             if (session?.user) {
@@ -60,8 +62,10 @@ export const AuthProvider = ({ children }) => {
                 if (error && error.code !== 'PGRST116') {
                     console.error("Error fetching initial profile:", error.message);
                     setProfile(null);
+                    setIsLoading(false);
                 } else {
                     setProfile(data);
+                    setIsLoading(false);
                 }
             }
 

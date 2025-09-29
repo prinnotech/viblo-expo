@@ -2,14 +2,14 @@ import { StyleSheet, Text, View } from 'react-native'
 import React from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
-const Workout = () => {
+const Campaigns = () => {
   return (
-    <SafeAreaView className='flex-1'>
-      <Text>Workout</Text>
+    <SafeAreaView>
+      <Text>campaigns</Text>
     </SafeAreaView>
   )
 }
 
-export default Workout
+export default Campaigns
 
 const styles = StyleSheet.create({})
