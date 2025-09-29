@@ -1,20 +1,26 @@
 {
-  "expo": {
-    "scheme": "acme",
-    "userInterfaceStyle": "automatic",
-    "orientation": "default",
-    "web": {
-      "output": "server"
-    },
-    "plugins": [
-      [
-        "expo-router",
-        {
-          "origin": "https://n"
-        }
-      ]
-    ],
-    "name": "expo-template",
-    "slug": "expo-template"
-  }
+    "expo": {
+        "scheme": "acme",
+        "userInterfaceStyle": "automatic",
+        "orientation": "default",
+        "web": {
+            "output": "server"
+        },
+        "plugins": [
+            [
+                "expo-router",
+                {
+                    "origin": "https://n"
+                }
+            ],
+            [
+                "expo-image-picker",
+                {
+                    "photosPermission": "The app accesses your photos to let you share them with your friends."
+                }
+            ]
+        ],
+        "name": "expo-template",
+        "slug": "expo-template"
+    }
 }

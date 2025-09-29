@@ -14,6 +14,7 @@ const Layout = () => {
     const hasProfile = profile && profile?.username && profile?.user_type ? true : false;
     const needsOnboarding = isSignedIn && !hasProfile;
 
+
     if (isLoading) {
         return (
             <View className='flex-1 items-center justify-center'>
@@ -39,6 +40,7 @@ const Layout = () => {
         </Stack>
     )
 }
+
 
 export default Layout
 

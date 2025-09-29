@@ -1,5 +1,5 @@
 import {
-    StyleSheet,
+    Image,
     Text,
     View,
     TextInput,
@@ -18,6 +18,10 @@ import { Ionicons } from '@expo/vector-icons';
 import { Profile as ProfileData } from '@/lib/db_interface';
 import { UserType } from '@/lib/enum_types';
 import { useRouter } from 'expo-router';
+import * as ImagePicker from 'expo-image-picker';
+import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+
 
 // Constants
 const INFLUENCER_NICHES = [
@@ -33,12 +37,14 @@ const BRAND_INDUSTRIES = [
 ];
 
 const Onboarding = () => {
-    const { user } = useAuth();
+    const { user, getProfile } = useAuth();
     const router = useRouter();
 
     // State Management
     const [currentStep, setCurrentStep] = useState(1);
     const [loading, setLoading] = useState(false);
+    const [uploadingAvatar, setUploadingAvatar] = useState(false);
+
     const [profileData, setProfileData] = useState<ProfileData>({
         id: '',
         created_at: '',
@@ -73,6 +79,124 @@ const Onboarding = () => {
                 : prev.niches.length < 5 ? [...prev.niches, niche] : prev.niches
         }));
     };
+
+    const pickImage = async () => {
+        try {
+            // Request permissions
+            const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+            if (status !== 'granted') {
+                Alert.alert('Permission needed', 'We need access to your photos to upload an avatar.');
+                return;
+            }
+
+            // Launch image picker
+            const result = await ImagePicker.launchImageLibraryAsync({
+                mediaTypes: ['images'],
+                allowsEditing: true,
+                aspect: [1, 1], // Square aspect ratio
+                quality: 0.8,
+                base64: true,
+            });
+
+            if (!result.canceled && result.assets[0]) {
+                const asset = result.assets[0];
+
+                // Check file size (50MB = 50 * 1024 * 1024 bytes)
+                if (asset.fileSize && asset.fileSize > 50 * 1024 * 1024) {
+                    Alert.alert('File too large', 'Please select an image smaller than 50MB.');
+                    return;
+                }
+
+                await uploadAvatar(asset);
+            }
+        } catch (error) {
+            console.error('Error picking image:', error);
+            Alert.alert('Error', 'Failed to pick image. Please try again.');
+        }
+    };
+
+    const uploadAvatar = async (asset: ImagePicker.ImagePickerAsset) => {
+        if (!user || !asset.uri) {
+            Alert.alert('Error', 'No image selected or user not logged in.');
+            return;
+        }
+
+        setUploadingAvatar(true);
+
+        try {
+            // Fetch the image data directly as an ArrayBuffer
+            const response = await fetch(asset.uri);
+            const arrayBuffer = await response.arrayBuffer();
+
+            // Generate a unique file path
+            const fileExtension = asset.uri.split('.').pop()?.toLowerCase() || 'jpg';
+            const filePath = `${user.id}/profile_image.${fileExtension}`;
+
+            const { data, error } = await supabase.storage
+                .from('profile_avatars')
+                .upload(filePath, arrayBuffer, {
+                    contentType: asset.mimeType || `image/${fileExtension}`,
+                    upsert: true, // Use upsert to allow overwriting if needed
+                });
+
+            if (error) {
+                throw error;
+            }
+
+            // Get the public URL of the uploaded file
+            const { data: publicUrlData } = supabase.storage
+                .from('profile_avatars')
+                .getPublicUrl(filePath);
+
+            updateProfileData('avatar_url', publicUrlData.publicUrl);
+            Alert.alert('Success', 'Avatar uploaded successfully!');
+
+        } catch (err) {
+            const error = err as Error;
+            console.error('Error uploading avatar:', error.message);
+            Alert.alert('Error', 'Failed to upload avatar. Please try again.');
+        } finally {
+            setUploadingAvatar(false);
+        }
+    };
+
+    const removeAvatar = async () => {
+        if (!profileData.avatar_url) return;
+
+        Alert.alert(
+            'Remove Avatar',
+            'Are you sure you want to remove your avatar?',
+            [
+                { text: 'Cancel', style: 'cancel' },
+                {
+                    text: 'Remove',
+                    style: 'destructive',
+                    onPress: async () => {
+                        try {
+                            // Extract file path from URL for deletion
+                            if (profileData.avatar_url.includes('profile_avatars')) {
+                                const urlParts = profileData.avatar_url.split('/');
+                                const fileName = urlParts[urlParts.length - 1];
+                                const filePath = `${user?.id}/${fileName}`;
+
+                                // Delete from storage
+                                await supabase.storage
+                                    .from('profile_avatars')
+                                    .remove([filePath]);
+                            }
+
+                            // Update profile data
+                            updateProfileData('avatar_url', '');
+                        } catch (error) {
+                            console.error('Error removing avatar:', error);
+                        }
+                    }
+                }
+            ]
+        );
+    };
+
+
 
     // Validation Functions
     const validateStep = (step: number): boolean => {
@@ -174,6 +298,8 @@ const Onboarding = () => {
                 console.error('Error saving profile:', error);
                 Alert.alert('Error', `Failed to save profile: ${error.message}`);
             } else {
+
+                await getProfile();
                 // Navigate to main app ONLY on success
                 router.replace('/(tabs)');
             }
@@ -185,6 +311,51 @@ const Onboarding = () => {
             setLoading(false);
         }
     };
+
+    // Avatar Component
+    const renderAvatarSection = () => (
+        <View className="items-center mb-6 my-6 bg-gray-100">
+            <Text className="text-gray-700 font-medium mb-4">Profile Picture</Text>
+
+            <View className="relative">
+                <TouchableOpacity
+                    onPress={pickImage}
+                    disabled={uploadingAvatar}
+                    className="w-24 h-24 rounded-full bg-gray-100 border-2 border-gray-300 border-dashed items-center justify-center overflow-hidden"
+                >
+                    {uploadingAvatar ? (
+                        <ActivityIndicator size="small" color="#3B82F6" />
+                    ) : profileData.avatar_url ? (
+                        <Image
+                            source={{ uri: profileData.avatar_url }}
+                            className="w-full h-full"
+                            resizeMode="cover"
+                        />
+                    ) : (
+                        <View className="items-center">
+                            <Ionicons name="camera" size={24} color="#6B7280" />
+                            <Text className="text-xs text-gray-500 mt-1">Add Photo</Text>
+                        </View>
+                    )}
+                </TouchableOpacity>
+
+                {profileData.avatar_url && !uploadingAvatar && (
+                    <TouchableOpacity
+                        onPress={removeAvatar}
+                        className="absolute -top-1 -right-1 w-6 h-6 bg-red-500 rounded-full items-center justify-center"
+                    >
+                        <Ionicons name="close" size={14} color="white" />
+                    </TouchableOpacity>
+                )}
+            </View>
+
+            <Text className="text-xs text-gray-500 mt-2 text-center">
+                Upload a profile picture (max 50MB)
+            </Text>
+        </View>
+    );
+
+
 
     // Step Components
     const renderUserTypeStep = () => (
@@ -326,11 +497,15 @@ const Onboarding = () => {
                     </View>
                 )}
             </View>
+
+            {/* Avatar Upload Section */}
+            {renderAvatarSection()}
+
         </ScrollView>
     );
 
     const renderProfileDetailsStep = () => (
-        <ScrollView className="flex-1 p-6">
+        <View className="flex-1 p-6">
             <Text className="text-2xl font-bold text-gray-800 mb-2">
                 Profile Details
             </Text>
@@ -367,17 +542,48 @@ const Onboarding = () => {
                 </View>
 
                 {/* Location */}
-                <View>
+                <View style={{ zIndex: 1 }}>
                     <Text className="text-gray-700 font-medium mb-2">Location</Text>
-                    <TextInput
-                        value={profileData.location}
-                        onChangeText={(text) => updateProfileData('location', text)}
-                        placeholder="City, Country"
-                        className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-base"
+                    <GooglePlacesAutocomplete
+                        placeholder='City, Country'
+                        onPress={(data, details = null) => {
+                            console.log(data, details);
+                            updateProfileData('location', data.description);
+                        }}
+                        onFail={(error) => console.error("Google Places API Error:", error)}
+                        predefinedPlaces={[]}
+                        query={{
+                            key: 'AIzaSyCd35P5ccI0kfDFY3DS-urVwBik4TLWA_c',
+                            language: 'en',
+                            types: '(cities)',
+                        }}
+                        fetchDetails={false}
+                        debounce={300}
+                        textInputProps={{
+                            autoCorrect: false,
+                        }}
+                        styles={{
+                            textInput: {
+                                height: 48,
+                                borderRadius: 8,
+                                borderWidth: 1,
+                                borderColor: '#d1d5db',
+                                backgroundColor: '#ffffff',
+                                paddingHorizontal: 16,
+                                fontSize: 16,
+                            },
+                            listView: {
+                                borderWidth: 1,
+                                borderColor: '#d1d5db',
+                                backgroundColor: '#ffffff',
+                                borderRadius: 8,
+                                marginTop: 8,
+                            },
+                        }}
                     />
                 </View>
             </View>
-        </ScrollView>
+        </View>
     );
 
     const renderPreferencesStep = () => (
@@ -470,6 +676,17 @@ const Onboarding = () => {
                 return null;
         }
     };
+
+
+    if (loading) {
+        return (
+            <SafeAreaView className="flex-1 justify-center items-center bg-gray-100">
+                <ActivityIndicator size="large" color="#3B82F6" />
+            </SafeAreaView>
+        );
+    }
+
+
 
     return (
         <SafeAreaView className="flex-1 bg-gray-100">

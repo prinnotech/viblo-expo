@@ -3,11 +3,12 @@ import { supabase } from '@/lib/supabase';
 import { Session, User } from '@supabase/supabase-js';
 import { Profile } from '@/lib/db_interface';
 
-const AuthContext = createContext<{ user: User | null; session: Session | null; isLoading: boolean, profile: Profile | null }>({
+const AuthContext = createContext<{ user: User | null; session: Session | null; isLoading: boolean, profile: Profile | null, getProfile: () => Promise<void> }>({
     user: null,
     session: null,
     isLoading: true,
     profile: null,
+    getProfile: async () => { console.log("No user ID provided to getProfile") },
 });
 
 export const AuthProvider = ({ children }) => {
@@ -71,8 +72,30 @@ export const AuthProvider = ({ children }) => {
         };
     }, []);
 
+    const getProfile = async () => {
+        if (!user?.id || !session?.user?.id) {
+            setProfile(null);
+            console.log("No user ID provided to getProfile");
+            return;
+        }
+
+        const { data, error } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', session?.user.id || user?.id)
+            .single();
+
+        if (error && error.code !== 'PGRST116') {
+            console.error("Error fetching initial profile:", error.message);
+            setProfile(null);
+        } else {
+            setProfile(data);
+            console.log("profile set: ", data)
+        }
+    }
+
     return (
-        <AuthContext.Provider value={{ user, session, isLoading, profile }}>
+        <AuthContext.Provider value={{ user, session, isLoading, profile, getProfile }}>
             {children}
         </AuthContext.Provider>
     );
