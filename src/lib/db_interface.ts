@@ -54,6 +54,7 @@ export interface Campaign {
     target_niches: string[] | null;
     target_audience_age: string | null;
     target_audience_locations: string[] | null;
+    target_platforms: string[] | null;
     start_date: string | null; // timestamp with time zone
     end_date: string | null; // timestamp with time zone
     created_at: string | null; // timestamp with time zone
@@ -75,6 +76,11 @@ export interface ContentSubmission {
     submitted_at: string | null; // timestamp with time zone
     approved_at: string | null; // timestamp with time zone
     posted_at: string | null; // timestamp with time zone
+    video_summary: string | null;
+    match_percentage: number | null;
+    message: string | null;
+    rating: number | null;
+    justify: string | null;
 }
 
 export interface SocialLink {
