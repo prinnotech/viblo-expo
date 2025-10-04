@@ -238,9 +238,9 @@ const CampaignDetailsPage = () => {
                     <Pressable
                         disabled={isButtonDisabled}
                         className={`py-4 rounded-xl items-center justify-center shadow-lg ${isButtonDisabled ? 'bg-gray-400' : 'bg-blue-600'}`}
-onPress={() => {
-    router.push(`/campaigns/${campaignId}/apply`);
-}}
+                        onPress={() => {
+                            router.push(`/campaigns/${campaignId}/apply`);
+                        }}
                     >
                         <Text className="text-white text-lg font-bold">{getButtonText()}</Text>
                     </Pressable>

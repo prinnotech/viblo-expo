@@ -5,29 +5,13 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import * as ImagePicker from 'expo-image-picker';
 import { ResizeMode, Video } from 'expo-av';
 import { Feather } from '@expo/vector-icons';
+import { ContentSubmission } from '@/lib/db_interface';
+import { SubmissionStatus } from '@/lib/enum_types';
 
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import { Campaign } from '@/lib/db_interface';
 
-type SubmissionStatus = 'pending_review' | 'needs_revision' | 'approved' | 'posted_live' | 'completed' | 'rejected';
-
-interface ContentSubmission {
-    id: string;
-    status: SubmissionStatus;
-    review_video_url: string;
-    brand_feedback: string | null;
-    message: string | null;
-    rating: number | null;
-    justify: string | null;
-    public_post_url: string | null;
-    view_count: number | null;
-    like_count: number | null;
-    comment_count: number | null;
-    earned_amount: number | null;
-    approved_at: string | null;
-    posted_at: string | null;
-}
 
 const ApplyPage = () => {
     const router = useRouter();
@@ -224,7 +208,7 @@ const ApplyPage = () => {
             const response = await fetch(asset.uri);
             const arrayBuffer = await response.arrayBuffer();
             const fileExtension = asset.uri.split('.').pop()?.toLowerCase() || 'mp4';
-            const filePath = `${profile.id}/${campaignId}_${Date.now()}.${fileExtension}`;
+            const filePath = `${profile.id}/${campaignId}.${fileExtension}`;
 
             const { error } = await supabase.storage
                 .from('video_submission')
@@ -498,16 +482,6 @@ const ApplyPage = () => {
                     </>
                 );
 
-            case 'rejected':
-                return (
-                    <View className="flex-1 items-center justify-center p-6">
-                        <Feather name="x-circle" size={64} color="#EF4444" />
-                        <Text className="text-2xl font-bold mt-4 text-center text-red-600">Application Rejected</Text>
-                        {submission.message && (
-                            <Text className="text-gray-600 text-center mt-2">{submission.message}</Text>
-                        )}
-                    </View>
-                );
 
             default:
                 return null;
