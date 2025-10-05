@@ -34,6 +34,20 @@ function Layout() {
                 }}
             />
 
+            <Stack.Screen
+                name="analytics/index"
+                options={{
+                    // This makes the screen slide up from the bottom
+                    presentation: 'modal',
+
+                    // This ensures the header is visible
+                    headerShown: true,
+
+                    // Set a default title that shows while data is loading
+                    title: 'Your stats',
+                }}
+            />
+
 
         </Stack>
     );

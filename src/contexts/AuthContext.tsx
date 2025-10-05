@@ -18,11 +18,11 @@ export const AuthProvider = ({ children }) => {
     const [profile, setProfile] = useState<Profile | null>(null);
 
     useEffect(() => {
+
         // Get the initial session
         supabase.auth.getSession().then(async ({ data: { session } }) => {
             setSession(session);
             setUser(session?.user ?? null);
-            
 
             // If a user is logged in, fetch their profile data
             if (session?.user) {
@@ -42,14 +42,15 @@ export const AuthProvider = ({ children }) => {
                 }
             }
 
+            setIsLoading(false);
         });
+
 
 
         // Listen for auth state changes
         const { data: authListener } = supabase.auth.onAuthStateChange(async (_event, session) => {
             setSession(session);
             setUser(session?.user ?? null);
-            
 
             // If a user is logged in, fetch their profile data
             if (session?.user) {
@@ -68,6 +69,8 @@ export const AuthProvider = ({ children }) => {
                     setIsLoading(false);
                 }
             }
+
+            setIsLoading(false);
 
         });
 

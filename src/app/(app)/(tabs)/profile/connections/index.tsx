@@ -67,29 +67,36 @@ const ConnectionsPage = () => {
         }
 
         // Listen for deep link redirects after OAuth
-        const subscription = Linking.addEventListener('url', handleDeepLink);
+        /* const subscription = Linking.addEventListener('url', handleDeepLink);
 
         return () => {
             subscription.remove();
-        };
+        }; */
     }, [profile]);
 
     const handleDeepLink = ({ url }: { url: string }) => {
         console.log('Deep link received:', url);
 
-        // Parse URL: exp://192.168.1.214:8081?success=true&platform=instagram
-        if (url.includes('connections')) {
-            const urlParams = new URL(url).searchParams;
-            const success = urlParams.get('success');
-            const error = urlParams.get('error');
-            const platform = urlParams.get('platform');
+        // Parse URL - the URL comes back as: exp://192.168.1.214:8081?success=true&platform=tiktok
+        // Remove the check for 'connections' since it won't be in the redirect URL
+        try {
+            // Handle both URL formats
+            const urlObj = url.includes('?') ? new URL(url) : null;
 
-            if (success === 'true') {
+            if (!urlObj) return;
+
+            const success = urlObj.searchParams.get('success');
+            const error = urlObj.searchParams.get('error');
+            const platform = urlObj.searchParams.get('platform');
+
+            if (success === 'true' && platform) {
                 Alert.alert('Success', `${platform} connected successfully!`);
                 fetchConnections();
             } else if (error) {
                 Alert.alert('Error', decodeURIComponent(error));
             }
+        } catch (e) {
+            console.error('Error parsing deep link:', e);
         }
     };
 
@@ -121,8 +128,7 @@ const ConnectionsPage = () => {
         setConnecting(platformId);
 
         try {
-            // Your backend URL - update this to your actual backend
-            const backendUrl = process.env.EXPO_PUBLIC_BACKEND_URL || 'https://e30932831acd.ngrok-free.app';
+            const backendUrl = process.env.EXPO_PUBLIC_BACKEND_URL || 'https://viblo-backend-production.up.railway.app';
 
             let authUrl = '';
 
@@ -134,24 +140,40 @@ const ConnectionsPage = () => {
                     authUrl = `${backendUrl}/api/tiktok/authorize?user_id=${profile?.id}`;
                     break;
                 case 'youtube':
-                    Alert.alert('Coming Soon', 'YouTube integration coming soon!');
-                    setConnecting(null);
-                    return;
+                    authUrl = `${backendUrl}/api/youtube/authorize?user_id=${profile?.id}`;
+                    break;
                 default:
                     Alert.alert('Error', 'Platform not supported');
                     setConnecting(null);
                     return;
             }
 
-            // Open auth URL in system browser
             const result = await WebBrowser.openAuthSessionAsync(
                 authUrl,
-                'exp://192.168.1.214:8081' // Your app's deep link scheme
+                'exp://192.168.1.214:8081'
             );
 
-            if (result.type === 'success') {
-                // The callback will be handled by handleDeepLink
-                console.log('Auth session completed');
+            // After auth session completes, check the database directly
+            if (result.type === 'success' || result.type === 'dismiss') {
+                console.log('Auth session completed, checking connection status...');
+
+                // Wait a moment for backend to complete
+                await new Promise(resolve => setTimeout(resolve, 1000));
+
+                // Check if connection was successful by fetching from database
+                const { data, error } = await supabase
+                    .from('social_links')
+                    .select('*')
+                    .eq('user_id', profile?.id)
+                    .eq('platform', platformId)
+                    .single();
+
+                if (data && !error) {
+                    Alert.alert('Success', `${platformId} connected successfully!`);
+                    fetchConnections();
+                } else {
+                    Alert.alert('Error', 'Connection was not completed. Please try again.');
+                }
             } else if (result.type === 'cancel') {
                 Alert.alert('Cancelled', 'Authorization was cancelled');
             }
@@ -175,15 +197,41 @@ const ConnectionsPage = () => {
                     style: 'destructive',
                     onPress: async () => {
                         try {
-                            const { error } = await supabase
+                            const backendUrl = process.env.EXPO_PUBLIC_BACKEND_URL || 'https://viblo-backend-production.up.railway.app';
+
+                            // Revoke OAuth token first
+                            if (platformId === 'tiktok' || platformId === 'youtube') {
+                                try {
+                                    await fetch(`${backendUrl}/api/${platformId}/revoke?user_id=${profile?.id}`, {
+                                        method: 'POST',
+                                        headers: {
+                                            'x-api-key': process.env.EXPO_PUBLIC_API_KEY || 'fb52e30a-274d-4871-bdce-bebb6464bcf1',
+                                        },
+                                    });
+                                } catch (e) {
+                                    console.error('Token revocation failed:', e);
+                                }
+                            }
+
+                            // Delete from database
+                            const { error: socialError } = await supabase
                                 .from('social_links')
                                 .delete()
                                 .eq('user_id', profile?.id)
                                 .eq('platform', platformId);
 
-                            if (error) throw error;
+                            if (socialError) throw socialError;
 
-                            Alert.alert('Disconnected', `${platformId} account disconnected`);
+                            // Also delete OAuth tokens
+                            const { error: tokenError } = await supabase
+                                .from('oauth_tokens')
+                                .delete()
+                                .eq('user_id', profile?.id)
+                                .eq('platform', platformId);
+
+                            if (tokenError) console.error('Token deletion error:', tokenError);
+
+                            Alert.alert('Disconnected', `${platformId} account disconnected. You can now connect a different account.`);
                             fetchConnections();
                         } catch (error) {
                             console.error('Disconnect error:', error);

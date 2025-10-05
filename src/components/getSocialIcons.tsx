@@ -18,32 +18,32 @@ interface SocialIconProps extends React.SVGProps<SVGSVGElement> {
  * @param className Optional classes for styling the SVG element.
  * @returns A React component rendering the requested SVG icon.
  */
-export const SocialIcon: React.FC<SocialIconProps> = ({ platform, className = 'h-6 w-6', ...props }) => {
+export const SocialIcon: React.FC<SocialIconProps> = ({ platform, className = 'h-6 w-6', color = 'black' }) => {
     const getIcon = () => {
         switch (platform) {
             case 'tiktok':
                 return (
-                    <FontAwesome5 name="tiktok" size={24} color="black" />
+                    <FontAwesome5 name="tiktok" size={24} color={color} />
 
                 );
             case 'instagram':
                 return (
-                    <Entypo name="instagram" size={24} color="black" />
+                    <Entypo name="instagram" size={24} color={color} />
 
                 );
             case 'youtube':
                 return (
-                    <Feather name="youtube" size={24} color="black" />
+                    <Feather name="youtube" size={24} color={color} />
 
                 );
             case 'facebook':
                 return (
-                    <Feather name="facebook" size={24} color="black" />
+                    <Feather name="facebook" size={24} color={color} />
 
                 );
             case 'twitter_x':
                 return (
-                    <Feather name="twitter" size={24} color="black" />
+                    <Feather name="twitter" size={24} color={color} />
 
                 );
             default:

@@ -14,7 +14,6 @@ const Layout = () => {
     const hasProfile = profile && profile?.username && profile?.user_type ? true : false;
     const needsOnboarding = isSignedIn && !hasProfile;
 
-
     if (isLoading) {
         return (
             <View className='flex-1 items-center justify-center'>
@@ -23,10 +22,13 @@ const Layout = () => {
         )
     }
 
+    console.log('✅ Rendering Stack');
+
     return (
         <Stack>
             <Stack.Protected guard={isSignedIn && hasProfile}>
                 <Stack.Screen name='(tabs)' options={{ headerShown: false }} />
+                <Stack.Screen name='creators/[id]' options={{ headerShown: false }} />
             </Stack.Protected>
 
             <Stack.Protected guard={needsOnboarding}>

@@ -21,7 +21,7 @@ import { useRouter } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
-
+import { registerForPushNotifications } from '@/hooks/usePushNotifications';
 
 // Constants
 const INFLUENCER_NICHES = [
@@ -270,6 +270,9 @@ const Onboarding = () => {
         setLoading(true);
 
         try {
+            const pushToken = await registerForPushNotifications();
+            console.log('Push token:', pushToken);
+
             const dataToSave: any = {
                 id: user.id,
                 username: profileData.username.trim(),
@@ -278,7 +281,7 @@ const Onboarding = () => {
                 website_url: profileData.website_url.trim() || null,
                 location: profileData.location.trim() || null,
                 updated_at: new Date().toISOString(),
-                push_token: profileData.push_token || null
+                push_token: pushToken || null,
             };
 
             if (profileData.user_type === 'influencer') {

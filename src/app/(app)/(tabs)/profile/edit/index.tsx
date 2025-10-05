@@ -7,7 +7,8 @@ import {
     ActivityIndicator,
     Image,
     TextInput,
-    Alert
+    Alert,
+    Switch
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -17,6 +18,7 @@ import { supabase } from '@/lib/supabase';
 import { useState, useEffect } from 'react';
 import * as ImagePicker from 'expo-image-picker';
 import { useAuth } from '@/contexts/AuthContext';
+import { registerForPushNotifications } from '@/hooks/usePushNotifications';
 
 // A reusable input component for the form
 const FormInput = ({ label, value, onChangeText, placeholder, multiline = false }: {
@@ -53,6 +55,8 @@ const EditProfileScreen = () => {
     const [bio, setBio] = useState('');
     const [website, setWebsite] = useState('');
     const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+    const [notificationsEnabled, setNotificationsEnabled] = useState(false);
+
 
     const [updating, setUpdating] = useState(false);
 
@@ -65,6 +69,7 @@ const EditProfileScreen = () => {
             setBio(initialProfile.bio || '');
             setWebsite(initialProfile.website_url || '');
             setAvatarUrl(initialProfile.avatar_url);
+            setNotificationsEnabled(!!initialProfile.push_token);
         }
     }, [initialProfile]);
 
@@ -154,6 +159,46 @@ const EditProfileScreen = () => {
         }
     };
 
+    const handleNotificationToggle = async (value: boolean) => {
+        setNotificationsEnabled(value);
+
+        if (value) {
+            // User wants to enable notifications
+            const token = await registerForPushNotifications();
+
+            if (token) {
+                // Save immediately to database
+                const { error } = await supabase
+                    .from('profiles')
+                    .update({ push_token: token })
+                    .eq('id', session?.user?.id);
+
+                if (error) {
+                    console.error('Error saving push token:', error);
+                    Alert.alert('Error', 'Failed to enable notifications');
+                    setNotificationsEnabled(false);
+                } else {
+                    Alert.alert('Success', 'Notifications enabled!');
+                }
+            } else {
+                Alert.alert('Permission Denied', 'Please enable notifications in your device settings');
+                setNotificationsEnabled(false);
+            }
+        } else {
+            // User wants to disable - clear the token
+            const { error } = await supabase
+                .from('profiles')
+                .update({ push_token: null })
+                .eq('id', session?.user?.id);
+
+            if (error) {
+                console.error('Error clearing push token:', error);
+            } else {
+                Alert.alert('Success', 'Notifications disabled');
+            }
+        }
+    };
+
     if (initialLoading) {
         return (
             <SafeAreaView className="flex-1 bg-gray-50 justify-center items-center">
@@ -182,6 +227,25 @@ const EditProfileScreen = () => {
                 <FormInput label="Username" value={username} onChangeText={setUsername} placeholder="Your public username" />
                 <FormInput label="Bio" value={bio} onChangeText={setBio} placeholder="Tell us about yourself" multiline />
                 <FormInput label="Website" value={website} onChangeText={setWebsite} placeholder="https://yourwebsite.com" />
+
+                {/* Notifications Toggle */}
+                <View className="mb-6 bg-white border border-gray-300 rounded-lg px-4 py-4">
+                    <View className="flex-row justify-between items-center">
+                        <View className="flex-1 mr-4">
+                            <Text className="text-base font-semibold text-gray-800">Push Notifications</Text>
+                            <Text className="text-sm text-gray-600 mt-1">
+                                Receive updates about campaigns, messages, and activity
+                            </Text>
+                        </View>
+                        <Switch
+                            value={notificationsEnabled}
+                            onValueChange={handleNotificationToggle}
+                            trackColor={{ false: '#d1d5db', true: '#93c5fd' }}
+                            thumbColor={notificationsEnabled ? '#3b82f6' : '#f3f4f6'}
+                        />
+                    </View>
+                </View>
+
 
                 {/* Save Button */}
                 <TouchableOpacity
