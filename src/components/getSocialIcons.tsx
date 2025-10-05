@@ -2,9 +2,7 @@ import React from 'react';
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 import Entypo from '@expo/vector-icons/Entypo';
 import Feather from '@expo/vector-icons/Feather';
-
-// Define the types for the component props
-type SocialPlatform = 'tiktok' | 'instagram' | 'youtube' | 'facebook' | 'x';
+import { SocialPlatform } from '@/lib/enum_types';
 
 interface SocialIconProps extends React.SVGProps<SVGSVGElement> {
     platform: SocialPlatform;
@@ -43,7 +41,7 @@ export const SocialIcon: React.FC<SocialIconProps> = ({ platform, className = 'h
                     <Feather name="facebook" size={24} color="black" />
 
                 );
-            case 'x':
+            case 'twitter_x':
                 return (
                     <Feather name="twitter" size={24} color="black" />
 

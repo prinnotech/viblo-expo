@@ -7,8 +7,8 @@ const Layout = () => {
 
     const { user, isLoading, profile } = useAuth();
 
-    console.log("user", user)
-    console.log("profile", profile)
+    //console.log("user", user)
+    //console.log("profile", profile)
 
     const isSignedIn = user ? true : false
     const hasProfile = profile && profile?.username && profile?.user_type ? true : false;

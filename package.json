@@ -25,6 +25,8 @@
     "expo-router": "~6.0.4",
     "expo-splash-screen": "~31.0.10",
     "expo-status-bar": "~3.0.8",
+    "expo-web-browser": "^15.0.8",
+    "lodash": "^4.17.21",
     "nativewind": "^4.0.1",
     "openai": "^5.20.2",
     "react": "19.1.0",

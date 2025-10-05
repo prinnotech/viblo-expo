@@ -63,8 +63,8 @@ export interface Campaign {
 
 export interface ContentSubmission {
     id: string; // uuid
-    influencer_id: string; // uuid
-    campaign_id: string; // uuid
+    influencer_id: Profile | string; // uuid
+    campaign_id: Campaign | string; // uuid
     status: SubmissionStatus;
     review_video_url: string;
     brand_feedback: string | null;

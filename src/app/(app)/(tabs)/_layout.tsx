@@ -1,13 +1,16 @@
 import React from 'react';
 import { Tabs } from 'expo-router';
 import AntDesign from '@expo/vector-icons/AntDesign';
-import { ActivityIndicator, View } from 'react-native';
+import { ActivityIndicator, View, Text } from 'react-native';
 import { useAuth } from '@/contexts/AuthContext';
+import { useConversations } from '@/hooks/useConversations';
 
 const Layout = () => {
     const { profile, isLoading } = useAuth();
     const isBrand = profile?.user_type === 'brand';
     const isInfluencer = profile?.user_type === 'influencer';
+
+    const { unreadCount } = useConversations();
 
     if (isLoading) {
         return (
@@ -81,7 +84,18 @@ const Layout = () => {
                 options={{
                     title: 'Inbox',
                     headerShown: false,
-                    tabBarIcon: ({ color, size }) => <AntDesign name="inbox" size={size} color={color} />,
+                    tabBarIcon: ({ color, size }) => (
+                        <View>
+                            <AntDesign name="inbox" size={size} color={color} />
+                            {unreadCount > 0 && (
+                                <View className="absolute -right-2 -top-1 bg-red-500 rounded-full w-4 h-4 justify-center items-center">
+                                    <Text className="text-white text-[10px] font-bold">
+                                        {unreadCount}
+                                    </Text>
+                                </View>
+                            )}
+                        </View>
+                    ),
                 }}
             />
             <Tabs.Screen
