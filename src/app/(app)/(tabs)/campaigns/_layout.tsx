@@ -50,6 +50,34 @@ export default function CampaignsLayout() {
                     title: 'Loading Campaign...',
                 }}
             />
+
+            <Stack.Screen
+                name="create/index"
+                options={{
+                    // This makes the screen slide up from the bottom
+                    presentation: 'modal',
+
+                    // This ensures the header is visible
+                    headerShown: true,
+
+                    // Set a default title that shows while data is loading
+                    title: 'Create Campaign',
+                }}
+            />
+
+            <Stack.Screen
+                name="[id]/payment"
+                options={{
+                    // This makes the screen slide up from the bottom
+                    presentation: 'modal',
+
+                    // This ensures the header is visible
+                    headerShown: false,
+
+                    // Set a default title that shows while data is loading
+                    title: 'Checkout',
+                }}
+            />
         </Stack>
     );
 }

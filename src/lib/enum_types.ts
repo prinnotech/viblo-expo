@@ -45,3 +45,37 @@ export type NotificationType =
     | 'submission_revision_needed'
     | 'new_campaign_match'
     | 'payout_completed';
+
+export interface SocialLink {
+    id: string;
+    platform: SocialPlatform;
+    url: string;
+    handle: string | null;
+    follower_count: number | null;
+    total_views_count: number | null;
+    total_likes_count: number | null;
+    total_comments_count: number | null;
+}
+
+
+export interface Influencer {
+    id: string;
+    created_at: string;
+    username: string;
+    user_type: 'influencer';
+    first_name: string | null;
+    last_name: string | null;
+    avatar_url: string | null;
+    bio: string | null;
+    website_url: string | null;
+    is_verified: boolean;
+    company_name: string | null;
+    industry: string | null;
+    location: string | null;
+    niches: string[] | null;
+    updated_at: string | null;
+    social_links: SocialLink[];
+    total_followers: number;
+    total_views: number;
+    total_likes: number;
+}

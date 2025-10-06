@@ -5,14 +5,12 @@ import { AuthProvider } from "../contexts/AuthContext";
 import 'react-native-get-random-values';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from "react";
+import { StripeProvider } from '@stripe/stripe-react-native';
 
-// Prevent auto-hiding
 SplashScreen.preventAutoHideAsync();
 
 export default function Layout() {
-
     useEffect(() => {
-        // Hide splash after 1 second
         setTimeout(() => {
             SplashScreen.hideAsync();
         }, 1000);
@@ -20,7 +18,12 @@ export default function Layout() {
 
     return (
         <AuthProvider>
-            <Slot />
+            <StripeProvider
+                publishableKey="pk_test_51SEzaBJ6uKV4HQBES2UANsuTfRy87LuusjmIfjNu1QD4aldmYaqxQwAwp4EUKnQnByt4vBo0MjP4dXSesvK1UtWW0069cfpEO4"
+                merchantIdentifier="io.viblo.app"
+            >
+                <Slot />
+            </StripeProvider>
         </AuthProvider>
     );
 }

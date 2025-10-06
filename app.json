@@ -1,55 +1,62 @@
 {
-  "expo": {
-    "scheme": "viblo",
-    "userInterfaceStyle": "automatic",
-    "orientation": "default",
-    "web": {
-      "output": "server"
-    },
-    "plugins": [
-      [
-        "expo-router",
-        {
-          "origin": "https://n"
+    "expo": {
+        "scheme": "viblo",
+        "userInterfaceStyle": "automatic",
+        "orientation": "default",
+        "web": {
+            "output": "server"
+        },
+        "plugins": [
+            [
+                "expo-router",
+                {
+                    "origin": "https://n"
+                }
+            ],
+            [
+                "expo-image-picker",
+                {
+                    "photosPermission": "The app accesses your photos to let you share them with your friends."
+                }
+            ],
+            [
+                "expo-notifications",
+                {
+                    "icon": "./assets/favicon.png",
+                    "color": "#ffffff",
+                    "sounds": [],
+                    "mode": "production"
+                }
+            ],
+            [
+                "@stripe/stripe-react-native",
+                {
+                    "merchantIdentifier": "merchant.com.viblo",
+                    "enableGooglePay": false
+                }
+            ]
+        ],
+        "name": "Viblo",
+        "slug": "viblo",
+        "extra": {
+            "router": {
+                "origin": "https://n"
+            },
+            "eas": {
+                "projectId": "f729ec49-9c1d-42f3-a307-dc1801a5ea0b"
+            }
+        },
+        "android": {
+            "package": "io.viblo.app",
+            "permissions": [
+                "android.permission.RECORD_AUDIO"
+            ]
+        },
+        "ios": {
+            "bundleIdentifier": "io.viblo.app",
+            "infoPlist": {
+                "ITSAppUsesNonExemptEncryption": false
+            }
         }
-      ],
-      [
-        "expo-image-picker",
-        {
-          "photosPermission": "The app accesses your photos to let you share them with your friends."
-        }
-      ],
-      [
-        "expo-notifications",
-        {
-          "icon": "./assets/favicon.png",
-          "color": "#ffffff",
-          "sounds": [],
-          "mode": "production"
-        }
-      ]
-    ],
-    "name": "Viblo",
-    "slug": "viblo",
-    "extra": {
-      "router": {
-        "origin": "https://n"
-      },
-      "eas": {
-        "projectId": "f729ec49-9c1d-42f3-a307-dc1801a5ea0b"
-      }
-    },
-    "android": {
-      "package": "io.viblo.app",
-      "permissions": [
-        "android.permission.RECORD_AUDIO"
-      ]
-    },
-    "ios": {
-      "bundleIdentifier": "io.viblo.app",
-      "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
-      }
     }
-  }
 }

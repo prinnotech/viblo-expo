@@ -5,8 +5,9 @@ import {
     ScrollView,
     Image,
     Pressable,
+    RefreshControl,
 } from 'react-native';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
@@ -93,61 +94,77 @@ const CampaignDetailsPage = () => {
 
     const [campaign, setCampaign] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [refreshing, setRefreshing] = useState(false); // Add refreshing state
     const [error, setError] = useState(null);
 
-    // --- New State for Submission Status ---
     const [submissionStatus, setSubmissionStatus] = useState<string | null>(null);
     const [isStatusLoading, setIsStatusLoading] = useState(true);
 
-    // Fetch Campaign Details
-    useEffect(() => {
+    // Extract fetch logic into a separate function
+    const fetchCampaignDetails = useCallback(async () => {
         if (!campaignId) {
-            setLoading(false);
             setError("Campaign ID is missing.");
             return;
         }
-        const fetchCampaignDetails = async () => {
-            setLoading(true);
-            const { data, error } = await supabase
-                .from('campaigns')
-                .select(` *, profile:profiles!campaigns_brand_id_fkey(*) `)
-                .eq('id', campaignId)
-                .single();
-            if (error) {
-                setError(error.message);
-                console.error("Error fetching campaign:", error);
-            } else if (data) {
-                setCampaign(data);
-                navigation.setOptions({ title: data.title });
-            }
-            setLoading(false);
-        };
-        fetchCampaignDetails();
+
+        const { data, error } = await supabase
+            .from('campaigns')
+            .select(` *, profile:profiles!campaigns_brand_id_fkey(*) `)
+            .eq('id', campaignId)
+            .single();
+
+        if (error) {
+            setError(error.message);
+            console.error("Error fetching campaign:", error);
+        } else if (data) {
+            setCampaign(data);
+            navigation.setOptions({ title: data.title });
+            setError(null);
+        }
     }, [campaignId, navigation]);
 
-    // --- New Effect to check submission status ---
-    useEffect(() => {
-        const checkSubmissionStatus = async () => {
-            // Only run if the user is a logged-in influencer
-            if (isInfluencer && profile?.id && campaignId) {
-                setIsStatusLoading(true);
-                const { data, error } = await supabase.rpc('get_submission_status', {
-                    p_influencer_id: profile.id,
-                    p_campaign_id: campaignId,
-                });
+    const checkSubmissionStatus = useCallback(async () => {
+        if (isInfluencer && profile?.id && campaignId) {
+            const { data, error } = await supabase.rpc('get_submission_status', {
+                p_influencer_id: profile.id,
+                p_campaign_id: campaignId,
+            });
 
-                if (error) {
-                    console.error("Error checking submission status:", error);
-                } else {
-                    setSubmissionStatus(data); // data is the status string or null
-                }
-                setIsStatusLoading(false);
+            if (error) {
+                console.error("Error checking submission status:", error);
             } else {
-                setIsStatusLoading(false); // Not an influencer, no status to check
+                setSubmissionStatus(data);
             }
+        }
+    }, [isInfluencer, profile?.id, campaignId]);
+
+    // Initial fetch
+    useEffect(() => {
+        const fetchData = async () => {
+            setLoading(true);
+            setIsStatusLoading(true);
+
+            await fetchCampaignDetails();
+            await checkSubmissionStatus();
+
+            setLoading(false);
+            setIsStatusLoading(false);
         };
-        checkSubmissionStatus();
-    }, [profile, campaignId, isInfluencer]);
+
+        fetchData();
+    }, [fetchCampaignDetails, checkSubmissionStatus]);
+
+    // Pull-to-refresh handler
+    const onRefresh = useCallback(async () => {
+        setRefreshing(true);
+
+        await Promise.all([
+            fetchCampaignDetails(),
+            checkSubmissionStatus()
+        ]);
+
+        setRefreshing(false);
+    }, [fetchCampaignDetails, checkSubmissionStatus]);
 
     // Combined loading state
     if (loading || isAuthLoading || isStatusLoading) {
@@ -168,7 +185,6 @@ const CampaignDetailsPage = () => {
         );
     }
 
-    // Helper function to render the button text
     const getButtonText = () => {
         switch (submissionStatus) {
             case 'pending_review':
@@ -189,7 +205,18 @@ const CampaignDetailsPage = () => {
 
     return (
         <SafeAreaView className="flex-1 bg-gray-50" edges={['bottom']}>
-            <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 100 }}>
+            <ScrollView
+                contentContainerStyle={{ padding: 16, paddingBottom: 100 }}
+                refreshControl={
+                    <RefreshControl
+                        refreshing={refreshing}
+                        onRefresh={onRefresh}
+                        colors={['#3B82F6']} // Android
+                        tintColor="#3B82F6"  // iOS
+                    />
+                }
+            >
+
                 {campaign.profile && <BrandHeader profile={campaign.profile} />}
                 <Text className="text-3xl font-extrabold text-gray-900 mb-4">{campaign.title}</Text>
                 <BudgetProgressBar

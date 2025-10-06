@@ -1,4 +1,4 @@
-import { View, Text, ActivityIndicator, FlatList, RefreshControl, TextInput, TouchableOpacity, Modal, Button } from 'react-native';
+import { View, Text, ActivityIndicator, FlatList, RefreshControl, TextInput, TouchableOpacity, Modal, Button, ScrollView } from 'react-native';
 import React from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AntDesign from '@expo/vector-icons/AntDesign';
@@ -7,6 +7,9 @@ import { useCampaigns } from '@/hooks/useCampaigns';
 import CampaignCard from '@/components/CampaignCard';
 import { useMemo, useState } from 'react';
 import { Campaign } from '@/components/CampaignCard';
+import { useCreators } from '@/hooks/useCreators';
+import { Influencer } from '@/lib/enum_types';
+import CreatorCard from '@/components/CreatorCard';
 
 // Main Page Component
 export default function Page() {
@@ -132,7 +135,7 @@ function InfluencerDiscover() {
                                 </TouchableOpacity>
                             ))}
                         </View>
-                        <Button title="Done" onPress={() => setModalVisible(false)}/>
+                        <Button title="Done" onPress={() => setModalVisible(false)} />
                     </View>
                 </View>
             </Modal>
@@ -143,35 +146,231 @@ function InfluencerDiscover() {
 // --- Brand's Dashboard ---
 function BrandDashboard() {
     const { profile } = useAuth();
-    const { campaigns, loading, refresh, refreshing } = useCampaigns(profile);
+    const {
+        influencers,
+        loading,
+        loadingMore,
+        refreshing,
+        hasMore,
+        loadMore,
+        refresh,
+        searchTerm,
+        setSearchTerm,
+        selectedNiches,
+        setSelectedNiches,
+        sort,
+        setSort,
+    } = useCreators(profile);
 
-    // FIX: Memoize and filter the campaigns array to ensure all items are unique.
-    const uniqueCampaigns = useMemo(() => {
+    // Available niches for filtering
+    const availableNiches = [
+        'Technology',
+        'Gaming',
+        'Sports',
+        'Lifestyle',
+        'Fashion',
+        'Beauty',
+        'Food',
+        'Travel',
+        'Fitness',
+        'Music',
+    ];
+
+    // Memoize and filter the influencers array to ensure all items are unique
+    const uniqueInfluencers = useMemo(() => {
         const seen = new Set();
-        return campaigns.filter((item: Campaign) => {
+        return influencers.filter((item: Influencer) => {
             const duplicate = seen.has(item.id);
             seen.add(item.id);
             return !duplicate;
         });
-    }, [campaigns]);
+    }, [influencers]);
+
+    const toggleNiche = (niche: string) => {
+        if (selectedNiches.includes(niche)) {
+            setSelectedNiches(selectedNiches.filter(n => n !== niche));
+        } else {
+            setSelectedNiches([...selectedNiches, niche]);
+        }
+    };
+
+    const clearFilters = () => {
+        setSelectedNiches([]);
+        setSearchTerm('');
+    };
 
     return (
-        <View className="flex-1">
-            <View className="p-4">
-                <Text className="text-2xl font-bold">Your Campaigns</Text>
+        <View className="flex-1 bg-gray-50">
+            {/* Header */}
+            <View className="p-4 bg-white border-b border-gray-200">
+                <Text className="text-2xl font-bold text-gray-800 mb-1">Discover Creators</Text>
+                <Text className="text-sm text-gray-500">Find the perfect influencers for your brand</Text>
             </View>
+
+            {/* Search Bar */}
+            <View className="px-4 py-3 bg-white border-b border-gray-200">
+                <View className="flex-row items-center bg-gray-100 rounded-xl px-4 py-3">
+                    <AntDesign name="search" size={18} color="#6B7280" />
+                    <TextInput
+                        className="flex-1 ml-2 text-base text-gray-800"
+                        placeholder="Search by name, username, or bio..."
+                        placeholderTextColor="#9CA3AF"
+                        value={searchTerm}
+                        onChangeText={setSearchTerm}
+                    />
+                    {searchTerm.length > 0 && (
+                        <TouchableOpacity onPress={() => setSearchTerm('')}>
+                            <AntDesign name="close-circle" size={18} color="#6B7280" />
+                        </TouchableOpacity>
+                    )}
+                </View>
+            </View>
+
+            {/* Filters */}
+            <View className="bg-white border-b border-gray-200 px-4 py-3">
+                {/* Sort and Clear Row */}
+                <View className="flex-row justify-between items-center mb-3">
+                    <Text className="text-sm font-semibold text-gray-700">FILTERS</Text>
+                    {(selectedNiches.length > 0 || searchTerm.length > 0) && (
+                        <TouchableOpacity onPress={clearFilters} className="flex-row items-center gap-1">
+                            <AntDesign name="close" size={14} color="#EF4444" />
+                            <Text className="text-sm text-red-500 font-medium">Clear All</Text>
+                        </TouchableOpacity>
+                    )}
+                </View>
+
+                {/* Sort Options */}
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} className="mb-3">
+                    <TouchableOpacity
+                        onPress={() => setSort('total_followers')}
+                        className={`mr-2 px-4 py-2 rounded-full border ${sort === 'total_followers'
+                            ? 'bg-blue-500 border-blue-500'
+                            : 'bg-white border-gray-300'
+                            }`}
+                    >
+                        <Text
+                            className={`text-sm font-medium ${sort === 'total_followers' ? 'text-white' : 'text-gray-700'
+                                }`}
+                        >
+                            Most Followers
+                        </Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        onPress={() => setSort('created_at')}
+                        className={`px-4 py-2 rounded-full border ${sort === 'created_at'
+                            ? 'bg-blue-500 border-blue-500'
+                            : 'bg-white border-gray-300'
+                            }`}
+                    >
+                        <Text
+                            className={`text-sm font-medium ${sort === 'created_at' ? 'text-white' : 'text-gray-700'
+                                }`}
+                        >
+                            Recently Joined
+                        </Text>
+                    </TouchableOpacity>
+                </ScrollView>
+
+                {/* Niche Filters */}
+                <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                    <TouchableOpacity
+                        onPress={() => setSelectedNiches([])}
+                        className={`mr-2 px-4 py-2 rounded-full border ${selectedNiches.length === 0
+                            ? 'bg-purple-500 border-purple-500'
+                            : 'bg-white border-gray-300'
+                            }`}
+                    >
+                        <Text
+                            className={`text-sm font-medium ${selectedNiches.length === 0 ? 'text-white' : 'text-gray-700'
+                                }`}
+                        >
+                            All
+                        </Text>
+                    </TouchableOpacity>
+                    {availableNiches.map((niche) => (
+                        <TouchableOpacity
+                            key={niche}
+                            onPress={() => toggleNiche(niche)}
+                            className={`mr-2 px-4 py-2 rounded-full border ${selectedNiches.includes(niche)
+                                ? 'bg-purple-500 border-purple-500'
+                                : 'bg-white border-gray-300'
+                                }`}
+                        >
+                            <Text
+                                className={`text-sm font-medium ${selectedNiches.includes(niche) ? 'text-white' : 'text-gray-700'
+                                    }`}
+                            >
+                                {niche}
+                            </Text>
+                        </TouchableOpacity>
+                    ))}
+                </ScrollView>
+            </View>
+
+            {/* Results Count */}
+            {!loading && (
+                <View className="px-4 py-2 bg-gray-50">
+                    <Text className="text-sm text-gray-600">
+                        {uniqueInfluencers.length} {uniqueInfluencers.length === 1 ? 'creator' : 'creators'} found
+                    </Text>
+                </View>
+            )}
+
+            {/* Influencers List */}
             {loading ? (
-                 <ActivityIndicator className="flex-1" size="large" color="#3B82F6" />
+                <View className="flex-1 justify-center items-center">
+                    <ActivityIndicator size="large" color="#3B82F6" />
+                    <Text className="mt-4 text-gray-500">Loading creators...</Text>
+                </View>
             ) : (
                 <FlatList
-                    data={uniqueCampaigns}
-                    renderItem={({ item }) => <CampaignCard campaign={item} />}
+                    data={uniqueInfluencers}
+                    renderItem={({ item }) => <CreatorCard influencer={item} />}
                     keyExtractor={(item) => item.id}
-                    ListEmptyComponent={<Text className="text-center mt-5 text-gray-500">You haven't created any campaigns yet.</Text>}
-                    refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} />}
+                    ListEmptyComponent={
+                        <View className="flex-1 justify-center items-center p-8">
+                            <AntDesign name="frown" size={48} color="#9CA3AF" />
+                            <Text className="text-center mt-4 text-gray-600 text-lg font-medium">
+                                No creators found
+                            </Text>
+                            <Text className="text-center mt-2 text-gray-500">
+                                Try adjusting your filters or search terms
+                            </Text>
+                            {(selectedNiches.length > 0 || searchTerm.length > 0) && (
+                                <TouchableOpacity
+                                    onPress={clearFilters}
+                                    className="mt-4 bg-blue-500 px-6 py-3 rounded-full"
+                                >
+                                    <Text className="text-white font-semibold">Clear Filters</Text>
+                                </TouchableOpacity>
+                            )}
+                        </View>
+                    }
+                    refreshControl={
+                        <RefreshControl
+                            refreshing={refreshing}
+                            onRefresh={refresh}
+                            colors={['#3B82F6']}
+                            tintColor="#3B82F6"
+                        />
+                    }
+                    onEndReached={loadMore}
+                    onEndReachedThreshold={0.5}
+                    ListFooterComponent={
+                        loadingMore ? (
+                            <View className="py-4">
+                                <ActivityIndicator size="small" color="#3B82F6" />
+                            </View>
+                        ) : !hasMore && uniqueInfluencers.length > 0 ? (
+                            <View className="py-4">
+                                <Text className="text-center text-gray-500 text-sm">
+                                    You've reached the end
+                                </Text>
+                            </View>
+                        ) : null
+                    }
                 />
             )}
         </View>
     );
 }
-
