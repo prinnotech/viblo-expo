@@ -3,6 +3,7 @@
         "scheme": "viblo",
         "userInterfaceStyle": "automatic",
         "orientation": "default",
+        "icon": "./assets/icon.png",
         "web": {
             "output": "server"
         },
@@ -50,7 +51,11 @@
             "package": "io.viblo.app",
             "permissions": [
                 "android.permission.RECORD_AUDIO"
-            ]
+            ],
+            "adaptiveIcon": {
+                "foregroundImage": "./assets/icon.png",
+                "backgroundColor": "#ffffff"
+            }
         },
         "ios": {
             "bundleIdentifier": "io.viblo.app",
