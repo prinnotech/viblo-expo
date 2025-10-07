@@ -29,6 +29,7 @@ const Layout = () => {
             <Stack.Protected guard={isSignedIn && hasProfile}>
                 <Stack.Screen name='(tabs)' options={{ headerShown: false }} />
                 <Stack.Screen name='creators/[id]' options={{ headerShown: false }} />
+                <Stack.Screen name='brand/[id]' options={{ headerShown: false }} />
             </Stack.Protected>
 
             <Stack.Protected guard={needsOnboarding}>

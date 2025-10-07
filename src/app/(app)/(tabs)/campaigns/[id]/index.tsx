@@ -33,6 +33,7 @@ const BrandHeader = ({ profile }) => (
         </View>
     </View>
 );
+
 const CampaignStat = ({ icon, label, value }) => (
     <View className="flex-1 items-center bg-blue-50 p-3 rounded-lg border border-blue-100">
         <Feather name={icon} size={24} color="#3B82F6" />
@@ -40,22 +41,26 @@ const CampaignStat = ({ icon, label, value }) => (
         <Text className="text-base font-bold text-gray-800">{value}</Text>
     </View>
 );
+
 const Tag = ({ text }) => (
     <View className="bg-gray-200 rounded-full px-3 py-1 mr-2 mb-2">
         <Text className="text-xs font-medium text-gray-700">{text}</Text>
     </View>
 );
+
 const TagPlatforms = ({ platform }) => (
     <View className=" rounded-full px-3 py-1 mr-2 mb-2">
         <SocialIcon platform={platform} />
     </View>
 );
+
 const InfoSection = ({ title, children }) => (
     <View className="mb-6">
         <Text className="text-lg font-semibold text-gray-800 mb-2">{title}</Text>
         {children}
     </View>
 );
+
 const BudgetProgressBar = ({ total, paid }: { total: number; paid: number }) => {
     const paidAmount = paid || 0;
     const totalAmount = total || 0;

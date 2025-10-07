@@ -4,6 +4,7 @@ import AntDesign from '@expo/vector-icons/AntDesign';
 import { ActivityIndicator, View, Text } from 'react-native';
 import { useAuth } from '@/contexts/AuthContext';
 import { useConversations } from '@/hooks/useConversations';
+import Ionicons from '@expo/vector-icons/Ionicons';
 
 const Layout = () => {
     const { profile, isLoading } = useAuth();
@@ -68,13 +69,13 @@ const Layout = () => {
                 }}
             />
             <Tabs.Screen
-                name="find-creators"
+                name="analytics"
                 options={{
-                    title: 'Find Creators',
+                    title: 'Analytics',
                     headerShown: false,
-                    tabBarIcon: ({ color, size }) => <AntDesign name="team" size={size} color={color} />,
+                    tabBarIcon: ({ color, size }) => <Ionicons name="analytics" size={size} color={color} />,
                     // This is the key: hide the tab if the user is not a brand
-                    href: isBrand ? '/find-creators' : null,
+                    href: isBrand ? '/analytics' : null,
                 }}
             />
 

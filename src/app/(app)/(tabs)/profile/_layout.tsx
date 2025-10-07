@@ -9,13 +9,8 @@ function Layout() {
             <Stack.Screen
                 name="edit/index"
                 options={{
-                    // This makes the screen slide up from the bottom
                     presentation: 'modal',
-
-                    // This ensures the header is visible
                     headerShown: true,
-
-                    // Set a default title that shows while data is loading
                     title: 'Edit Profile',
                 }}
             />
@@ -23,32 +18,38 @@ function Layout() {
             <Stack.Screen
                 name="connections/index"
                 options={{
-                    // This makes the screen slide up from the bottom
                     presentation: 'modal',
-
-                    // This ensures the header is visible
                     headerShown: true,
-
-                    // Set a default title that shows while data is loading
-                    title: 'Create a connection',
+                    title: 'Connected Accounts',
                 }}
             />
 
             <Stack.Screen
                 name="analytics/index"
                 options={{
-                    // This makes the screen slide up from the bottom
                     presentation: 'modal',
-
-                    // This ensures the header is visible
                     headerShown: true,
-
-                    // Set a default title that shows while data is loading
-                    title: 'Your stats',
+                    title: 'Your Stats',
                 }}
             />
 
+            <Stack.Screen
+                name="payments"
+                options={{
+                    presentation: 'modal',
+                    headerShown: true,
+                    title: 'Payments',
+                }}
+            />
 
+            <Stack.Screen
+                name="settings/index"
+                options={{
+                    presentation: 'modal',
+                    headerShown: true,
+                    title: 'Settings',
+                }}
+            />
         </Stack>
     );
 }

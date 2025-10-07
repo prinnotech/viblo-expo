@@ -15,7 +15,6 @@ import { useUserProfile } from '@/hooks/useUserProfile';
 import { Feather } from '@expo/vector-icons';
 import { supabase } from '@/lib/supabase';
 
-// A reusable component for each menu item
 const MenuItem = ({ icon, text, onPress }: { icon: any; text: string; onPress: () => void; }) => (
     <TouchableOpacity
         className="flex-row items-center p-4 bg-white border border-gray-100 rounded-xl"
@@ -31,15 +30,16 @@ const MenuItem = ({ icon, text, onPress }: { icon: any; text: string; onPress: (
 const ProfileScreen = () => {
     const { profile, loading, refetch } = useUserProfile();
     const router = useRouter();
-
     const [refreshing, setRefreshing] = useState(false);
+
+    const isBrand = profile?.user_type === 'brand';
+    const isInfluencer = profile?.user_type === 'influencer';
 
     const onRefresh = useCallback(async () => {
         setRefreshing(true);
         await refetch();
         setRefreshing(false);
     }, [refetch]);
-
 
     async function signOut() {
         Alert.alert("Sign Out", "Are you sure you want to sign out?", [
@@ -49,7 +49,6 @@ const ProfileScreen = () => {
                 style: "destructive",
                 onPress: async () => {
                     await supabase.auth.signOut();
-                    // The AuthProvider will handle redirecting the user
                 }
             }
         ]);
@@ -64,13 +63,13 @@ const ProfileScreen = () => {
     }
 
     return (
-        <SafeAreaView className="flex-1 bg-gray-50" >
+        <SafeAreaView className="flex-1 bg-gray-50">
             <ScrollView
                 refreshControl={
                     <RefreshControl
                         refreshing={refreshing}
                         onRefresh={onRefresh}
-                        tintColor="#3b82f6" // Optional: for iOS loading indicator color
+                        tintColor="#3b82f6"
                     />
                 }
             >
@@ -81,11 +80,16 @@ const ProfileScreen = () => {
                         className="w-24 h-24 rounded-full"
                     />
                     <Text className="text-2xl font-bold text-gray-900 mt-4">
-                        {profile?.first_name || profile?.username}
+                        {isBrand ? profile?.company_name : profile?.first_name || profile?.username}
                     </Text>
                     <Text className="text-sm text-gray-600 mt-1">
                         @{profile?.username}
                     </Text>
+                    {isBrand && profile?.industry && (
+                        <Text className="text-sm text-gray-500 mt-1">
+                            {profile.industry}
+                        </Text>
+                    )}
                 </View>
 
                 {/* Menu Section */}
@@ -95,20 +99,38 @@ const ProfileScreen = () => {
                         text="Edit Profile"
                         onPress={() => router.push('/profile/edit')}
                     />
-                    <MenuItem
-                        icon="share-2"
-                        text="Connected Accounts"
-                        onPress={() => router.push('/profile/connections')}
-                    />
-                    <MenuItem
-                        icon="bar-chart-2"
-                        text="Analytics"
-                        onPress={() => router.push('/profile/analytics')}
-                    />
+
+                    {/* Influencer Only */}
+                    {isInfluencer && (
+                        <>
+                            <MenuItem
+                                icon="share-2"
+                                text="Connected Accounts"
+                                onPress={() => router.push('/profile/connections')}
+                            />
+                            <MenuItem
+                                icon="bar-chart-2"
+                                text="Analytics"
+                                onPress={() => router.push('/profile/analytics')}
+                            />
+                        </>
+                    )}
+
+                    {/* Both */}
                     <MenuItem
                         icon="eye"
                         text="View Public Profile"
-                        onPress={() => router.push(`/creators/${profile?.id}`)} // Example route
+                        onPress={() => router.push(isBrand ? `/brand/${profile?.id}` : `/creators/${profile?.id}`)}
+                    />
+                    <MenuItem
+                        icon="credit-card"
+                        text="Payments"
+                        onPress={() => router.push('/profile/payments')}
+                    />
+                    <MenuItem
+                        icon="settings"
+                        text="Settings"
+                        onPress={() => router.push('/profile/settings')}
                     />
                 </View>
 
