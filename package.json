@@ -4,8 +4,8 @@
   "main": "expo-router/entry",
   "scripts": {
     "start": "expo start",
-    "android": "expo start --android",
-    "ios": "expo start --ios",
+    "android": "expo run:android",
+    "ios": "expo run:ios",
     "web": "expo start --web",
     "deploy": "npx expo export -p web && npx eas-cli@latest deploy"
   },
@@ -32,6 +32,7 @@
     "expo-router": "~6.0.4",
     "expo-splash-screen": "~31.0.10",
     "expo-status-bar": "~3.0.8",
+    "expo-system-ui": "^6.0.7",
     "expo-web-browser": "^15.0.8",
     "lodash": "^4.17.21",
     "nativewind": "^4.0.1",

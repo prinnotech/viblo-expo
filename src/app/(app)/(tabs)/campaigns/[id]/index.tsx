@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import React, { useState, useEffect, useCallback } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
+import { Link, useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
 import { supabase } from '@/lib/supabase';
 import { SocialIcon } from '@/components/getSocialIcons';
@@ -24,7 +24,9 @@ const BrandHeader = ({ profile }) => (
         />
         <View>
             <View className="flex-row items-center">
-                <Text className="text-xl font-bold text-gray-800">{profile.company_name || 'Brand Name'}</Text>
+                <Link href={`/brand/${profile?.id}`} asChild>
+                    <Text className="text-xl font-bold text-gray-800">{profile.company_name || 'Brand Name'}</Text>
+                </Link>
                 {profile.is_verified && (
                     <Feather name="check-circle" size={18} color="#3B82F6" className="ml-2" />
                 )}

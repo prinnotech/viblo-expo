@@ -94,9 +94,11 @@ const CampaignCard = ({ campaign }: { campaign: Campaign }) => {
                         <Text className="text-lg font-bold text-gray-800" numberOfLines={1}>
                             {campaign.title}
                         </Text>
-                        <Text className="text-sm text-gray-500" numberOfLines={1}>
-                            {brand?.company_name || brand?.username || '...'}
-                        </Text>
+                        <Link href={`/brand/${brand?.id}`} asChild>
+                            <Text className="text-sm text-gray-500" numberOfLines={1}>
+                                {brand?.company_name || brand?.username || '...'}
+                            </Text>
+                        </Link>
                     </View>
                 </View>
 

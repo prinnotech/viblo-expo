@@ -218,7 +218,7 @@ const SettingsPage = () => {
 
                 {/* Privacy & Legal */}
                 <View className="mt-6 mx-4">
-                    <Text className="text-sm font-semibold text-gray-500 mb-2 px-2">PRIVACY & LEGAL</Text>
+                    <Text className="text-sm font-semibold mb-2 px-2" style={{ color: theme.textTertiary }}>PRIVACY & LEGAL</Text>
                     <View className="bg-white rounded-xl border border-gray-200">
                         <TouchableOpacity
                             onPress={() => openURL('https://viblo.io/privacy')}
