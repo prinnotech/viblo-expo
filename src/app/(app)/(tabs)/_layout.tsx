@@ -5,9 +5,11 @@ import { ActivityIndicator, View, Text } from 'react-native';
 import { useAuth } from '@/contexts/AuthContext';
 import { useConversations } from '@/hooks/useConversations';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import { useTheme } from '@/contexts/ThemeContext';
 
 const Layout = () => {
     const { profile, isLoading } = useAuth();
+    const { theme } = useTheme();
     const isBrand = profile?.user_type === 'brand';
     const isInfluencer = profile?.user_type === 'influencer';
 
@@ -15,14 +17,27 @@ const Layout = () => {
 
     if (isLoading) {
         return (
-            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                <ActivityIndicator size="large" />
+            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: theme.background }}>
+                <ActivityIndicator size="large" color={theme.primary} />
             </View>
         );
     }
 
     return (
-        <Tabs>
+        <Tabs
+            screenOptions={{
+                tabBarActiveTintColor: theme.primary,
+                tabBarInactiveTintColor: theme.textTertiary,
+                tabBarStyle: {
+                    backgroundColor: theme.surface,
+                    borderTopColor: theme.border,
+                },
+                headerStyle: {
+                    backgroundColor: theme.surface,
+                },
+                headerTintColor: theme.text,
+            }}
+        >
             {/* 1. Shared Index Screen with Conditional Options */}
             <Tabs.Screen
                 name="index"
@@ -89,8 +104,11 @@ const Layout = () => {
                         <View>
                             <AntDesign name="inbox" size={size} color={color} />
                             {unreadCount > 0 && (
-                                <View className="absolute -right-2 -top-1 bg-red-500 rounded-full w-4 h-4 justify-center items-center">
-                                    <Text className="text-white text-[10px] font-bold">
+                                <View
+                                    className="absolute -right-2 -top-1 rounded-full w-4 h-4 justify-center items-center"
+                                    style={{ backgroundColor: theme.error }}
+                                >
+                                    <Text className="text-[10px] font-bold" style={{ color: theme.surface }}>
                                         {unreadCount}
                                     </Text>
                                 </View>
@@ -112,4 +130,3 @@ const Layout = () => {
 };
 
 export default Layout;
-

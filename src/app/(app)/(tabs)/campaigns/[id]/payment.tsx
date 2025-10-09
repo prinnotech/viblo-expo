@@ -13,6 +13,7 @@ import { useStripe } from '@stripe/stripe-react-native';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import AntDesign from '@expo/vector-icons/AntDesign';
+import { useTheme } from '@/contexts/ThemeContext';
 
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL || 'http://192.168.1.214:3001';
 const API_KEY = process.env.EXPO_PUBLIC_API_KEY;
@@ -22,6 +23,7 @@ const PaymentPage = () => {
     const { id } = useLocalSearchParams();
     const { profile } = useAuth();
     const { initPaymentSheet, presentPaymentSheet } = useStripe();
+    const { theme } = useTheme();
 
     const [loading, setLoading] = useState(true);
     const [processing, setProcessing] = useState(false);
@@ -104,12 +106,12 @@ const PaymentPage = () => {
                 returnURL: 'viblo://campaigns',
                 appearance: {
                     colors: {
-                        primary: '#3B82F6',
-                        background: '#ffffff',
-                        componentBackground: '#f3f4f6',
-                        componentText: '#1F2937', // Add this - dark gray text
-                        primaryText: '#111827',   // Add this - almost black
-                        secondaryText: '#6B7280', // Add this - gray text
+                        primary: theme.primary,
+                        background: theme.surface,
+                        componentBackground: theme.surfaceSecondary,
+                        componentText: theme.text,
+                        primaryText: theme.text,
+                        secondaryText: theme.textSecondary,
                     },
                 },
             });
@@ -180,9 +182,9 @@ const PaymentPage = () => {
 
     if (loading) {
         return (
-            <View className="flex-1 bg-gray-50 items-center justify-center">
-                <ActivityIndicator size="large" color="#3B82F6" />
-                <Text className="mt-4 text-gray-500">Setting up payment...</Text>
+            <View className="flex-1 items-center justify-center" style={{ backgroundColor: theme.background }}>
+                <ActivityIndicator size="large" color={theme.primary} />
+                <Text className="mt-4" style={{ color: theme.textTertiary }}>Setting up payment...</Text>
             </View>
         );
     }
@@ -194,87 +196,87 @@ const PaymentPage = () => {
     const total = parseFloat(paymentDetails.total);
 
     return (
-        <SafeAreaView className="flex-1 bg-gray-50">
+        <SafeAreaView className="flex-1" style={{ backgroundColor: theme.background }}>
             <ScrollView className="flex-1 p-4">
                 {/* Header */}
                 <View className="mb-6">
-                    <Text className="text-2xl font-bold text-gray-800">Complete Payment</Text>
-                    <Text className="text-sm text-gray-500 mt-1">
+                    <Text className="text-2xl font-bold" style={{ color: theme.text }}>Complete Payment</Text>
+                    <Text className="text-sm mt-1" style={{ color: theme.textTertiary }}>
                         Activate your campaign and start connecting with influencers
                     </Text>
                 </View>
 
                 {/* Campaign Summary Card */}
-                <View className="bg-white rounded-2xl p-4 mb-6 border border-gray-200">
+                <View className="rounded-2xl p-4 mb-6 border" style={{ backgroundColor: theme.surface, borderColor: theme.border }}>
                     <View className="flex-row items-center mb-4">
-                        <View className="w-16 h-16 bg-blue-100 rounded-xl items-center justify-center mr-4">
-                            <AntDesign name="notification" size={32} color="#3B82F6" />
+                        <View className="w-16 h-16 rounded-xl items-center justify-center mr-4" style={{ backgroundColor: theme.primaryLight }}>
+                            <AntDesign name="notification" size={32} color={theme.primary} />
                         </View>
                         <View className="flex-1">
-                            <Text className="text-lg font-bold text-gray-800" numberOfLines={2}>
+                            <Text className="text-lg font-bold" numberOfLines={2} style={{ color: theme.text }}>
                                 {campaign.title}
                             </Text>
-                            <Text className="text-sm text-gray-500">
+                            <Text className="text-sm" style={{ color: theme.textTertiary }}>
                                 Campaign Budget
                             </Text>
                         </View>
                     </View>
 
                     {/* Rate Details */}
-                    <View className="bg-blue-50 p-3 rounded-lg">
-                        <Text className="text-xs text-blue-800">
+                    <View className="p-3 rounded-lg" style={{ backgroundColor: theme.primaryLight }}>
+                        <Text className="text-xs" style={{ color: theme.primaryDark }}>
                             ${(campaign.rate_per_view * 1000).toFixed(2)} per 1,000 views
                         </Text>
                     </View>
                 </View>
 
                 {/* Payment Method Info */}
-                <View className="bg-white rounded-2xl p-4 mb-6 border border-gray-200">
+                <View className="rounded-2xl p-4 mb-6 border" style={{ backgroundColor: theme.surface, borderColor: theme.border }}>
                     <View className="flex-row items-center">
-                        <AntDesign name="credit-card" size={24} color="#4B5563" />
-                        <Text className="text-base font-semibold text-gray-800 ml-3">
+                        <AntDesign name="credit-card" size={24} color={theme.textSecondary} />
+                        <Text className="text-base font-semibold ml-3" style={{ color: theme.text }}>
                             Payment Method
                         </Text>
                     </View>
-                    <Text className="text-sm text-gray-500 mt-2">
+                    <Text className="text-sm mt-2" style={{ color: theme.textTertiary }}>
                         Securely processed by Stripe. Your payment method will be saved for future campaigns.
                     </Text>
                 </View>
 
                 {/* Cost Breakdown */}
-                <View className="bg-white rounded-2xl p-4 mb-6 border border-gray-200">
-                    <Text className="text-base font-semibold text-gray-800 mb-4">
+                <View className="rounded-2xl p-4 mb-6 border" style={{ backgroundColor: theme.surface, borderColor: theme.border }}>
+                    <Text className="text-base font-semibold mb-4" style={{ color: theme.text }}>
                         Payment Summary
                     </Text>
 
                     <View className="flex-row justify-between items-center mb-3">
-                        <Text className="text-base text-gray-600">Campaign Budget</Text>
-                        <Text className="text-base font-semibold text-gray-800">
+                        <Text className="text-base" style={{ color: theme.textSecondary }}>Campaign Budget</Text>
+                        <Text className="text-base font-semibold" style={{ color: theme.text }}>
                             ${subtotal.toFixed(2)}
                         </Text>
                     </View>
 
-                    <View className="flex-row justify-between items-center mb-3 pb-3 border-b border-gray-200">
-                        <Text className="text-base text-gray-600">Processing Fee (3%)</Text>
-                        <Text className="text-base font-semibold text-gray-800">
+                    <View className="flex-row justify-between items-center mb-3 pb-3 border-b" style={{ borderColor: theme.border }}>
+                        <Text className="text-base" style={{ color: theme.textSecondary }}>Processing Fee (3%)</Text>
+                        <Text className="text-base font-semibold" style={{ color: theme.text }}>
                             ${processingFee.toFixed(2)}
                         </Text>
                     </View>
 
                     <View className="flex-row justify-between items-center">
-                        <Text className="text-lg font-bold text-gray-800">Total Amount</Text>
-                        <Text className="text-2xl font-bold text-blue-600">
+                        <Text className="text-lg font-bold" style={{ color: theme.text }}>Total Amount</Text>
+                        <Text className="text-2xl font-bold" style={{ color: theme.primary }}>
                             ${total.toFixed(2)}
                         </Text>
                     </View>
                 </View>
 
                 {/* Info Box */}
-                <View className="bg-blue-50 p-4 rounded-xl mb-6 border border-blue-200">
+                <View className="p-4 rounded-xl mb-6 border" style={{ backgroundColor: theme.primaryLight, borderColor: theme.primaryLight }}>
                     <View className="flex-row items-start">
-                        <AntDesign name="info-circle" size={20} color="#3B82F6" />
+                        <AntDesign name="info-circle" size={20} color={theme.primary} />
                         <View className="flex-1 ml-3">
-                            <Text className="text-sm text-blue-800 leading-5">
+                            <Text className="text-sm leading-5" style={{ color: theme.primaryDark }}>
                                 Once payment is complete, your campaign will be activated immediately and visible to influencers on the platform.
                             </Text>
                         </View>
@@ -283,23 +285,23 @@ const PaymentPage = () => {
             </ScrollView>
 
             {/* Fixed Bottom Button */}
-            <View className="p-4 bg-white border-t border-gray-200">
+            <View className="p-4 border-t" style={{ backgroundColor: theme.surface, borderColor: theme.border }}>
                 <TouchableOpacity
                     onPress={handlePayment}
                     disabled={!ready || processing}
-                    className={`py-4 rounded-xl items-center justify-center ${ready && !processing ? 'bg-blue-600' : 'bg-gray-400'
-                        }`}
+                    className="py-4 rounded-xl items-center justify-center"
+                    style={{ backgroundColor: ready && !processing ? theme.primary : theme.textTertiary }}
                 >
                     {processing ? (
                         <View className="flex-row items-center">
-                            <ActivityIndicator color="white" size="small" />
-                            <Text className="text-white text-base font-semibold ml-2">
+                            <ActivityIndicator color={theme.surface} size="small" />
+                            <Text className="text-base font-semibold ml-2" style={{ color: theme.surface }}>
                                 Processing...
                             </Text>
                         </View>
                     ) : (
                         <View className="flex-row items-center">
-                            <Text className="text-white text-lg font-bold mr-2">
+                            <Text className="text-lg font-bold mr-2" style={{ color: theme.surface }}>
                                 Pay ${total.toFixed(2)}
                             </Text>
                             <AntDesign name="arrow-right" size={20} color="white" />

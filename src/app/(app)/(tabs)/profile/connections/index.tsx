@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import {
     View,
     Text,
@@ -17,6 +17,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import * as WebBrowser from 'expo-web-browser';
 import { SocialIcon } from '@/components/getSocialIcons';
 import { SocialPlatform } from '@/lib/enum_types';
+import { useTheme } from '@/contexts/ThemeContext';
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -32,6 +33,7 @@ interface SocialLink {
 
 const ConnectionsPage = () => {
     const { profile } = useAuth();
+    const { theme } = useTheme();
     const [connections, setConnections] = useState<SocialLink[]>([]);
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
@@ -42,21 +44,18 @@ const ConnectionsPage = () => {
             id: 'instagram',
             name: 'Instagram',
             icon: 'instagram' as SocialPlatform,
-            color: 'bg-pink-500',
             description: 'Connect your Instagram Business account'
         },
         {
             id: 'tiktok',
             name: 'TikTok',
             icon: 'tiktok' as SocialPlatform,
-            color: 'bg-black',
             description: 'Connect your TikTok account'
         },
         {
             id: 'youtube',
             name: 'YouTube',
             icon: 'youtube' as SocialPlatform,
-            color: 'bg-red-600',
             description: 'Connect your YouTube channel'
         }
     ];
@@ -65,40 +64,7 @@ const ConnectionsPage = () => {
         if (profile) {
             fetchConnections();
         }
-
-        // Listen for deep link redirects after OAuth
-        /* const subscription = Linking.addEventListener('url', handleDeepLink);
-
-        return () => {
-            subscription.remove();
-        }; */
     }, [profile]);
-
-    const handleDeepLink = ({ url }: { url: string }) => {
-        console.log('Deep link received:', url);
-
-        // Parse URL - the URL comes back as: exp://192.168.1.214:8081?success=true&platform=tiktok
-        // Remove the check for 'connections' since it won't be in the redirect URL
-        try {
-            // Handle both URL formats
-            const urlObj = url.includes('?') ? new URL(url) : null;
-
-            if (!urlObj) return;
-
-            const success = urlObj.searchParams.get('success');
-            const error = urlObj.searchParams.get('error');
-            const platform = urlObj.searchParams.get('platform');
-
-            if (success === 'true' && platform) {
-                Alert.alert('Success', `${platform} connected successfully!`);
-                fetchConnections();
-            } else if (error) {
-                Alert.alert('Error', decodeURIComponent(error));
-            }
-        } catch (e) {
-            console.error('Error parsing deep link:', e);
-        }
-    };
 
     const fetchConnections = async () => {
         if (!profile) return;
@@ -153,14 +119,9 @@ const ConnectionsPage = () => {
                 'exp://192.168.1.214:8081'
             );
 
-            // After auth session completes, check the database directly
             if (result.type === 'success' || result.type === 'dismiss') {
                 console.log('Auth session completed, checking connection status...');
-
-                // Wait a moment for backend to complete
                 await new Promise(resolve => setTimeout(resolve, 1000));
-
-                // Check if connection was successful by fetching from database
                 const { data, error } = await supabase
                     .from('social_links')
                     .select('*')
@@ -199,7 +160,6 @@ const ConnectionsPage = () => {
                         try {
                             const backendUrl = process.env.EXPO_PUBLIC_BACKEND_URL || 'https://viblo-backend-production.up.railway.app';
 
-                            // Revoke OAuth token first
                             if (platformId === 'tiktok' || platformId === 'youtube') {
                                 try {
                                     await fetch(`${backendUrl}/api/${platformId}/revoke?user_id=${profile?.id}`, {
@@ -213,7 +173,6 @@ const ConnectionsPage = () => {
                                 }
                             }
 
-                            // Delete from database
                             const { error: socialError } = await supabase
                                 .from('social_links')
                                 .delete()
@@ -222,7 +181,6 @@ const ConnectionsPage = () => {
 
                             if (socialError) throw socialError;
 
-                            // Also delete OAuth tokens
                             const { error: tokenError } = await supabase
                                 .from('oauth_tokens')
                                 .delete()
@@ -260,20 +218,20 @@ const ConnectionsPage = () => {
 
     if (loading) {
         return (
-            <SafeAreaView className="flex-1 bg-gray-50">
+            <SafeAreaView className="flex-1" style={{ backgroundColor: theme.background }}>
                 <View className="flex-1 justify-center items-center">
-                    <ActivityIndicator size="large" color="#3b82f6" />
+                    <ActivityIndicator size="large" color={theme.primary} />
                 </View>
             </SafeAreaView>
         );
     }
 
     return (
-        <SafeAreaView className="flex-1 bg-gray-50">
+        <SafeAreaView className="flex-1" style={{ backgroundColor: theme.background }}>
             {/* Header */}
-            <View className="px-6 py-4 bg-white border-b border-gray-200">
-                <Text className="text-2xl font-bold text-gray-900">Connections</Text>
-                <Text className="text-sm text-gray-600 mt-1">
+            <View className="px-6 py-4 border-b" style={{ backgroundColor: theme.surface, borderColor: theme.border }}>
+                <Text className="text-2xl font-bold" style={{ color: theme.text }}>Connections</Text>
+                <Text className="text-sm mt-1" style={{ color: theme.textSecondary }}>
                     Connect your social media accounts
                 </Text>
             </View>
@@ -281,20 +239,20 @@ const ConnectionsPage = () => {
             <ScrollView
                 className="flex-1"
                 refreshControl={
-                    <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+                    <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[theme.primary]} tintColor={theme.primary} />
                 }
                 contentContainerStyle={{ paddingBottom: 20 }}
             >
                 <View className="px-4 py-6">
                     {/* Info Card */}
-                    <View className="bg-blue-50 rounded-xl p-4 mb-6 border border-blue-100">
+                    <View className="rounded-xl p-4 mb-6 border" style={{ backgroundColor: theme.primaryLight, borderColor: theme.border }}>
                         <View className="flex-row items-start">
-                            <Feather name="info" size={18} color="#2563eb" />
+                            <Feather name="info" size={18} color={theme.primaryDark} />
                             <View className="flex-1 ml-3">
-                                <Text className="text-sm text-blue-900 font-medium mb-1">
+                                <Text className="text-sm font-medium mb-1" style={{ color: theme.primaryDark }}>
                                     Why Connect?
                                 </Text>
-                                <Text className="text-xs text-blue-700 leading-5">
+                                <Text className="text-xs leading-5" style={{ color: theme.primaryDark }}>
                                     Connect your accounts to automatically sync your stats, find matching campaigns, and get paid for your content.
                                 </Text>
                             </View>
@@ -310,21 +268,22 @@ const ConnectionsPage = () => {
                         return (
                             <View
                                 key={platform.id}
-                                className="bg-white rounded-xl p-5 mb-4 border border-gray-200"
+                                className="rounded-xl p-5 mb-4 border"
+                                style={{ backgroundColor: theme.surface, borderColor: theme.border }}
                             >
                                 <View className="flex-row items-center mb-4">
                                     <SocialIcon platform={platform.icon} />
                                     <View className="flex-1 ml-3">
-                                        <Text className="text-lg font-semibold text-gray-900">
+                                        <Text className="text-lg font-semibold" style={{ color: theme.text }}>
                                             {platform.name}
                                         </Text>
-                                        <Text className="text-xs text-gray-600 mt-1">
+                                        <Text className="text-xs mt-1" style={{ color: theme.textSecondary }}>
                                             {platform.description}
                                         </Text>
                                     </View>
                                     {connected && (
-                                        <View className="bg-green-100 px-2 py-1 rounded-full">
-                                            <Text className="text-xs font-semibold text-green-600">
+                                        <View className="px-2 py-1 rounded-full" style={{ backgroundColor: theme.successLight }}>
+                                            <Text className="text-xs font-semibold" style={{ color: theme.success }}>
                                                 Connected
                                             </Text>
                                         </View>
@@ -333,29 +292,29 @@ const ConnectionsPage = () => {
 
                                 {/* Stats (if connected) */}
                                 {connected && connection && (
-                                    <View className="bg-gray-50 rounded-lg p-3 mb-4">
+                                    <View className="rounded-lg p-3 mb-4" style={{ backgroundColor: theme.surfaceSecondary }}>
                                         <View className="flex-row justify-between">
                                             <View className="items-center flex-1">
-                                                <Text className="text-xs text-gray-500 mb-1">Followers</Text>
-                                                <Text className="text-sm font-bold text-gray-900">
+                                                <Text className="text-xs mb-1" style={{ color: theme.textTertiary }}>Followers</Text>
+                                                <Text className="text-sm font-bold" style={{ color: theme.text }}>
                                                     {formatNumber(connection.follower_count)}
                                                 </Text>
                                             </View>
                                             <View className="items-center flex-1">
-                                                <Text className="text-xs text-gray-500 mb-1">Views</Text>
-                                                <Text className="text-sm font-bold text-gray-900">
+                                                <Text className="text-xs mb-1" style={{ color: theme.textTertiary }}>Views</Text>
+                                                <Text className="text-sm font-bold" style={{ color: theme.text }}>
                                                     {formatNumber(connection.total_views_count)}
                                                 </Text>
                                             </View>
                                             <View className="items-center flex-1">
-                                                <Text className="text-xs text-gray-500 mb-1">Likes</Text>
-                                                <Text className="text-sm font-bold text-gray-900">
+                                                <Text className="text-xs mb-1" style={{ color: theme.textTertiary }}>Likes</Text>
+                                                <Text className="text-sm font-bold" style={{ color: theme.text }}>
                                                     {formatNumber(connection.total_likes_count)}
                                                 </Text>
                                             </View>
                                         </View>
                                         {connection.handle && (
-                                            <Text className="text-xs text-gray-600 text-center mt-2">
+                                            <Text className="text-xs text-center mt-2" style={{ color: theme.textSecondary }}>
                                                 @{connection.handle}
                                             </Text>
                                         )}
@@ -366,17 +325,18 @@ const ConnectionsPage = () => {
                                 <TouchableOpacity
                                     onPress={() => connected ? handleDisconnect(platform.id) : handleConnect(platform.id)}
                                     disabled={isLoading}
-                                    className={`rounded-lg p-3 ${connected
-                                        ? 'bg-red-50 border border-red-200'
-                                        : 'bg-blue-600'
-                                        }`}
+                                    className="rounded-lg p-3"
+                                    style={{
+                                        backgroundColor: connected ? theme.errorLight : theme.primary,
+                                        borderWidth: connected ? 1 : 0,
+                                        borderColor: theme.error
+                                    }}
                                     activeOpacity={0.8}
                                 >
                                     {isLoading ? (
-                                        <ActivityIndicator color={connected ? '#dc2626' : 'white'} />
+                                        <ActivityIndicator color={connected ? theme.error : theme.surface} />
                                     ) : (
-                                        <Text className={`text-center font-semibold ${connected ? 'text-red-600' : 'text-white'
-                                            }`}>
+                                        <Text className="text-center font-semibold" style={{ color: connected ? theme.error : theme.surface }}>
                                             {connected ? 'Disconnect' : `Connect ${platform.name}`}
                                         </Text>
                                     )}

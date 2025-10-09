@@ -14,72 +14,90 @@ import { Feather } from '@expo/vector-icons';
 import { supabase } from '@/lib/supabase';
 import { SocialIcon } from '@/components/getSocialIcons';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTheme } from '@/contexts/ThemeContext';
 
 // --- Helper Components ---
-const BrandHeader = ({ profile }) => (
-    <View className="flex-row items-center mb-4">
-        <Image
-            source={{ uri: profile.avatar_url || 'https://placehold.co/100x100/E2E8F0/4A5568?text=Brand' }}
-            className="w-14 h-14 rounded-full mr-4 bg-gray-200"
-        />
-        <View>
-            <View className="flex-row items-center">
-                <Link href={`/brand/${profile?.id}`} asChild>
-                    <Text className="text-xl font-bold text-gray-800">{profile.company_name || 'Brand Name'}</Text>
-                </Link>
-                {profile.is_verified && (
-                    <Feather name="check-circle" size={18} color="#3B82F6" className="ml-2" />
-                )}
+const BrandHeader = ({ profile }) => {
+    const { theme } = useTheme();
+    return (
+        <View className="flex-row items-center mb-4">
+            <Image
+                source={{ uri: profile.avatar_url || 'https://placehold.co/100x100/E2E8F0/4A5568?text=Brand' }}
+                className="w-14 h-14 rounded-full mr-4"
+                style={{ backgroundColor: theme.surfaceSecondary }}
+            />
+            <View>
+                <View className="flex-row items-center">
+                    <Link href={`/brand/${profile?.id}`} asChild>
+                        <Text className="text-xl font-bold" style={{ color: theme.text }}>{profile.company_name || 'Brand Name'}</Text>
+                    </Link>
+                    {profile.is_verified && (
+                        <Feather name="check-circle" size={18} color={theme.primary} style={{ marginLeft: 8 }} />
+                    )}
+                </View>
+                <Text className="text-sm" style={{ color: theme.textSecondary }}>{profile.industry || 'Industry'}</Text>
             </View>
-            <Text className="text-sm text-gray-500">{profile.industry || 'Industry'}</Text>
         </View>
-    </View>
-);
+    );
+};
 
-const CampaignStat = ({ icon, label, value }) => (
-    <View className="flex-1 items-center bg-blue-50 p-3 rounded-lg border border-blue-100">
-        <Feather name={icon} size={24} color="#3B82F6" />
-        <Text className="text-xs text-gray-500 mt-1">{label}</Text>
-        <Text className="text-base font-bold text-gray-800">{value}</Text>
-    </View>
-);
+const CampaignStat = ({ icon, label, value }) => {
+    const { theme } = useTheme();
+    return (
+        <View className="flex-1 items-center p-3 rounded-lg border" style={{ backgroundColor: theme.primaryLight, borderColor: theme.border }}>
+            <Feather name={icon} size={24} color={theme.primary} />
+            <Text className="text-xs mt-1" style={{ color: theme.textSecondary }}>{label}</Text>
+            <Text className="text-base font-bold" style={{ color: theme.text }}>{value}</Text>
+        </View>
+    );
+};
 
-const Tag = ({ text }) => (
-    <View className="bg-gray-200 rounded-full px-3 py-1 mr-2 mb-2">
-        <Text className="text-xs font-medium text-gray-700">{text}</Text>
-    </View>
-);
+const Tag = ({ text }) => {
+    const { theme } = useTheme();
+    return (
+        <View className="rounded-full px-3 py-1 mr-2 mb-2" style={{ backgroundColor: theme.surfaceSecondary }}>
+            <Text className="text-xs font-medium" style={{ color: theme.textSecondary }}>{text}</Text>
+        </View>
+    );
+};
 
-const TagPlatforms = ({ platform }) => (
-    <View className=" rounded-full px-3 py-1 mr-2 mb-2">
-        <SocialIcon platform={platform} />
-    </View>
-);
+const TagPlatforms = ({ platform }) => {
+    return (
+        <View className=" rounded-full px-3 py-1 mr-2 mb-2">
+            <SocialIcon platform={platform} />
+        </View>
+    );
+};
 
-const InfoSection = ({ title, children }) => (
-    <View className="mb-6">
-        <Text className="text-lg font-semibold text-gray-800 mb-2">{title}</Text>
-        {children}
-    </View>
-);
+const InfoSection = ({ title, children }) => {
+    const { theme } = useTheme();
+    return (
+        <View className="mb-6">
+            <Text className="text-lg font-semibold mb-2" style={{ color: theme.text }}>{title}</Text>
+            {children}
+        </View>
+    );
+};
 
 const BudgetProgressBar = ({ total, paid }: { total: number; paid: number }) => {
+    const { theme } = useTheme();
     const paidAmount = paid || 0;
     const totalAmount = total || 0;
     const percentage = totalAmount > 0 ? (paidAmount / totalAmount) * 100 : 0;
-    let barColor = 'bg-green-500';
-    if (percentage > 50) barColor = 'bg-yellow-500';
-    if (percentage > 85) barColor = 'bg-red-500';
+    let barColor = theme.success;
+    if (percentage > 50) barColor = theme.warning;
+    if (percentage > 85) barColor = theme.error;
+
     return (
         <View className="mb-6">
             <View className="flex-row justify-between items-center mb-1">
-                <Text className="text-xs font-medium text-gray-500">Budget Used: ${paidAmount.toFixed(2)}</Text>
-                <Text className="text-xs font-bold text-gray-600">{Math.round(percentage)}%</Text>
+                <Text className="text-xs font-medium" style={{ color: theme.textSecondary }}>Budget Used: ${paidAmount.toFixed(2)}</Text>
+                <Text className="text-xs font-bold" style={{ color: theme.textSecondary }}>{Math.round(percentage)}%</Text>
             </View>
-            <View className="w-full bg-gray-200 rounded-full h-2.5">
+            <View className="w-full rounded-full h-2.5" style={{ backgroundColor: theme.surfaceSecondary }}>
                 <View
-                    className={`${barColor} h-2.5 rounded-full`}
-                    style={{ width: `${percentage}%` }}
+                    className="h-2.5 rounded-full"
+                    style={{ width: `${percentage}%`, backgroundColor: barColor }}
                 />
             </View>
         </View>
@@ -92,6 +110,7 @@ const CampaignDetailsPage = () => {
     const router = useRouter();
     const { id } = useLocalSearchParams();
     const navigation = useNavigation();
+    const { theme } = useTheme();
 
     const { profile, isLoading: isAuthLoading } = useAuth();
     const isBrand = profile?.user_type === 'brand';
@@ -176,16 +195,16 @@ const CampaignDetailsPage = () => {
     // Combined loading state
     if (loading || isAuthLoading || isStatusLoading) {
         return (
-            <View className="flex-1 bg-gray-50 items-center justify-center">
-                <ActivityIndicator size="large" color="#3B82F6" />
+            <View className="flex-1 items-center justify-center" style={{ backgroundColor: theme.background }}>
+                <ActivityIndicator size="large" color={theme.primary} />
             </View>
         );
     }
 
     if (error || !campaign) {
         return (
-            <View className="flex-1 bg-gray-50 items-center justify-center p-4">
-                <Text className="text-red-500 text-center">
+            <View className="flex-1 items-center justify-center p-4" style={{ backgroundColor: theme.background }}>
+                <Text className="text-center" style={{ color: theme.error }}>
                     {error || "Campaign not found."}
                 </Text>
             </View>
@@ -211,21 +230,21 @@ const CampaignDetailsPage = () => {
     const isButtonDisabled = submissionStatus === 'pending_review' || submissionStatus === 'completed';
 
     return (
-        <SafeAreaView className="flex-1 bg-gray-50" edges={['bottom']}>
+        <SafeAreaView className="flex-1" style={{ backgroundColor: theme.background }} edges={['bottom']}>
             <ScrollView
                 contentContainerStyle={{ padding: 16, paddingBottom: 100 }}
                 refreshControl={
                     <RefreshControl
                         refreshing={refreshing}
                         onRefresh={onRefresh}
-                        colors={['#3B82F6']} // Android
-                        tintColor="#3B82F6"  // iOS
+                        colors={[theme.primary]} // Android
+                        tintColor={theme.primary}  // iOS
                     />
                 }
             >
 
                 {campaign.profile && <BrandHeader profile={campaign.profile} />}
-                <Text className="text-3xl font-extrabold text-gray-900 mb-4">{campaign.title}</Text>
+                <Text className="text-3xl font-extrabold mb-4" style={{ color: theme.text }}>{campaign.title}</Text>
                 <BudgetProgressBar
                     total={parseFloat(campaign.total_budget)}
                     paid={parseFloat(campaign.total_paid)}
@@ -235,11 +254,11 @@ const CampaignDetailsPage = () => {
                     <CampaignStat icon="eye" label="Rate Per View" value={`$${campaign.rate_per_view}`} />
                 </View>
                 <InfoSection title="Description">
-                    <Text className="text-base text-gray-600 leading-relaxed">{campaign.description}</Text>
+                    <Text className="text-base leading-relaxed" style={{ color: theme.textSecondary }}>{campaign.description}</Text>
                 </InfoSection>
                 {campaign.content_requirements && (
                     <InfoSection title="Content Requirements">
-                        <Text className="text-base text-gray-600 leading-relaxed">{campaign.content_requirements}</Text>
+                        <Text className="text-base leading-relaxed" style={{ color: theme.textSecondary }}>{campaign.content_requirements}</Text>
                     </InfoSection>
                 )}
                 <InfoSection title="Platforms">
@@ -260,23 +279,25 @@ const CampaignDetailsPage = () => {
             </ScrollView>
 
             {/* --- Updated Floating Button Logic --- */}
-            <View className="absolute bottom-0 left-0 right-0 p-4 bg-white border-t border-gray-200">
+            <View className="absolute bottom-0 left-0 right-0 p-4 border-t" style={{ backgroundColor: theme.surface, borderColor: theme.border }}>
                 {isBrand ? (
                     <Pressable
-                        className="bg-blue-600 py-4 rounded-xl items-center justify-center shadow-lg"
+                        className="py-4 rounded-xl items-center justify-center shadow-lg"
+                        style={{ backgroundColor: theme.primary }}
                         onPress={() => router.push(`/campaigns/${campaignId}/edit`)}
                     >
-                        <Text className="text-white text-lg font-bold">Edit</Text>
+                        <Text className="text-lg font-bold" style={{ color: theme.surface }}>Edit</Text>
                     </Pressable>
                 ) : isInfluencer ? (
                     <Pressable
                         disabled={isButtonDisabled}
-                        className={`py-4 rounded-xl items-center justify-center shadow-lg ${isButtonDisabled ? 'bg-gray-400' : 'bg-blue-600'}`}
+                        className="py-4 rounded-xl items-center justify-center shadow-lg"
+                        style={{ backgroundColor: isButtonDisabled ? theme.textTertiary : theme.primary }}
                         onPress={() => {
                             router.push(`/campaigns/${campaignId}/apply`);
                         }}
                     >
-                        <Text className="text-white text-lg font-bold">{getButtonText()}</Text>
+                        <Text className="text-lg font-bold" style={{ color: theme.surface }}>{getButtonText()}</Text>
                     </Pressable>
                 ) : null}
             </View>
@@ -285,4 +306,3 @@ const CampaignDetailsPage = () => {
 };
 
 export default CampaignDetailsPage;
-

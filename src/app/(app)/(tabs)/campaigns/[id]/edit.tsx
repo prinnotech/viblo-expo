@@ -1,4 +1,3 @@
-// app/campaigns/edit/[id].tsx
 import {
     Text,
     View,
@@ -18,6 +17,7 @@ import AntDesign from '@expo/vector-icons/AntDesign';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { CampaignStatus } from '@/lib/enum_types';
 import { Campaign as BaseCampaign } from '@/lib/db_interface';
+import { useTheme } from '@/contexts/ThemeContext';
 
 interface Campaign extends BaseCampaign {
     brand_id: string;
@@ -60,6 +60,7 @@ const EditCampaignPage = () => {
     const router = useRouter();
     const { id } = useLocalSearchParams();
     const { profile } = useAuth();
+    const { theme } = useTheme();
     const campaignId = Array.isArray(id) ? id[0] : id;
 
     const [loading, setLoading] = useState(true);
@@ -336,33 +337,33 @@ const EditCampaignPage = () => {
 
     if (loading) {
         return (
-            <View className="flex-1 bg-gray-50 items-center justify-center">
-                <ActivityIndicator size="large" color="#3B82F6" />
+            <View className="flex-1 items-center justify-center" style={{ backgroundColor: theme.background }}>
+                <ActivityIndicator size="large" color={theme.primary} />
             </View>
         );
     }
 
     if (!campaign) {
         return (
-            <View className="flex-1 bg-gray-50 items-center justify-center p-4">
-                <Text className="text-red-500 text-center">Campaign not found</Text>
+            <View className="flex-1 items-center justify-center p-4" style={{ backgroundColor: theme.background }}>
+                <Text className="text-center" style={{ color: theme.error }}>Campaign not found</Text>
             </View>
         );
     }
 
     return (
-        <SafeAreaView className="flex-1 bg-gray-50">
+        <SafeAreaView className="flex-1" style={{ backgroundColor: theme.background }}>
             <ScrollView className="flex-1" contentContainerStyle={{ padding: 16, paddingBottom: 100 }}>
                 {/* Header */}
                 <View className="mb-6">
-                    <Text className="text-2xl font-bold text-gray-800">Edit Campaign</Text>
+                    <Text className="text-2xl font-bold" style={{ color: theme.text }}>Edit Campaign</Text>
                     {submissionStats && submissionStats.total > 0 && (
-                        <View className="mt-2 bg-blue-50 p-3 rounded-lg">
-                            <Text className="text-sm text-blue-800 font-medium">
+                        <View className="mt-2 p-3 rounded-lg" style={{ backgroundColor: theme.primaryLight }}>
+                            <Text className="text-sm font-medium" style={{ color: theme.primaryDark }}>
                                 📊 {submissionStats.total} total submission(s)
                             </Text>
                             {hasActiveSubmissions && (
-                                <Text className="text-xs text-blue-600 mt-1">
+                                <Text className="text-xs mt-1" style={{ color: theme.primary }}>
                                     ⚠️ Some fields are locked due to active submissions
                                 </Text>
                             )}
@@ -372,68 +373,70 @@ const EditCampaignPage = () => {
 
                 {/* Title */}
                 <View className="mb-4">
-                    <Text className="text-sm font-semibold text-gray-700 mb-2">
-                        Campaign Title <Text className="text-red-500">*</Text>
+                    <Text className="text-sm font-semibold mb-2" style={{ color: theme.textSecondary }}>
+                        Campaign Title <Text style={{ color: theme.error }}>*</Text>
                     </Text>
                     <TextInput
-                        className="bg-white border border-gray-300 rounded-lg px-4 py-3 text-base text-gray-800"
+                        className="border rounded-lg px-4 py-3 text-base"
+                        style={{ backgroundColor: theme.surface, borderColor: theme.border, color: theme.text }}
                         value={title}
                         onChangeText={setTitle}
                         placeholder="Enter campaign title"
-                        placeholderTextColor="#9CA3AF"
+                        placeholderTextColor={theme.textTertiary}
                     />
                 </View>
 
                 {/* Description */}
                 <View className="mb-4">
-                    <Text className="text-sm font-semibold text-gray-700 mb-2">Description</Text>
+                    <Text className="text-sm font-semibold mb-2" style={{ color: theme.textSecondary }}>Description</Text>
                     <TextInput
-                        className="bg-white border border-gray-300 rounded-lg px-4 py-3 text-base text-gray-800"
+                        className="border rounded-lg px-4 py-3 text-base"
+                        style={{ backgroundColor: theme.surface, borderColor: theme.border, color: theme.text, height: 100, textAlignVertical: 'top' }}
                         value={description}
                         onChangeText={setDescription}
                         placeholder="Describe your campaign"
-                        placeholderTextColor="#9CA3AF"
+                        placeholderTextColor={theme.textTertiary}
                         multiline
                         numberOfLines={4}
-                        textAlignVertical="top"
                     />
                 </View>
 
                 {/* Content Requirements */}
                 <View className="mb-4">
-                    <Text className="text-sm font-semibold text-gray-700 mb-2">
+                    <Text className="text-sm font-semibold mb-2" style={{ color: theme.textSecondary }}>
                         Content Requirements
                     </Text>
                     <TextInput
-                        className="bg-white border border-gray-300 rounded-lg px-4 py-3 text-base text-gray-800"
+                        className="border rounded-lg px-4 py-3 text-base"
+                        style={{ backgroundColor: theme.surface, borderColor: theme.border, color: theme.text, height: 100, textAlignVertical: 'top' }}
                         value={contentRequirements}
                         onChangeText={setContentRequirements}
                         placeholder="What should influencers include in their content?"
-                        placeholderTextColor="#9CA3AF"
+                        placeholderTextColor={theme.textTertiary}
                         multiline
                         numberOfLines={4}
-                        textAlignVertical="top"
                     />
                 </View>
 
                 {/* Status */}
                 <View className="mb-4">
-                    <Text className="text-sm font-semibold text-gray-700 mb-2">
-                        Campaign Status <Text className="text-red-500">*</Text>
+                    <Text className="text-sm font-semibold mb-2" style={{ color: theme.textSecondary }}>
+                        Campaign Status <Text style={{ color: theme.error }}>*</Text>
                     </Text>
                     <View className="flex-row flex-wrap gap-2">
                         {['draft', 'active', 'paused', 'completed'].map((s) => (
                             <TouchableOpacity
                                 key={s}
                                 onPress={() => setStatus(s as CampaignStatus)}
-                                className={`px-4 py-2 rounded-full border ${status === s
-                                    ? 'bg-blue-500 border-blue-500'
-                                    : 'bg-white border-gray-300'
-                                    }`}
+                                className="px-4 py-2 rounded-full border"
+                                style={{
+                                    backgroundColor: status === s ? theme.primary : theme.surface,
+                                    borderColor: status === s ? theme.primary : theme.border
+                                }}
                             >
                                 <Text
-                                    className={`text-sm font-medium capitalize ${status === s ? 'text-white' : 'text-gray-700'
-                                        }`}
+                                    className="text-sm font-medium capitalize"
+                                    style={{ color: status === s ? theme.surface : theme.text }}
                                 >
                                     {s}
                                 </Text>
@@ -445,30 +448,32 @@ const EditCampaignPage = () => {
                 {/* Budget Fields */}
                 <View className="mb-4">
                     <View className="flex-row items-center justify-between mb-2">
-                        <Text className="text-sm font-semibold text-gray-700">
-                            Total Budget <Text className="text-red-500">*</Text>
+                        <Text className="text-sm font-semibold" style={{ color: theme.textSecondary }}>
+                            Total Budget <Text style={{ color: theme.error }}>*</Text>
                         </Text>
                         {!canEditFinancials && (
                             <View className="flex-row items-center">
-                                <AntDesign name="lock" size={12} color="#EF4444" />
-                                <Text className="text-xs text-red-500 ml-1">Locked</Text>
+                                <AntDesign name="lock" size={12} color={theme.error} />
+                                <Text className="text-xs ml-1" style={{ color: theme.error }}>Locked</Text>
                             </View>
                         )}
                     </View>
                     <TextInput
-                        className={`bg-white border rounded-lg px-4 py-3 text-base ${canEditFinancials
-                            ? 'border-gray-300 text-gray-800'
-                            : 'border-gray-200 text-gray-400 bg-gray-100'
-                            }`}
+                        className="border rounded-lg px-4 py-3 text-base"
+                        style={{
+                            backgroundColor: canEditFinancials ? theme.surface : theme.surfaceSecondary,
+                            borderColor: theme.border,
+                            color: canEditFinancials ? theme.text : theme.textTertiary
+                        }}
                         value={totalBudget}
                         onChangeText={setTotalBudget}
                         placeholder="0.00"
-                        placeholderTextColor="#9CA3AF"
+                        placeholderTextColor={theme.textTertiary}
                         keyboardType="decimal-pad"
                         editable={canEditFinancials}
                     />
                     {campaign.total_paid > 0 && (
-                        <Text className="text-xs text-gray-500 mt-1">
+                        <Text className="text-xs mt-1" style={{ color: theme.textSecondary }}>
                             ${campaign.total_paid.toFixed(2)} already paid to influencers
                         </Text>
                     )}
@@ -476,25 +481,27 @@ const EditCampaignPage = () => {
 
                 <View className="mb-4">
                     <View className="flex-row items-center justify-between mb-2">
-                        <Text className="text-sm font-semibold text-gray-700">
-                            Rate Per View <Text className="text-red-500">*</Text>
+                        <Text className="text-sm font-semibold" style={{ color: theme.textSecondary }}>
+                            Rate Per View <Text style={{ color: theme.error }}>*</Text>
                         </Text>
                         {!canEditFinancials && (
                             <View className="flex-row items-center">
-                                <AntDesign name="lock" size={12} color="#EF4444" />
-                                <Text className="text-xs text-red-500 ml-1">Locked</Text>
+                                <AntDesign name="lock" size={12} color={theme.error} />
+                                <Text className="text-xs ml-1" style={{ color: theme.error }}>Locked</Text>
                             </View>
                         )}
                     </View>
                     <TextInput
-                        className={`bg-white border rounded-lg px-4 py-3 text-base ${canEditFinancials
-                            ? 'border-gray-300 text-gray-800'
-                            : 'border-gray-200 text-gray-400 bg-gray-100'
-                            }`}
+                        className="border rounded-lg px-4 py-3 text-base"
+                        style={{
+                            backgroundColor: canEditFinancials ? theme.surface : theme.surfaceSecondary,
+                            borderColor: theme.border,
+                            color: canEditFinancials ? theme.text : theme.textTertiary
+                        }}
                         value={ratePerView}
                         onChangeText={setRatePerView}
                         placeholder="0.0000"
-                        placeholderTextColor="#9CA3AF"
+                        placeholderTextColor={theme.textTertiary}
                         keyboardType="decimal-pad"
                         editable={canEditFinancials}
                     />
@@ -502,22 +509,23 @@ const EditCampaignPage = () => {
 
                 {/* Target Niches */}
                 <View className="mb-4">
-                    <Text className="text-sm font-semibold text-gray-700 mb-2">
-                        Target Niches <Text className="text-red-500">*</Text>
+                    <Text className="text-sm font-semibold mb-2" style={{ color: theme.textSecondary }}>
+                        Target Niches <Text style={{ color: theme.error }}>*</Text>
                     </Text>
                     <View className="flex-row flex-wrap gap-2">
                         {AVAILABLE_NICHES.map((niche) => (
                             <TouchableOpacity
                                 key={niche}
                                 onPress={() => toggleNiche(niche)}
-                                className={`px-4 py-2 rounded-full border ${selectedNiches.includes(niche)
-                                    ? 'bg-purple-500 border-purple-500'
-                                    : 'bg-white border-gray-300'
-                                    }`}
+                                className="px-4 py-2 rounded-full border"
+                                style={{
+                                    backgroundColor: selectedNiches.includes(niche) ? theme.primary : theme.surface,
+                                    borderColor: selectedNiches.includes(niche) ? theme.primary : theme.border
+                                }}
                             >
                                 <Text
-                                    className={`text-sm font-medium ${selectedNiches.includes(niche) ? 'text-white' : 'text-gray-700'
-                                        }`}
+                                    className="text-sm font-medium"
+                                    style={{ color: selectedNiches.includes(niche) ? theme.surface : theme.text }}
                                 >
                                     {niche}
                                 </Text>
@@ -528,22 +536,23 @@ const EditCampaignPage = () => {
 
                 {/* Target Platforms */}
                 <View className="mb-4">
-                    <Text className="text-sm font-semibold text-gray-700 mb-2">
-                        Target Platforms <Text className="text-red-500">*</Text>
+                    <Text className="text-sm font-semibold mb-2" style={{ color: theme.textSecondary }}>
+                        Target Platforms <Text style={{ color: theme.error }}>*</Text>
                     </Text>
                     <View className="flex-row flex-wrap gap-2">
                         {AVAILABLE_PLATFORMS.map((platform) => (
                             <TouchableOpacity
                                 key={platform}
                                 onPress={() => togglePlatform(platform)}
-                                className={`px-4 py-2 rounded-full border ${selectedPlatforms.includes(platform)
-                                    ? 'bg-blue-500 border-blue-500'
-                                    : 'bg-white border-gray-300'
-                                    }`}
+                                className="px-4 py-2 rounded-full border"
+                                style={{
+                                    backgroundColor: selectedPlatforms.includes(platform) ? theme.primary : theme.surface,
+                                    borderColor: selectedPlatforms.includes(platform) ? theme.primary : theme.border
+                                }}
                             >
                                 <Text
-                                    className={`text-sm font-medium capitalize ${selectedPlatforms.includes(platform) ? 'text-white' : 'text-gray-700'
-                                        }`}
+                                    className="text-sm font-medium capitalize"
+                                    style={{ color: selectedPlatforms.includes(platform) ? theme.surface : theme.text }}
                                 >
                                     {platform.replace('_', ' ')}
                                 </Text>
@@ -554,7 +563,7 @@ const EditCampaignPage = () => {
 
                 {/* Target Locations */}
                 <View className="mb-4">
-                    <Text className="text-sm font-semibold text-gray-700 mb-2">
+                    <Text className="text-sm font-semibold mb-2" style={{ color: theme.textSecondary }}>
                         Target Locations (Optional)
                     </Text>
                     <View className="flex-row flex-wrap gap-2">
@@ -562,14 +571,15 @@ const EditCampaignPage = () => {
                             <TouchableOpacity
                                 key={location}
                                 onPress={() => toggleLocation(location)}
-                                className={`px-4 py-2 rounded-full border ${selectedLocations.includes(location)
-                                    ? 'bg-green-500 border-green-500'
-                                    : 'bg-white border-gray-300'
-                                    }`}
+                                className="px-4 py-2 rounded-full border"
+                                style={{
+                                    backgroundColor: selectedLocations.includes(location) ? theme.success : theme.surface,
+                                    borderColor: selectedLocations.includes(location) ? theme.success : theme.border
+                                }}
                             >
                                 <Text
-                                    className={`text-sm font-medium ${selectedLocations.includes(location) ? 'text-white' : 'text-gray-700'
-                                        }`}
+                                    className="text-sm font-medium"
+                                    style={{ color: selectedLocations.includes(location) ? theme.surface : theme.text }}
                                 >
                                     {location}
                                 </Text>
@@ -580,26 +590,28 @@ const EditCampaignPage = () => {
 
                 {/* Target Audience Age */}
                 <View className="mb-4">
-                    <Text className="text-sm font-semibold text-gray-700 mb-2">
+                    <Text className="text-sm font-semibold mb-2" style={{ color: theme.textSecondary }}>
                         Target Audience Age (Optional)
                     </Text>
                     <TextInput
-                        className="bg-white border border-gray-300 rounded-lg px-4 py-3 text-base text-gray-800"
+                        className="border rounded-lg px-4 py-3 text-base"
+                        style={{ backgroundColor: theme.surface, borderColor: theme.border, color: theme.text }}
                         value={targetAudienceAge}
                         onChangeText={setTargetAudienceAge}
                         placeholder="e.g., 18-35"
-                        placeholderTextColor="#9CA3AF"
+                        placeholderTextColor={theme.textTertiary}
                     />
                 </View>
 
                 {/* Dates */}
                 <View className="mb-4">
-                    <Text className="text-sm font-semibold text-gray-700 mb-2">Start Date</Text>
+                    <Text className="text-sm font-semibold mb-2" style={{ color: theme.textSecondary }}>Start Date</Text>
                     <TouchableOpacity
                         onPress={() => setShowStartPicker(true)}
-                        className="bg-white border border-gray-300 rounded-lg px-4 py-3"
+                        className="border rounded-lg px-4 py-3"
+                        style={{ backgroundColor: theme.surface, borderColor: theme.border }}
                     >
-                        <Text className="text-base text-gray-800">
+                        <Text className="text-base" style={{ color: startDate ? theme.text : theme.textTertiary }}>
                             {startDate ? startDate.toLocaleDateString() : 'Select start date'}
                         </Text>
                     </TouchableOpacity>
@@ -620,14 +632,15 @@ const EditCampaignPage = () => {
                 <TouchableOpacity
                     onPress={handleDelete}
                     disabled={hasActiveSubmissions}
-                    className={`py-3 rounded-lg border-2 mb-4 ${hasActiveSubmissions
-                        ? 'border-gray-300 bg-gray-100'
-                        : 'border-red-500 bg-white'
-                        }`}
+                    className="py-3 rounded-lg border-2 mb-4"
+                    style={{
+                        borderColor: hasActiveSubmissions ? theme.border : theme.error,
+                        backgroundColor: hasActiveSubmissions ? theme.surfaceSecondary : theme.surface
+                    }}
                 >
                     <Text
-                        className={`text-center font-semibold ${hasActiveSubmissions ? 'text-gray-400' : 'text-red-500'
-                            }`}
+                        className="text-center font-semibold"
+                        style={{ color: hasActiveSubmissions ? theme.textTertiary : theme.error }}
                     >
                         {hasActiveSubmissions ? 'Cannot Delete (Active Submissions)' : 'Delete Campaign'}
                     </Text>
@@ -635,16 +648,17 @@ const EditCampaignPage = () => {
             </ScrollView>
 
             {/* Fixed Bottom Save Button */}
-            <View className="absolute bottom-0 left-0 right-0 p-4 bg-white border-t border-gray-200">
+            <View className="absolute bottom-0 left-0 right-0 p-4 border-t" style={{ backgroundColor: theme.surface, borderColor: theme.border }}>
                 <TouchableOpacity
                     onPress={handleSave}
                     disabled={saving}
-                    className="bg-blue-600 py-4 rounded-xl items-center justify-center"
+                    className="py-4 rounded-xl items-center justify-center"
+                    style={{ backgroundColor: saving ? theme.textTertiary : theme.primary }}
                 >
                     {saving ? (
-                        <ActivityIndicator color="white" />
+                        <ActivityIndicator color={theme.surface} />
                     ) : (
-                        <Text className="text-white text-lg font-bold">Save Changes</Text>
+                        <Text className="text-lg font-bold" style={{ color: theme.surface }}>Save Changes</Text>
                     )}
                 </TouchableOpacity>
             </View>
@@ -653,3 +667,4 @@ const EditCampaignPage = () => {
 };
 
 export default EditCampaignPage;
+

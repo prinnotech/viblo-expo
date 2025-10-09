@@ -1,9 +1,22 @@
 import { Stack } from 'expo-router';
 import React from 'react';
+import { useTheme } from '@/contexts/ThemeContext';
 
 export default function AnalyticsLayout() {
+    const { theme } = useTheme();
+
     return (
-        <Stack>
+        <Stack
+            screenOptions={{
+                headerStyle: {
+                    backgroundColor: theme.surface,
+                },
+                headerTintColor: theme.text,
+                headerTitleStyle: {
+                    color: theme.text,
+                },
+            }}
+        >
             {/* This screen is for your main campaigns list (index.tsx) */}
             {/* We hide its header because it's the base screen. */}
             <Stack.Screen name="index" options={{ headerShown: false }} />

@@ -1,4 +1,3 @@
-// components/ProfileBrandForm.tsx
 import React, { useState, useEffect } from 'react';
 import {
     View,
@@ -19,6 +18,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { useAuth } from '@/contexts/AuthContext';
 import { registerForPushNotifications } from '@/hooks/usePushNotifications';
 import { Profile } from '@/lib/db_interface';
+import { useTheme } from '@/contexts/ThemeContext';
 
 const FormInput = ({ label, value, onChangeText, placeholder, multiline = false }: {
     label: string;
@@ -26,24 +26,34 @@ const FormInput = ({ label, value, onChangeText, placeholder, multiline = false 
     onChangeText: (text: string) => void;
     placeholder: string;
     multiline?: boolean;
-}) => (
-    <View className="mb-4">
-        <Text className="text-sm font-semibold text-gray-600 mb-2">{label}</Text>
-        <TextInput
-            className="bg-white border border-gray-300 rounded-lg px-4 py-3 text-base text-gray-800"
-            value={value}
-            onChangeText={onChangeText}
-            placeholder={placeholder}
-            placeholderTextColor="#9ca3af"
-            multiline={multiline}
-            style={multiline ? { height: 100, textAlignVertical: 'top' } : {}}
-        />
-    </View>
-);
+}) => {
+    const { theme } = useTheme();
+    return (
+        <View className="mb-4">
+            <Text className="text-sm font-semibold mb-2" style={{ color: theme.textSecondary }}>{label}</Text>
+            <TextInput
+                className="rounded-lg px-4 py-3 text-base"
+                style={{
+                    backgroundColor: theme.surface,
+                    borderColor: theme.borderLight,
+                    borderWidth: 1,
+                    color: theme.text,
+                    ...(multiline ? { height: 100, textAlignVertical: 'top' } : {})
+                }}
+                value={value}
+                onChangeText={onChangeText}
+                placeholder={placeholder}
+                placeholderTextColor={theme.textTertiary}
+                multiline={multiline}
+            />
+        </View>
+    );
+}
 
 const ProfileBrandForm = ({ profile }: { profile: Profile }) => {
     const router = useRouter();
     const { session } = useAuth();
+    const { theme } = useTheme();
 
     const [companyName, setCompanyName] = useState('');
     const [industry, setIndustry] = useState('');
@@ -74,7 +84,7 @@ const ProfileBrandForm = ({ profile }: { profile: Profile }) => {
         }
 
         let result = await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ['images'],
+            mediaTypes: ImagePicker.MediaTypeOptions.Images,
             allowsEditing: true,
             aspect: [1, 1],
             quality: 0.8,
@@ -175,7 +185,7 @@ const ProfileBrandForm = ({ profile }: { profile: Profile }) => {
     };
 
     return (
-        <SafeAreaView className="flex-1 bg-gray-50">
+        <SafeAreaView className="flex-1" style={{ backgroundColor: theme.background }}>
             <ScrollView className="p-4" contentContainerStyle={{ paddingBottom: 40 }}>
                 {/* Avatar Section */}
                 <View className="items-center mb-6">
@@ -184,7 +194,7 @@ const ProfileBrandForm = ({ profile }: { profile: Profile }) => {
                         className="w-28 h-28 rounded-full"
                     />
                     <TouchableOpacity onPress={pickImage} className="mt-4">
-                        <Text className="text-blue-500 font-semibold">Change Photo</Text>
+                        <Text className="font-semibold" style={{ color: theme.primary }}>Change Photo</Text>
                     </TouchableOpacity>
                 </View>
 
@@ -222,19 +232,19 @@ const ProfileBrandForm = ({ profile }: { profile: Profile }) => {
                 />
 
                 {/* Notifications Toggle */}
-                <View className="mb-6 bg-white border border-gray-300 rounded-lg px-4 py-4">
+                <View className="mb-6 rounded-lg px-4 py-4" style={{ backgroundColor: theme.surface, borderColor: theme.borderLight, borderWidth: 1 }}>
                     <View className="flex-row justify-between items-center">
                         <View className="flex-1 mr-4">
-                            <Text className="text-base font-semibold text-gray-800">Push Notifications</Text>
-                            <Text className="text-sm text-gray-600 mt-1">
+                            <Text className="text-base font-semibold" style={{ color: theme.text }}>Push Notifications</Text>
+                            <Text className="text-sm mt-1" style={{ color: theme.textSecondary }}>
                                 Receive updates about campaigns and messages
                             </Text>
                         </View>
                         <Switch
                             value={notificationsEnabled}
                             onValueChange={handleNotificationToggle}
-                            trackColor={{ false: '#d1d5db', true: '#93c5fd' }}
-                            thumbColor={notificationsEnabled ? '#3b82f6' : '#f3f4f6'}
+                            trackColor={{ false: theme.border, true: theme.primaryLight }}
+                            thumbColor={notificationsEnabled ? theme.primary : theme.borderLight}
                         />
                     </View>
                 </View>
@@ -242,15 +252,16 @@ const ProfileBrandForm = ({ profile }: { profile: Profile }) => {
                 {/* Save Button */}
                 <TouchableOpacity
                     onPress={handleUpdateProfile}
-                    className={`bg-blue-500 py-4 rounded-lg flex-row justify-center items-center mt-4 ${updating ? 'opacity-70' : ''}`}
+                    className={`py-4 rounded-lg flex-row justify-center items-center mt-4 ${updating ? 'opacity-70' : ''}`}
+                    style={{ backgroundColor: theme.primary }}
                     disabled={updating}
                 >
                     {updating ? (
-                        <ActivityIndicator color="#fff" />
+                        <ActivityIndicator color="#FFFFFF" />
                     ) : (
                         <>
-                            <Feather name="save" size={18} color="#fff" />
-                            <Text className="text-white text-base font-semibold ml-2">Save Changes</Text>
+                            <Feather name="save" size={18} color="#FFFFFF" />
+                            <Text className="text-base font-semibold ml-2" style={{ color: '#FFFFFF' }}>Save Changes</Text>
                         </>
                     )}
                 </TouchableOpacity>

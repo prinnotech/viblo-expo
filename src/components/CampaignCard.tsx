@@ -4,6 +4,7 @@ import { Link } from 'expo-router';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { supabase } from '@/lib/supabase';
 import { Profile } from '@/lib/db_interface';
+import { useTheme } from '@/contexts/ThemeContext';
 
 // Updated Campaign type to include total_paid
 export type Campaign = {
@@ -20,24 +21,27 @@ export type Campaign = {
 
 // --- New Progress Bar Component ---
 const BudgetProgressBar = ({ total, paid }: { total: number; paid: number }) => {
+    const { theme } = useTheme();
     // FIX: Default 'paid' to 0 if it's null or undefined to prevent NaN result.
     const percentage = total > 0 ? ((paid || 0) / total) * 100 : 0;
 
     // Determine color based on percentage
-    let barColor = 'bg-green-500'; // Default to green
-    if (percentage > 50) barColor = 'bg-yellow-500';
-    if (percentage > 85) barColor = 'bg-red-500';
+    const getBarColor = () => {
+        if (percentage > 85) return theme.error;
+        if (percentage > 50) return theme.warning;
+        return theme.success;
+    };
 
     return (
         <View className="mb-4">
             <View className="flex-row justify-between items-center mb-1">
-                <Text className="text-xs font-medium text-gray-500">Budget Used  ${paid}</Text>
-                <Text className="text-xs font-bold text-gray-600">{Math.round(percentage)}%</Text>
+                <Text className="text-xs font-medium" style={{ color: theme.textTertiary }}>Budget Used  ${paid}</Text>
+                <Text className="text-xs font-bold" style={{ color: theme.textSecondary }}>{Math.round(percentage)}%</Text>
             </View>
-            <View className="w-full bg-gray-200 rounded-full h-2.5">
+            <View className="w-full rounded-full h-2.5" style={{ backgroundColor: theme.border }}>
                 <View
-                    className={`${barColor} h-2.5 rounded-full`}
-                    style={{ width: `${percentage}%` }}
+                    className="h-2.5 rounded-full"
+                    style={{ width: `${percentage}%`, backgroundColor: getBarColor() }}
                 />
             </View>
         </View>
@@ -48,6 +52,7 @@ const BudgetProgressBar = ({ total, paid }: { total: number; paid: number }) => 
 const CampaignCard = ({ campaign }: { campaign: Campaign }) => {
     const [brand, setBrand] = useState<Profile | null>(null);
     const [loading, setLoading] = useState(true);
+    const { theme } = useTheme();
 
     useEffect(() => {
         const fetchBrandProfile = async () => {
@@ -82,20 +87,20 @@ const CampaignCard = ({ campaign }: { campaign: Campaign }) => {
 
     return (
         <Link href={`/(tabs)/campaigns/${campaign.id}`} asChild>
-            <TouchableOpacity className="m-4 bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+            <TouchableOpacity className="m-4 rounded-2xl shadow-sm overflow-hidden" style={{ backgroundColor: theme.surface, borderColor: theme.border, borderWidth: 1 }}>
                 {/* Card Header */}
-                <View className="p-4 flex-row items-center gap-4 bg-gray-50 border-b border-gray-200">
+                <View className="p-4 flex-row items-center gap-4" style={{ backgroundColor: theme.background, borderBottomColor: theme.border, borderBottomWidth: 1 }}>
                     {loading ? (
                         <ActivityIndicator />
                     ) : (
                         <Image source={{ uri: avatarUrl }} className="w-12 h-12 rounded-full" />
                     )}
                     <View className="flex-1">
-                        <Text className="text-lg font-bold text-gray-800" numberOfLines={1}>
+                        <Text className="text-lg font-bold" style={{ color: theme.text }} numberOfLines={1}>
                             {campaign.title}
                         </Text>
                         <Link href={`/brand/${brand?.id}`} asChild>
-                            <Text className="text-sm text-gray-500" numberOfLines={1}>
+                            <Text className="text-sm" style={{ color: theme.textTertiary }} numberOfLines={1}>
                                 {brand?.company_name || brand?.username || '...'}
                             </Text>
                         </Link>
@@ -104,14 +109,14 @@ const CampaignCard = ({ campaign }: { campaign: Campaign }) => {
 
                 {/* Card Body */}
                 <View className="p-4">
-                    <Text className="text-base text-gray-600 mb-4" numberOfLines={2}>
+                    <Text className="text-base mb-4" style={{ color: theme.textSecondary }} numberOfLines={2}>
                         {campaign.description || 'No description provided.'}
                     </Text>
                     {campaign.target_niches && campaign.target_niches.length > 0 && (
                         <View className="flex-row flex-wrap gap-2 mb-4">
                             {campaign.target_niches.slice(0, 3).map((niche) => (
-                                <View key={niche} className="bg-blue-100 px-3 py-1 rounded-full">
-                                    <Text className="text-blue-800 text-xs font-medium">{niche}</Text>
+                                <View key={niche} className="px-3 py-1 rounded-full" style={{ backgroundColor: theme.primaryLight }}>
+                                    <Text className="text-xs font-medium" style={{ color: theme.primary }}>{niche}</Text>
                                 </View>
                             ))}
                         </View>
@@ -121,26 +126,26 @@ const CampaignCard = ({ campaign }: { campaign: Campaign }) => {
                 </View>
 
                 {/* Card Footer */}
-                <View className="px-4 py-3 bg-gray-50 border-t border-gray-200 flex-row justify-between items-center">
+                <View className="px-4 py-3 flex-row justify-between items-center" style={{ backgroundColor: theme.background, borderTopColor: theme.border, borderTopWidth: 1 }}>
                     <View className="flex-row gap-6">
                         {/* Total Budget */}
                         <View>
-                            <Text className="text-sm font-semibold text-gray-800">
+                            <Text className="text-sm font-semibold" style={{ color: theme.text }}>
                                 {formatCurrency(campaign.total_budget, { notation: 'compact' })}
                             </Text>
-                            <Text className="text-xs text-gray-500">Budget</Text>
+                            <Text className="text-xs" style={{ color: theme.textTertiary }}>Budget</Text>
                         </View>
                         {/* Rate Per View */}
                         <View>
-                            <Text className="text-sm font-semibold text-gray-800">
+                            <Text className="text-sm font-semibold" style={{ color: theme.text }}>
                                 {formatCurrency(campaign.rate_per_view, { maximumFractionDigits: 4 })}
                             </Text>
-                            <Text className="text-xs text-gray-500">Rate/View</Text>
+                            <Text className="text-xs" style={{ color: theme.textTertiary }}>Rate/View</Text>
                         </View>
                     </View>
                     <View className="flex-row items-center gap-2">
-                        <Text className="text-sm text-gray-600">View Details</Text>
-                        <AntDesign name="arrow-right" size={16} color="#4B5563" />
+                        <Text className="text-sm" style={{ color: theme.textSecondary }}>View Details</Text>
+                        <AntDesign name="arrow-right" size={16} color={theme.textSecondary} />
                     </View>
                 </View>
             </TouchableOpacity>
@@ -149,4 +154,3 @@ const CampaignCard = ({ campaign }: { campaign: Campaign }) => {
 };
 
 export default CampaignCard;
-

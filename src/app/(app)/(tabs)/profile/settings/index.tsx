@@ -132,7 +132,7 @@ const SettingsPage = () => {
     if (loading) {
         return (
             <SafeAreaView className="flex-1 justify-center items-center" style={{ backgroundColor: theme.background }}>
-                <ActivityIndicator size="large" color="#3b82f6" />
+                <ActivityIndicator size="large" color={theme.primary} />
             </SafeAreaView>
         );
     }
@@ -144,7 +144,7 @@ const SettingsPage = () => {
                 {/* Notifications Section */}
                 <View className="mt-4 mx-4">
                     <Text className="text-sm font-semibold  mb-2 px-2" style={{ color: theme.textTertiary }}>NOTIFICATIONS</Text>
-                    <View className=" rounded-xl border border-gray-200" style={{ backgroundColor: theme.background, borderColor: theme.border }}>
+                    <View className=" rounded-xl" style={{ backgroundColor: theme.surface, borderColor: theme.border, borderWidth: 1 }}>
                         <View className="flex-row justify-between items-center p-4">
                             <View className="flex-1 mr-4">
                                 <Text className="text-base font-semibold " style={{ color: theme.text }}>Push Notifications</Text>
@@ -155,8 +155,8 @@ const SettingsPage = () => {
                             <Switch
                                 value={notificationsEnabled}
                                 onValueChange={handleNotificationToggle}
-                                trackColor={{ false: '#d1d5db', true: '#93c5fd' }}
-                                thumbColor={notificationsEnabled ? '#3b82f6' : '#f3f4f6'}
+                                trackColor={{ false: theme.border, true: theme.primaryLight }}
+                                thumbColor={notificationsEnabled ? theme.primary : theme.surfaceSecondary}
                             />
                         </View>
                     </View>
@@ -165,51 +165,50 @@ const SettingsPage = () => {
                 {/* Appearance Section */}
                 <View className="mt-6 mx-4">
                     <Text className="text-sm font-semibold  mb-2 px-2" style={{ color: theme.textTertiary }}>APPEARANCE</Text>
-                    <View className=" rounded-xl border " style={{ backgroundColor: theme.background, borderColor: theme.border }}>
+                    <View className=" rounded-xl" style={{ backgroundColor: theme.surface, borderColor: theme.border, borderWidth: 1 }}>
                         <TouchableOpacity
                             onPress={() => setThemeMode('light')}
-                            className="flex-row items-center justify-between p-4 border-b "
-                            style={{ borderColor: theme.border }}
+                            className="flex-row items-center justify-between p-4"
+                            style={{ borderBottomColor: theme.border, borderBottomWidth: 1 }}
                         >
                             <View className="flex-row items-center flex-1">
-                                <Feather name="sun" size={20} color="#6b7280" />
-                                <Text className="text-base text-gray-800 ml-3" style={{ color: theme.text }}>Light Mode</Text>
+                                <Feather name="sun" size={20} color={theme.textSecondary} />
+                                <Text className="text-base ml-3" style={{ color: theme.text }}>Light Mode</Text>
                             </View>
                             {themeMode === 'light' && (
-                                <Feather name="check" size={20} color="#3b82f6" />
+                                <Feather name="check" size={20} color={theme.primary} />
                             )}
                         </TouchableOpacity>
 
                         <TouchableOpacity
                             onPress={() => setThemeMode('dark')}
-                            className="flex-row items-center justify-between p-4 border-b "
-                            style={{ borderColor: theme.border }}
+                            className="flex-row items-center justify-between p-4"
+                            style={{ borderBottomColor: theme.border, borderBottomWidth: 1 }}
                         >
                             <View className="flex-row items-center flex-1">
-                                <Feather name="moon" size={20} color="#6b7280" />
+                                <Feather name="moon" size={20} color={theme.textSecondary} />
                                 <Text className="text-base ml-3" style={{ color: theme.text }}>Dark Mode</Text>
                             </View>
                             {themeMode === 'dark' && (
-                                <Feather name="check" size={20} color="#3b82f6" />
+                                <Feather name="check" size={20} color={theme.primary} />
                             )}
                         </TouchableOpacity>
 
                         <TouchableOpacity
                             onPress={() => setThemeMode('system')}
                             className="flex-row items-center justify-between p-4"
-                            style={{ borderColor: theme.border }}
                         >
-                            <View className="flex-row items-center gap-2 flex-1">
-                                <Feather name="smartphone" size={20} color="#6b7280" />
-                                <View className="flex-1">
+                            <View className="flex-row items-center flex-1">
+                                <Feather name="smartphone" size={20} color={theme.textSecondary} />
+                                <View className="ml-3 flex-1">
                                     <Text className="text-base " style={{ color: theme.text }}>System</Text>
-                                    <Text className="text-sm  mt-1" style={{ color: theme.textTertiary }}>
+                                    <Text className="text-sm mt-1" style={{ color: theme.textTertiary }}>
                                         Follow device settings
                                     </Text>
                                 </View>
                             </View>
                             {themeMode === 'system' && (
-                                <Feather name="check" size={20} color="#3b82f6" />
+                                <Feather name="check" size={20} color={theme.primary} />
                             )}
                         </TouchableOpacity>
                     </View>
@@ -219,16 +218,17 @@ const SettingsPage = () => {
                 {/* Privacy & Legal */}
                 <View className="mt-6 mx-4">
                     <Text className="text-sm font-semibold mb-2 px-2" style={{ color: theme.textTertiary }}>PRIVACY & LEGAL</Text>
-                    <View className="bg-white rounded-xl border border-gray-200">
+                    <View className="rounded-xl" style={{ backgroundColor: theme.surface, borderColor: theme.border, borderWidth: 1 }}>
                         <TouchableOpacity
                             onPress={() => openURL('https://viblo.io/privacy')}
-                            className="flex-row items-center justify-between p-4 border-b border-gray-200"
+                            className="flex-row items-center justify-between p-4"
+                            style={{ borderBottomColor: theme.border, borderBottomWidth: 1 }}
                         >
                             <View className="flex-row items-center flex-1">
-                                <Feather name="shield" size={20} color="#6b7280" />
-                                <Text className="text-base text-gray-800 ml-3">Privacy Policy</Text>
+                                <Feather name="shield" size={20} color={theme.textSecondary} />
+                                <Text className="text-base ml-3" style={{ color: theme.text }}>Privacy Policy</Text>
                             </View>
-                            <Feather name="external-link" size={18} color="#9ca3af" />
+                            <Feather name="external-link" size={18} color={theme.textTertiary} />
                         </TouchableOpacity>
 
                         <TouchableOpacity
@@ -236,41 +236,41 @@ const SettingsPage = () => {
                             className="flex-row items-center justify-between p-4"
                         >
                             <View className="flex-row items-center flex-1">
-                                <Feather name="file-text" size={20} color="#6b7280" />
-                                <Text className="text-base text-gray-800 ml-3">Terms of Service</Text>
+                                <Feather name="file-text" size={20} color={theme.textSecondary} />
+                                <Text className="text-base ml-3" style={{ color: theme.text }}>Terms of Service</Text>
                             </View>
-                            <Feather name="external-link" size={18} color="#9ca3af" />
+                            <Feather name="external-link" size={18} color={theme.textTertiary} />
                         </TouchableOpacity>
                     </View>
                 </View>
 
                 {/* Support */}
                 <View className="mt-6 mx-4">
-                    <Text className="text-sm font-semibold text-gray-500 mb-2 px-2">SUPPORT</Text>
-                    <View className="bg-white rounded-xl border border-gray-200">
+                    <Text className="text-sm font-semibold mb-2 px-2" style={{ color: theme.textTertiary }}>SUPPORT</Text>
+                    <View className="rounded-xl" style={{ backgroundColor: theme.surface, borderColor: theme.border, borderWidth: 1 }}>
                         <TouchableOpacity
                             onPress={() => openURL('https://viblo.io/en/contact')}
                             className="flex-row items-center justify-between p-4"
                         >
                             <View className="flex-row items-center flex-1">
-                                <Feather name="help-circle" size={20} color="#6b7280" />
-                                <Text className="text-base text-gray-800 ml-3">Contact Support</Text>
+                                <Feather name="help-circle" size={20} color={theme.textSecondary} />
+                                <Text className="text-base ml-3" style={{ color: theme.text }}>Contact Support</Text>
                             </View>
-                            <Feather name="external-link" size={18} color="#9ca3af" />
+                            <Feather name="external-link" size={18} color={theme.textTertiary} />
                         </TouchableOpacity>
                     </View>
                 </View>
 
                 {/* About */}
                 <View className="mt-6 mx-4">
-                    <Text className="text-sm font-semibold text-gray-500 mb-2 px-2">ABOUT</Text>
-                    <View className="bg-white rounded-xl border border-gray-200 p-4">
+                    <Text className="text-sm font-semibold mb-2 px-2" style={{ color: theme.textTertiary }}>ABOUT</Text>
+                    <View className="rounded-xl p-4" style={{ backgroundColor: theme.surface, borderColor: theme.border, borderWidth: 1 }}>
                         <View className="flex-row items-center mb-2">
-                            <Feather name="info" size={20} color="#6b7280" />
-                            <Text className="text-base font-semibold text-gray-800 ml-3">Viblo</Text>
+                            <Feather name="info" size={20} color={theme.textSecondary} />
+                            <Text className="text-base font-semibold ml-3" style={{ color: theme.text }}>Viblo</Text>
                         </View>
-                        <Text className="text-sm text-gray-500">Version 1.0</Text>
-                        <Text className="text-sm text-gray-500 mt-2">
+                        <Text className="text-sm" style={{ color: theme.textTertiary }}>Version 1.0</Text>
+                        <Text className="text-sm mt-2" style={{ color: theme.textTertiary }}>
                             Connecting brands with creators for authentic influencer marketing campaigns.
                         </Text>
                     </View>
@@ -278,23 +278,24 @@ const SettingsPage = () => {
 
                 {/* Danger Zone */}
                 <View className="mt-6 mx-4 mb-8">
-                    <Text className="text-sm font-semibold text-gray-500 mb-2 px-2">DANGER ZONE</Text>
+                    <Text className="text-sm font-semibold mb-2 px-2" style={{ color: theme.textTertiary }}>DANGER ZONE</Text>
                     <TouchableOpacity
                         onPress={handleDeleteAccount}
                         disabled={deleting}
-                        className="bg-white rounded-xl border-2 border-red-300 p-4"
+                        className="rounded-xl p-4"
+                        style={{ backgroundColor: theme.surface, borderColor: theme.error, borderWidth: 2 }}
                     >
                         {deleting ? (
                             <View className="flex-row items-center justify-center">
-                                <ActivityIndicator color="#ef4444" />
-                                <Text className="text-red-600 font-semibold ml-2">Deleting...</Text>
+                                <ActivityIndicator color={theme.error} />
+                                <Text className="font-semibold ml-2" style={{ color: theme.error }}>Deleting...</Text>
                             </View>
                         ) : (
                             <View className="flex-row items-center">
-                                <Feather name="trash-2" size={20} color="#ef4444" />
+                                <Feather name="trash-2" size={20} color={theme.error} />
                                 <View className="ml-3 flex-1">
-                                    <Text className="text-base font-semibold text-red-600">Delete Account</Text>
-                                    <Text className="text-sm text-gray-500 mt-1">
+                                    <Text className="text-base font-semibold" style={{ color: theme.error }}>Delete Account</Text>
+                                    <Text className="text-sm mt-1" style={{ color: theme.textTertiary }}>
                                         Permanently delete your account and all data
                                     </Text>
                                 </View>

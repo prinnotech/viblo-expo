@@ -5,10 +5,12 @@ import { useProfileAnalytics } from '@/hooks/useProfileAnalytics';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { SocialIcon } from '@/components/getSocialIcons';
+import { useTheme } from '@/contexts/ThemeContext';
 
 const AnalyticsPage = () => {
     const { profile } = useAuth();
     const { analytics, loading, refreshing, error, refresh } = useProfileAnalytics(profile?.id);
+    const { theme } = useTheme();
 
     const formatNumber = (num: number): string => {
         if (num >= 1000000) {
@@ -42,19 +44,19 @@ const AnalyticsPage = () => {
 
     if (loading) {
         return (
-            <View className="flex-1 justify-center items-center bg-gray-50">
-                <ActivityIndicator size="large" color="#667eea" />
-                <Text className="mt-4 text-base text-gray-600">Loading your analytics...</Text>
+            <View className="flex-1 justify-center items-center" style={{ backgroundColor: theme.background }}>
+                <ActivityIndicator size="large" color={theme.primary} />
+                <Text className="mt-4 text-base" style={{ color: theme.textSecondary }}>Loading your analytics...</Text>
             </View>
         );
     }
 
     if (error) {
         return (
-            <View className="flex-1 justify-center items-center bg-gray-50 px-5">
-                <Ionicons name="alert-circle-outline" size={64} color="#ef4444" />
-                <Text className="mt-4 text-base text-red-500 text-center">{error}</Text>
-                <Text className="mt-3 text-base text-indigo-600 font-semibold" onPress={refresh}>
+            <View className="flex-1 justify-center items-center px-5" style={{ backgroundColor: theme.background }}>
+                <Ionicons name="alert-circle-outline" size={64} color={theme.error} />
+                <Text className="mt-4 text-base text-center" style={{ color: theme.error }}>{error}</Text>
+                <Text className="mt-3 text-base font-semibold" style={{ color: theme.primary }} onPress={refresh}>
                     Tap to retry
                 </Text>
             </View>
@@ -63,24 +65,25 @@ const AnalyticsPage = () => {
 
     if (!analytics) {
         return (
-            <View className="flex-1 justify-center items-center bg-gray-50">
-                <Ionicons name="analytics-outline" size={64} color="#9ca3af" />
-                <Text className="mt-4 text-base text-gray-500">No analytics data available</Text>
+            <View className="flex-1 justify-center items-center" style={{ backgroundColor: theme.background }}>
+                <Ionicons name="analytics-outline" size={64} color={theme.textTertiary} />
+                <Text className="mt-4 text-base" style={{ color: theme.textTertiary }}>No analytics data available</Text>
             </View>
         );
     }
 
     return (
         <ScrollView
-            className="flex-1 bg-gray-50"
-            contentContainerClassName="p-5 pb-10"
+            className="flex-1"
+            style={{ backgroundColor: theme.background }}
+            contentContainerStyle={{ padding: 20, paddingBottom: 40 }}
             refreshControl={
-                <RefreshControl refreshing={refreshing} onRefresh={refresh} tintColor="#667eea" />
+                <RefreshControl refreshing={refreshing} onRefresh={refresh} tintColor={theme.primary} colors={[theme.primary]} />
             }
         >
             {/* Header */}
             <View className="mb-6">
-                <Text className="text-sm text-gray-600">
+                <Text className="text-sm" style={{ color: theme.textSecondary }}>
                     Last updated: {analytics.lastUpdated.toLocaleTimeString()}
                 </Text>
             </View>
@@ -108,79 +111,79 @@ const AnalyticsPage = () => {
             {/* Stats Grid */}
             <View className="flex-row flex-wrap justify-between mb-6">
                 {/* Followers */}
-                <View className="w-[48%] bg-white rounded-2xl p-4 mb-4 shadow-sm">
+                <View className="w-[48%] rounded-2xl p-4 mb-4" style={{ backgroundColor: theme.surface }}>
                     <LinearGradient
                         colors={['#f59e0b', '#f97316']}
                         className="w-12 h-12 rounded-xl justify-center items-center mb-3"
                     >
                         <Ionicons name="people" size={24} color="#fff" />
                     </LinearGradient>
-                    <Text className="text-3xl font-bold text-gray-900 mb-1">
+                    <Text className="text-3xl font-bold mb-1" style={{ color: theme.text }}>
                         {formatNumber(analytics.totalFollowers)}
                     </Text>
-                    <Text className="text-sm text-gray-600">Followers</Text>
+                    <Text className="text-sm" style={{ color: theme.textSecondary }}>Followers</Text>
                 </View>
 
                 {/* Views */}
-                <View className="w-[48%] bg-white rounded-2xl p-4 mb-4 shadow-sm">
+                <View className="w-[48%] rounded-2xl p-4 mb-4" style={{ backgroundColor: theme.surface }}>
                     <LinearGradient
                         colors={['#3b82f6', '#2563eb']}
                         className="w-12 h-12 rounded-xl justify-center items-center mb-3"
                     >
                         <Ionicons name="eye" size={24} color="#fff" />
                     </LinearGradient>
-                    <Text className="text-3xl font-bold text-gray-900 mb-1">
+                    <Text className="text-3xl font-bold mb-1" style={{ color: theme.text }}>
                         {formatNumber(analytics.totalViews)}
                     </Text>
-                    <Text className="text-sm text-gray-600">Views</Text>
+                    <Text className="text-sm" style={{ color: theme.textSecondary }}>Views</Text>
                 </View>
 
                 {/* Likes */}
-                <View className="w-[48%] bg-white rounded-2xl p-4 mb-4 shadow-sm">
+                <View className="w-[48%] rounded-2xl p-4 mb-4" style={{ backgroundColor: theme.surface }}>
                     <LinearGradient
                         colors={['#ec4899', '#db2777']}
                         className="w-12 h-12 rounded-xl justify-center items-center mb-3"
                     >
                         <Ionicons name="heart" size={24} color="#fff" />
                     </LinearGradient>
-                    <Text className="text-3xl font-bold text-gray-900 mb-1">
+                    <Text className="text-3xl font-bold mb-1" style={{ color: theme.text }}>
                         {formatNumber(analytics.totalLikes)}
                     </Text>
-                    <Text className="text-sm text-gray-600">Likes</Text>
+                    <Text className="text-sm" style={{ color: theme.textSecondary }}>Likes</Text>
                 </View>
 
                 {/* Comments */}
-                <View className="w-[48%] bg-white rounded-2xl p-4 mb-4 shadow-sm">
+                <View className="w-[48%] rounded-2xl p-4 mb-4" style={{ backgroundColor: theme.surface }}>
                     <LinearGradient
                         colors={['#8b5cf6', '#7c3aed']}
                         className="w-12 h-12 rounded-xl justify-center items-center mb-3"
                     >
                         <Ionicons name="chatbubble" size={24} color="#fff" />
                     </LinearGradient>
-                    <Text className="text-3xl font-bold text-gray-900 mb-1">
+                    <Text className="text-3xl font-bold mb-1" style={{ color: theme.text }}>
                         {formatNumber(analytics.totalComments)}
                     </Text>
-                    <Text className="text-sm text-gray-600">Comments</Text>
+                    <Text className="text-sm" style={{ color: theme.textSecondary }}>Comments</Text>
                 </View>
             </View>
 
             {/* Platform Breakdown */}
             <View className="mt-2">
-                <Text className="text-2xl font-bold text-gray-900 mb-4">Platform Breakdown</Text>
+                <Text className="text-2xl font-bold mb-4" style={{ color: theme.text }}>Platform Breakdown</Text>
 
                 {analytics.platforms.length === 0 ? (
-                    <View className="bg-white rounded-2xl p-10 items-center shadow-sm">
-                        <Ionicons name="link-outline" size={48} color="#9ca3af" />
-                        <Text className="mt-4 text-lg font-semibold text-gray-700">
+                    <View className="rounded-2xl p-10 items-center" style={{ backgroundColor: theme.surface }}>
+                        <Ionicons name="link-outline" size={48} color={theme.textTertiary} />
+                        <Text className="mt-4 text-lg font-semibold" style={{ color: theme.text }}>
                             No platforms connected
                         </Text>
-                        <Text className="mt-2 text-sm text-gray-500 text-center">
+                        <Text className="mt-2 text-sm text-center" style={{ color: theme.textTertiary }}>
                             Connect your social accounts to see analytics
                         </Text>
                     </View>
                 ) : (
                     analytics.platforms.map((platform) => (
-                        <View key={platform.platform} className="bg-white rounded-2xl mb-4 overflow-hidden shadow-sm">
+                        <View key={platform.platform} className="rounded-2xl mb-4 overflow-hidden" style={{ backgroundColor: theme.surface }}>
                             <LinearGradient
                                 colors={getPlatformColors(platform.platform)}
                                 start={{ x: 0, y: 0 }}
@@ -200,33 +203,33 @@ const AnalyticsPage = () => {
 
                             <View className="flex-row flex-wrap p-4">
                                 <View className="w-1/2 py-3">
-                                    <Text className="text-2xl font-bold text-gray-900 mb-1">
+                                    <Text className="text-2xl font-bold mb-1" style={{ color: theme.text }}>
                                         {formatNumber(platform.followers)}
                                     </Text>
-                                    <Text className="text-xs text-gray-600">Followers</Text>
+                                    <Text className="text-xs" style={{ color: theme.textSecondary }}>Followers</Text>
                                 </View>
 
                                 {platform.views > 0 && (
                                     <View className="w-1/2 py-3">
-                                        <Text className="text-2xl font-bold text-gray-900 mb-1">
+                                        <Text className="text-2xl font-bold mb-1" style={{ color: theme.text }}>
                                             {formatNumber(platform.views)}
                                         </Text>
-                                        <Text className="text-xs text-gray-600">Views</Text>
+                                        <Text className="text-xs" style={{ color: theme.textSecondary }}>Views</Text>
                                     </View>
                                 )}
 
                                 <View className="w-1/2 py-3">
-                                    <Text className="text-2xl font-bold text-gray-900 mb-1">
+                                    <Text className="text-2xl font-bold mb-1" style={{ color: theme.text }}>
                                         {formatNumber(platform.likes)}
                                     </Text>
-                                    <Text className="text-xs text-gray-600">Likes</Text>
+                                    <Text className="text-xs" style={{ color: theme.textSecondary }}>Likes</Text>
                                 </View>
 
                                 <View className="w-1/2 py-3">
-                                    <Text className="text-2xl font-bold text-gray-900 mb-1">
+                                    <Text className="text-2xl font-bold mb-1" style={{ color: theme.text }}>
                                         {formatNumber(platform.comments)}
                                     </Text>
-                                    <Text className="text-xs text-gray-600">Comments</Text>
+                                    <Text className="text-xs" style={{ color: theme.textSecondary }}>Comments</Text>
                                 </View>
                             </View>
                         </View>

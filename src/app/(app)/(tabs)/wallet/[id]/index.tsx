@@ -15,6 +15,7 @@ import { supabase } from '@/lib/supabase';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { PayoutMethodType } from '@/lib/enum_types';
 import { PayoutMethod } from '@/lib/db_interface';
+import { useTheme } from '@/contexts/ThemeContext';
 
 const revolut_img = require('@/../assets/bank_icons/revolut.png');
 const wise_img = require('@/../assets/bank_icons/wise.png');
@@ -25,6 +26,7 @@ const bank_img = require('@/../assets/bank_icons/transfer.png');
 const PayoutMethodPage = () => {
     const router = useRouter();
     const { id } = useLocalSearchParams();
+    const { theme } = useTheme();
 
     const [method, setMethod] = useState<PayoutMethod | null>(null);
     const [loading, setLoading] = useState(true);
@@ -69,7 +71,7 @@ const PayoutMethodPage = () => {
 
     const populateFields = (data: PayoutMethod) => {
         setIsPrimary(data.is_primary);
-        const details = data.details;
+        const details = data.details as any;
 
         switch (data.method_type) {
             case 'paypal':
@@ -227,23 +229,23 @@ const PayoutMethodPage = () => {
     const renderViewMode = () => {
         if (!method) return null;
 
-        const details = method.details;
+        const details = method.details as any;
 
         return (
             <View className="px-4 py-6">
                 {/* Method Header */}
-                <View className="bg-white rounded-xl p-6 mb-4 items-center border border-gray-200">
+                <View className="rounded-xl p-6 mb-4 items-center border" style={{ backgroundColor: theme.surface, borderColor: theme.border }}>
                     <Image
                         source={getMethodImage(method.method_type)}
                         className="w-20 h-20 mb-4"
                         resizeMode="contain"
                     />
-                    <Text className="text-2xl font-bold text-gray-900 mb-2">
+                    <Text className="text-2xl font-bold mb-2" style={{ color: theme.text }}>
                         {getMethodTitle(method.method_type)}
                     </Text>
                     {method.is_primary && (
-                        <View className="bg-blue-100 px-3 py-1 rounded-full">
-                            <Text className="text-xs font-semibold text-blue-600">
+                        <View className="px-3 py-1 rounded-full" style={{ backgroundColor: theme.primaryLight }}>
+                            <Text className="text-xs font-semibold" style={{ color: theme.primary }}>
                                 Primary Method
                             </Text>
                         </View>
@@ -251,13 +253,13 @@ const PayoutMethodPage = () => {
                 </View>
 
                 {/* Details Card */}
-                <View className="bg-white rounded-xl p-5 mb-4 border border-gray-200">
-                    <Text className="text-lg font-semibold text-gray-900 mb-4">Details</Text>
+                <View className="rounded-xl p-5 mb-4 border" style={{ backgroundColor: theme.surface, borderColor: theme.border }}>
+                    <Text className="text-lg font-semibold mb-4" style={{ color: theme.text }}>Details</Text>
 
                     {method.method_type === 'paypal' && (
                         <>
                             <DetailRow label="Name" value={details.name} />
-                            <DetailRow label="Email" value={details.email} />
+                            <DetailRow label="Email" value={details.email} isLast />
                         </>
                     )}
 
@@ -265,7 +267,7 @@ const PayoutMethodPage = () => {
                         <>
                             <DetailRow label="Name" value={details.name} />
                             <DetailRow label="Email" value={details.email} />
-                            <DetailRow label="Wise ID" value={details.wise_id} />
+                            <DetailRow label="Wise ID" value={details.wise_id} isLast />
                         </>
                     )}
 
@@ -273,7 +275,7 @@ const PayoutMethodPage = () => {
                         <>
                             <DetailRow label="Name" value={details.name} />
                             <DetailRow label="Email" value={details.email} />
-                            <DetailRow label="Revolut Tag" value={details.revolut_tag} />
+                            <DetailRow label="Revolut Tag" value={details.revolut_tag} isLast />
                         </>
                     )}
 
@@ -291,20 +293,22 @@ const PayoutMethodPage = () => {
                 {/* Action Buttons */}
                 <TouchableOpacity
                     onPress={() => setEditing(true)}
-                    className="bg-blue-600 rounded-xl p-4 mb-3"
+                    className="rounded-xl p-4 mb-3"
+                    style={{ backgroundColor: theme.primary }}
                     activeOpacity={0.8}
                 >
-                    <Text className="text-white font-semibold text-base text-center">
+                    <Text className="font-semibold text-base text-center" style={{ color: theme.surface }}>
                         Edit Details
                     </Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
                     onPress={handleDelete}
-                    className="bg-red-50 border border-red-200 rounded-xl p-4"
+                    className="border rounded-xl p-4"
+                    style={{ backgroundColor: theme.errorLight, borderColor: theme.error }}
                     activeOpacity={0.8}
                 >
-                    <Text className="text-red-600 font-semibold text-base text-center">
+                    <Text className="font-semibold text-base text-center" style={{ color: theme.error }}>
                         Delete Method
                     </Text>
                 </TouchableOpacity>
@@ -317,28 +321,32 @@ const PayoutMethodPage = () => {
 
         return (
             <View className="px-4 py-6">
-                <Text className="text-lg font-semibold text-gray-900 mb-4">
+                <Text className="text-lg font-semibold mb-4" style={{ color: theme.text }}>
                     Edit Payment Details
                 </Text>
 
                 {method.method_type === 'paypal' && (
                     <View className="flex-col gap-2 space-y-4">
                         <View>
-                            <Text className="text-sm font-medium text-gray-700 mb-2">Full Name *</Text>
+                            <Text className="text-sm font-medium mb-2" style={{ color: theme.textSecondary }}>Full Name *</Text>
                             <TextInput
                                 value={name}
                                 onChangeText={setName}
-                                className="bg-white border border-gray-300 rounded-lg px-4 py-3"
+                                className="border rounded-lg px-4 py-3"
+                                style={{ backgroundColor: theme.surface, borderColor: theme.border, color: theme.text }}
+                                placeholderTextColor={theme.textTertiary}
                             />
                         </View>
                         <View>
-                            <Text className="text-sm font-medium text-gray-700 mb-2">Email *</Text>
+                            <Text className="text-sm font-medium mb-2" style={{ color: theme.textSecondary }}>Email *</Text>
                             <TextInput
                                 value={email}
                                 onChangeText={setEmail}
                                 keyboardType="email-address"
                                 autoCapitalize="none"
-                                className="bg-white border border-gray-300 rounded-lg px-4 py-3"
+                                className="border rounded-lg px-4 py-3"
+                                style={{ backgroundColor: theme.surface, borderColor: theme.border, color: theme.text }}
+                                placeholderTextColor={theme.textTertiary}
                             />
                         </View>
                     </View>
@@ -347,32 +355,38 @@ const PayoutMethodPage = () => {
                 {(method.method_type === 'wise' || method.method_type === 'revolut') && (
                     <View className="flex-col gap-2 space-y-4">
                         <View>
-                            <Text className="text-sm font-medium text-gray-700 mb-2">Full Name *</Text>
+                            <Text className="text-sm font-medium mb-2" style={{ color: theme.textSecondary }}>Full Name *</Text>
                             <TextInput
                                 value={name}
                                 onChangeText={setName}
-                                className="bg-white border border-gray-300 rounded-lg px-4 py-3"
+                                className="border rounded-lg px-4 py-3"
+                                style={{ backgroundColor: theme.surface, borderColor: theme.border, color: theme.text }}
+                                placeholderTextColor={theme.textTertiary}
                             />
                         </View>
                         <View>
-                            <Text className="text-sm font-medium text-gray-700 mb-2">Email *</Text>
+                            <Text className="text-sm font-medium mb-2" style={{ color: theme.textSecondary }}>Email *</Text>
                             <TextInput
                                 value={email}
                                 onChangeText={setEmail}
                                 keyboardType="email-address"
                                 autoCapitalize="none"
-                                className="bg-white border border-gray-300 rounded-lg px-4 py-3"
+                                className="border rounded-lg px-4 py-3"
+                                style={{ backgroundColor: theme.surface, borderColor: theme.border, color: theme.text }}
+                                placeholderTextColor={theme.textTertiary}
                             />
                         </View>
                         <View>
-                            <Text className="text-sm font-medium text-gray-700 mb-2">
+                            <Text className="text-sm font-medium mb-2" style={{ color: theme.textSecondary }}>
                                 {method.method_type === 'wise' ? 'Wise ID' : 'Revolut Tag'} *
                             </Text>
                             <TextInput
                                 value={tagId}
                                 onChangeText={setTagId}
                                 autoCapitalize="none"
-                                className="bg-white border border-gray-300 rounded-lg px-4 py-3"
+                                className="border rounded-lg px-4 py-3"
+                                style={{ backgroundColor: theme.surface, borderColor: theme.border, color: theme.text }}
+                                placeholderTextColor={theme.textTertiary}
                             />
                         </View>
                     </View>
@@ -381,47 +395,57 @@ const PayoutMethodPage = () => {
                 {method.method_type === 'bank_transfer' && (
                     <View className="flex-col gap-2 space-y-4">
                         <View>
-                            <Text className="text-sm font-medium text-gray-700 mb-2">Account Owner *</Text>
+                            <Text className="text-sm font-medium mb-2" style={{ color: theme.textSecondary }}>Account Owner *</Text>
                             <TextInput
                                 value={accountOwner}
                                 onChangeText={setAccountOwner}
-                                className="bg-white border border-gray-300 rounded-lg px-4 py-3"
+                                className="border rounded-lg px-4 py-3"
+                                style={{ backgroundColor: theme.surface, borderColor: theme.border, color: theme.text }}
+                                placeholderTextColor={theme.textTertiary}
                             />
                         </View>
                         <View>
-                            <Text className="text-sm font-medium text-gray-700 mb-2">IBAN *</Text>
+                            <Text className="text-sm font-medium mb-2" style={{ color: theme.textSecondary }}>IBAN *</Text>
                             <TextInput
                                 value={iban}
                                 onChangeText={setIban}
                                 autoCapitalize="characters"
-                                className="bg-white border border-gray-300 rounded-lg px-4 py-3"
+                                className="border rounded-lg px-4 py-3"
+                                style={{ backgroundColor: theme.surface, borderColor: theme.border, color: theme.text }}
+                                placeholderTextColor={theme.textTertiary}
                             />
                         </View>
                         <View>
-                            <Text className="text-sm font-medium text-gray-700 mb-2">SWIFT/BIC *</Text>
+                            <Text className="text-sm font-medium mb-2" style={{ color: theme.textSecondary }}>SWIFT/BIC *</Text>
                             <TextInput
                                 value={swift}
                                 onChangeText={setSwift}
                                 autoCapitalize="characters"
-                                className="bg-white border border-gray-300 rounded-lg px-4 py-3"
+                                className="border rounded-lg px-4 py-3"
+                                style={{ backgroundColor: theme.surface, borderColor: theme.border, color: theme.text }}
+                                placeholderTextColor={theme.textTertiary}
                             />
                         </View>
                         <View>
-                            <Text className="text-sm font-medium text-gray-700 mb-2">Bank Name *</Text>
+                            <Text className="text-sm font-medium mb-2" style={{ color: theme.textSecondary }}>Bank Name *</Text>
                             <TextInput
                                 value={bankName}
                                 onChangeText={setBankName}
-                                className="bg-white border border-gray-300 rounded-lg px-4 py-3"
+                                className="border rounded-lg px-4 py-3"
+                                style={{ backgroundColor: theme.surface, borderColor: theme.border, color: theme.text }}
+                                placeholderTextColor={theme.textTertiary}
                             />
                         </View>
                         <View>
-                            <Text className="text-sm font-medium text-gray-700 mb-2">Bank Address *</Text>
+                            <Text className="text-sm font-medium mb-2" style={{ color: theme.textSecondary }}>Bank Address *</Text>
                             <TextInput
                                 value={bankAddress}
                                 onChangeText={setBankAddress}
                                 multiline
                                 numberOfLines={2}
-                                className="bg-white border border-gray-300 rounded-lg px-4 py-3"
+                                className="border rounded-lg px-4 py-3"
+                                style={{ backgroundColor: theme.surface, borderColor: theme.border, color: theme.text, height: 80, textAlignVertical: 'top' }}
+                                placeholderTextColor={theme.textTertiary}
                             />
                         </View>
                     </View>
@@ -430,14 +454,20 @@ const PayoutMethodPage = () => {
                 {/* Primary Checkbox */}
                 <TouchableOpacity
                     onPress={() => setIsPrimary(!isPrimary)}
-                    className="flex-row items-center mt-4 p-4 bg-gray-50 rounded-lg"
+                    className="flex-row items-center mt-4 p-4 rounded-lg"
+                    style={{ backgroundColor: theme.surfaceSecondary }}
                     activeOpacity={0.7}
                 >
-                    <View className={`w-6 h-6 rounded border-2 mr-3 items-center justify-center ${isPrimary ? 'bg-blue-600 border-blue-600' : 'border-gray-300 bg-white'
-                        }`}>
-                        {isPrimary && <Feather name="check" size={16} color="white" />}
+                    <View
+                        className="w-6 h-6 rounded border-2 mr-3 items-center justify-center"
+                        style={{
+                            backgroundColor: isPrimary ? theme.primary : theme.surface,
+                            borderColor: isPrimary ? theme.primary : theme.border
+                        }}
+                    >
+                        {isPrimary && <Feather name="check" size={16} color={theme.surface} />}
                     </View>
-                    <Text className="text-gray-900 font-medium">Set as primary payout method</Text>
+                    <Text className="font-medium" style={{ color: theme.text }}>Set as primary payout method</Text>
                 </TouchableOpacity>
             </View>
         );
@@ -445,34 +475,34 @@ const PayoutMethodPage = () => {
 
     if (loading) {
         return (
-            <SafeAreaView className="flex-1 bg-gray-50">
+            <SafeAreaView className="flex-1" style={{ backgroundColor: theme.background }}>
                 <View className="flex-1 justify-center items-center">
-                    <ActivityIndicator size="large" color="#3b82f6" />
+                    <ActivityIndicator size="large" color={theme.primary} />
                 </View>
             </SafeAreaView>
         );
     }
 
     return (
-        <SafeAreaView className="flex-1 bg-gray-50">
+        <SafeAreaView className="flex-1" style={{ backgroundColor: theme.background }}>
             <ScrollView className="flex-1">
                 {editing ? renderEditForm() : renderViewMode()}
             </ScrollView>
 
             {/* Action Buttons (Edit Mode) */}
             {editing && (
-                <View className="p-4 bg-white border-t border-gray-200">
+                <View className="p-4 border-t" style={{ backgroundColor: theme.surface, borderColor: theme.border }}>
                     <TouchableOpacity
                         onPress={handleUpdate}
                         disabled={submitting}
-                        className={`rounded-xl p-4 mb-3 items-center justify-center ${submitting ? 'bg-blue-400' : 'bg-blue-600'
-                            }`}
+                        className="rounded-xl p-4 mb-3 items-center justify-center"
+                        style={{ backgroundColor: submitting ? theme.primaryLight : theme.primary }}
                         activeOpacity={0.8}
                     >
                         {submitting ? (
-                            <ActivityIndicator color="white" />
+                            <ActivityIndicator color={theme.surface} />
                         ) : (
-                            <Text className="text-white font-semibold text-base">
+                            <Text className="font-semibold text-base" style={{ color: theme.surface }}>
                                 Save Changes
                             </Text>
                         )}
@@ -483,10 +513,11 @@ const PayoutMethodPage = () => {
                             populateFields(method!);
                             setEditing(false);
                         }}
-                        className="border border-gray-300 rounded-xl p-4"
+                        className="border rounded-xl p-4"
+                        style={{ borderColor: theme.border }}
                         activeOpacity={0.8}
                     >
-                        <Text className="text-gray-700 font-semibold text-base text-center">
+                        <Text className="font-semibold text-base text-center" style={{ color: theme.textSecondary }}>
                             Cancel
                         </Text>
                     </TouchableOpacity>
@@ -496,11 +527,15 @@ const PayoutMethodPage = () => {
     );
 };
 
-const DetailRow = ({ label, value, isLast = false }: { label: string; value: string; isLast?: boolean }) => (
-    <View className={`py-3 ${!isLast ? 'border-b border-gray-100' : ''}`}>
-        <Text className="text-xs text-gray-500 mb-1">{label}</Text>
-        <Text className="text-base text-gray-900 font-medium">{value}</Text>
-    </View>
-);
+const DetailRow = ({ label, value, isLast = false }: { label: string; value: string; isLast?: boolean }) => {
+    const { theme } = useTheme();
+    return (
+        <View className={`py-3 ${!isLast ? 'border-b' : ''}`} style={{ borderColor: theme.borderLight }}>
+            <Text className="text-xs mb-1" style={{ color: theme.textSecondary }}>{label}</Text>
+            <Text className="text-base font-medium" style={{ color: theme.text }}>{value}</Text>
+        </View>
+    );
+};
 
 export default PayoutMethodPage;
+

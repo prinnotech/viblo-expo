@@ -16,6 +16,7 @@ import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
 import { useMessages } from '@/hooks/useMessages';
 import { Feather } from '@expo/vector-icons';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTheme } from '@/contexts/ThemeContext';
 
 const ChatScreen = () => {
     const { id } = useLocalSearchParams();
@@ -27,6 +28,7 @@ const ChatScreen = () => {
     const router = useRouter();
     const flatListRef = useRef<FlatList>(null);
     const navigation = useNavigation();
+    const { theme } = useTheme();
 
     useEffect(() => {
         // Scroll to bottom when new messages arrive
@@ -52,15 +54,15 @@ const ChatScreen = () => {
     };
 
     if (loading) {
-        return <ActivityIndicator size="large" color="#3b82f6" className="flex-1" />;
+        return <ActivityIndicator size="large" color={theme.primary} style={{ flex: 1, backgroundColor: theme.background }} />;
     }
 
     if (error) {
-        return <View className="flex-1 justify-center items-center"><Text className="text-red-500">Failed to load messages.</Text></View>;
+        return <View className="flex-1 justify-center items-center" style={{ backgroundColor: theme.background }}><Text style={{ color: theme.error }}>Failed to load messages.</Text></View>;
     }
 
     return (
-        <SafeAreaView edges={['bottom']} className="flex-1 bg-white">
+        <SafeAreaView edges={['bottom']} className="flex-1" style={{ backgroundColor: theme.surface }}>
             <KeyboardAvoidingView
                 behavior={Platform.OS === "ios" ? "padding" : "height"}
                 className="flex-1"
@@ -76,31 +78,37 @@ const ChatScreen = () => {
                             <View className={`flex-row my-2 px-4 ${isMyMessage ? 'justify-end' : 'justify-start'}`}>
                                 <View
                                     className={`rounded-2xl p-3 max-w-[80%] ${isMyMessage
-                                        ? 'bg-blue-500 rounded-br-none'
-                                        : 'bg-gray-200 rounded-bl-none'
+                                        ? 'rounded-br-none'
+                                        : 'rounded-bl-none'
                                         }`}
+                                    style={{
+                                        backgroundColor: isMyMessage
+                                            ? theme.primary
+                                            : theme.surfaceSecondary,
+                                    }}
                                 >
-                                    <Text className={isMyMessage ? 'text-white' : 'text-gray-900'}>{item.content}</Text>
+                                    <Text style={{ color: isMyMessage ? theme.surface : theme.text }}>{item.content}</Text>
                                 </View>
                             </View>
                         );
                     }}
-                    contentContainerStyle={{ paddingVertical: 10 }}
-                    refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+                    contentContainerStyle={{ paddingVertical: 10, backgroundColor: theme.background }}
+                    refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[theme.primary]} tintColor={theme.primary} />}
                 />
 
                 {/* Message Input */}
-                <View className="flex-row items-center p-2 border-t border-gray-200 bg-white">
+                <View className="flex-row items-center p-2 border-t" style={{ borderColor: theme.border, backgroundColor: theme.surface }}>
                     <TextInput
                         value={newMessage}
                         onChangeText={setNewMessage}
                         placeholder="Type a message..."
-                        placeholderTextColor="#9CA3AF"
-                        className="flex-1 bg-gray-100 rounded-full h-10 px-4"
+                        placeholderTextColor={theme.textTertiary}
+                        className="flex-1 rounded-full h-10 px-4"
+                        style={{ backgroundColor: theme.surfaceSecondary, color: theme.text }}
                         multiline
                     />
                     <TouchableOpacity onPress={handleSend} className="p-2 ml-2">
-                        <Feather name="send" size={24} color="#3b82f6" />
+                        <Feather name="send" size={24} color={theme.primary} />
                     </TouchableOpacity>
                 </View>
             </KeyboardAvoidingView>

@@ -6,13 +6,14 @@ import {
     TouchableOpacity,
     ActivityIndicator,
     Image,
-    TextInput
+    TextInput,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useConversations, ConversationWithDetails } from '@/hooks/useConversations';
 import { Feather, Ionicons } from '@expo/vector-icons';
-import { useAuth } from '@/contexts/AuthContext'; // We'll get the current user from here
+import { useAuth } from '@/contexts/AuthContext';
+import { useTheme } from '@/contexts/ThemeContext';
 
 // A utility function to format the date/time of the last message
 const formatTimestamp = (timestamp: string | null): string => {
@@ -33,6 +34,7 @@ const formatTimestamp = (timestamp: string | null): string => {
 // A component for a single conversation item in the list
 const ConversationRow = ({ conversation, currentUserId }: { conversation: ConversationWithDetails, currentUserId?: string }) => {
     const router = useRouter();
+    const { theme } = useTheme();
     const { other_participant, last_message, id } = conversation;
 
     const getInitials = (name: string) => (name ? name.charAt(0).toUpperCase() : '?');
@@ -42,18 +44,19 @@ const ConversationRow = ({ conversation, currentUserId }: { conversation: Conver
 
     return (
         <TouchableOpacity
-            className="flex-row items-center p-4 bg-white border-b border-gray-100"
+            className="flex-row items-center p-4 border-b"
+            style={{ backgroundColor: theme.surface, borderColor: theme.borderLight }}
             onPress={() => router.push(`/inbox/${id}`)}
             activeOpacity={0.7}
         >
-            <View className="w-14 h-14 rounded-full mr-4 bg-gray-200 justify-center items-center">
+            <View className="w-14 h-14 rounded-full mr-4 justify-center items-center" style={{ backgroundColor: theme.surfaceSecondary }}>
                 {other_participant.avatar_url ? (
                     <Image
                         source={{ uri: other_participant.avatar_url }}
                         className="w-14 h-14 rounded-full"
                     />
                 ) : (
-                    <Text className="text-xl font-bold text-gray-500">
+                    <Text className="text-xl font-bold" style={{ color: theme.textTertiary }}>
                         {getInitials(other_participant.username)}
                     </Text>
                 )}
@@ -61,18 +64,18 @@ const ConversationRow = ({ conversation, currentUserId }: { conversation: Conver
 
             <View className="flex-1">
                 <View className="flex-row justify-between items-center">
-                    <Text className={`text-base ${isUnread ? 'font-bold text-gray-900' : 'font-semibold text-gray-800'}`} numberOfLines={1}>
+                    <Text className={`text-base ${isUnread ? 'font-bold' : 'font-semibold'}`} style={{ color: theme.text }} numberOfLines={1}>
                         {other_participant.username}
                     </Text>
-                    <Text className="text-xs text-gray-500">
+                    <Text className="text-xs" style={{ color: theme.textTertiary }}>
                         {formatTimestamp(last_message?.created_at || null)}
                     </Text>
                 </View>
-                <Text className={`text-sm mt-1 ${isUnread ? 'text-gray-800 font-semibold' : 'text-gray-500'}`} numberOfLines={1}>
+                <Text className={`text-sm mt-1 ${isUnread ? 'font-semibold' : ''}`} style={{ color: isUnread ? theme.text : theme.textTertiary }} numberOfLines={1}>
                     {last_message?.content || 'No messages yet'}
                 </Text>
             </View>
-            {isUnread && <View className="w-2.5 h-2.5 bg-blue-500 rounded-full ml-2" />}
+            {isUnread && <View className="w-2.5 h-2.5 rounded-full ml-2" style={{ backgroundColor: theme.primary }} />}
         </TouchableOpacity>
     );
 };
@@ -82,6 +85,7 @@ const InboxScreen = () => {
     const { conversations, loading, error, refetch } = useConversations();
     const [activeFilter, setActiveFilter] = useState<'all' | 'unread' | 'favorites'>('all');
     const { session } = useAuth();
+    const { theme } = useTheme();
     const currentUserId = session?.user.id;
     const router = useRouter();
 
@@ -99,71 +103,74 @@ const InboxScreen = () => {
 
     if (loading) {
         return (
-            <SafeAreaView className="flex-1 bg-white justify-center items-center">
-                <ActivityIndicator size="large" color="#3b82f6" />
+            <SafeAreaView className="flex-1 justify-center items-center" style={{ backgroundColor: theme.background }}>
+                <ActivityIndicator size="large" color={theme.primary} />
             </SafeAreaView>
         );
     }
 
     if (error) {
         return (
-            <SafeAreaView className="flex-1 bg-white justify-center items-center p-8">
-                <Feather name="alert-triangle" size={48} color="#ef4444" />
-                <Text className="text-lg font-semibold text-gray-800 mt-4">Something went wrong</Text>
-                <TouchableOpacity onPress={refetch} className="mt-6 bg-blue-500 px-6 py-2 rounded-lg">
-                    <Text className="text-white font-semibold">Retry</Text>
+            <SafeAreaView className="flex-1 justify-center items-center p-8" style={{ backgroundColor: theme.background }}>
+                <Feather name="alert-triangle" size={48} color={theme.error} />
+                <Text className="text-lg font-semibold mt-4" style={{ color: theme.text }}>Something went wrong</Text>
+                <TouchableOpacity onPress={refetch} className="mt-6 px-6 py-2 rounded-lg" style={{ backgroundColor: theme.primary }}>
+                    <Text className="font-semibold" style={{ color: theme.surface }}>Retry</Text>
                 </TouchableOpacity>
             </SafeAreaView>
         )
     }
 
     return (
-        <SafeAreaView className="flex-1 bg-white">
+        <SafeAreaView className="flex-1" style={{ backgroundColor: theme.surface }}>
             <View className="flex-row justify-between items-center px-4 pt-4 pb-2">
-                <Text className="text-3xl font-bold text-gray-900">Messages</Text>
+                <Text className="text-3xl font-bold" style={{ color: theme.text }}>Messages</Text>
                 <TouchableOpacity className="p-2" onPress={() => router.push('/inbox/new')}>
-                    <Ionicons name="add-circle-outline" size={28} color="#333" />
+                    <Ionicons name="add-circle-outline" size={28} color={theme.text} />
                 </TouchableOpacity>
             </View>
 
             <View className="flex-row items-center px-4 py-2 gap-3">
-                <View className="flex-1 flex-row items-center bg-gray-100 rounded-lg px-3">
-                    <Feather name="search" size={20} color="#9ca3af" />
-                    <TextInput placeholder="Search" className="flex-1 h-10 ml-2 text-base" />
+                <View className="flex-1 flex-row items-center rounded-lg px-3" style={{ backgroundColor: theme.surfaceSecondary }}>
+                    <Feather name="search" size={20} color={theme.textTertiary} />
+                    <TextInput placeholder="Search" className="flex-1 h-10 ml-2 text-base" style={{ color: theme.text }} placeholderTextColor={theme.textTertiary} />
                 </View>
             </View>
 
-            <View className="flex-row items-center px-4 py-3 gap-3 border-b border-gray-100">
+            <View className="flex-row items-center px-4 py-3 gap-3 border-b" style={{ borderColor: theme.borderLight }}>
                 <TouchableOpacity
                     onPress={() => setActiveFilter('all')}
-                    className={`px-4 py-1.5 rounded-full ${activeFilter === 'all' ? 'bg-blue-600' : 'bg-gray-100'}`}
+                    className="px-4 py-1.5 rounded-full"
+                    style={{ backgroundColor: activeFilter === 'all' ? theme.primary : theme.surfaceSecondary }}
                 >
-                    <Text className={`font-semibold ${activeFilter === 'all' ? 'text-white' : 'text-gray-700'}`}>All</Text>
+                    <Text className="font-semibold" style={{ color: activeFilter === 'all' ? theme.surface : theme.textSecondary }}>All</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                     onPress={() => setActiveFilter('unread')}
-                    className={`px-4 py-1.5 rounded-full ${activeFilter === 'unread' ? 'bg-blue-600' : 'bg-gray-100'}`}
+                    className="px-4 py-1.5 rounded-full"
+                    style={{ backgroundColor: activeFilter === 'unread' ? theme.primary : theme.surfaceSecondary }}
                 >
-                    <Text className={`font-semibold ${activeFilter === 'unread' ? 'text-white' : 'text-gray-700'}`}>Unread</Text>
+                    <Text className="font-semibold" style={{ color: activeFilter === 'unread' ? theme.surface : theme.textSecondary }}>Unread</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                     onPress={() => setActiveFilter('favorites')}
-                    className={`px-4 py-1.5 rounded-full ${activeFilter === 'favorites' ? 'bg-blue-600' : 'bg-gray-100'}`}
+                    className="px-4 py-1.5 rounded-full"
+                    style={{ backgroundColor: activeFilter === 'favorites' ? theme.primary : theme.surfaceSecondary }}
                 >
-                    <Text className={`font-semibold ${activeFilter === 'favorites' ? 'text-white' : 'text-gray-700'}`}>Favorites</Text>
+                    <Text className="font-semibold" style={{ color: activeFilter === 'favorites' ? theme.surface : theme.textSecondary }}>Favorites</Text>
                 </TouchableOpacity>
             </View>
 
             {filteredConversations.length === 0 ? (
-                <View className="flex-1 justify-center items-center p-8">
-                    <Feather name="message-square" size={64} color="#d1d5db" />
-                    <Text className="text-lg font-semibold text-gray-800 mt-4">No Conversations Found</Text>
-                    <Text className="text-gray-500 mt-2 text-center">
+                <View className="flex-1 justify-center items-center p-8" style={{ backgroundColor: theme.background }}>
+                    <Feather name="message-square" size={64} color={theme.border} />
+                    <Text className="text-lg font-semibold mt-4" style={{ color: theme.text }}>No Conversations Found</Text>
+                    <Text className="mt-2 text-center" style={{ color: theme.textTertiary }}>
                         Your conversations in the "{activeFilter}" filter will appear here.
                     </Text>
                 </View>
             ) : (
-                <ScrollView>
+                <ScrollView style={{ backgroundColor: theme.background }}>
                     {filteredConversations.map((convo) => (
                         <ConversationRow key={convo.id} conversation={convo} currentUserId={currentUserId} />
                     ))}
@@ -174,4 +181,3 @@ const InboxScreen = () => {
 };
 
 export default InboxScreen;
-

@@ -6,17 +6,17 @@ import * as ImagePicker from 'expo-image-picker';
 import { ResizeMode, Video } from 'expo-av';
 import { Feather } from '@expo/vector-icons';
 import { ContentSubmission } from '@/lib/db_interface';
-import { SubmissionStatus } from '@/lib/enum_types';
-
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import { Campaign } from '@/lib/db_interface';
+import { useTheme } from '@/contexts/ThemeContext';
 
 
 const SubmissionPage = () => {
     const router = useRouter();
     const { id } = useLocalSearchParams();
     const navigation = useNavigation();
+    const { theme } = useTheme();
 
     const { profile, isLoading: isAuthLoading } = useAuth();
     const campaignId = Array.isArray(id) ? id[0] : id;
@@ -49,7 +49,7 @@ const SubmissionPage = () => {
                 .single();
 
             if (campaignError) {
-                setError(campaignError.message);
+                setError(campaignError.message as any);
                 setLoading(false);
                 return;
             }
@@ -241,15 +241,15 @@ const SubmissionPage = () => {
     };
 
     if (loading || isAuthLoading) {
-        return <ActivityIndicator className="flex-1" size="large" />;
+        return <ActivityIndicator style={{ flex: 1, backgroundColor: theme.background }} size="large" color={theme.primary} />;
     }
 
     if (error || !campaign) {
-        return <View className="flex-1 justify-center items-center p-4"><Text className="text-red-500">{error || "Campaign not found."}</Text></View>;
+        return <View className="flex-1 justify-center items-center p-4" style={{ backgroundColor: theme.background }}><Text style={{ color: theme.error }}>{error || "Campaign not found."}</Text></View>;
     }
 
     if (profile?.user_type === 'brand') {
-        return <View className="flex-1 justify-center items-center p-4"><Text className="text-lg">Brands cannot apply to campaigns.</Text></View>
+        return <View className="flex-1 justify-center items-center p-4" style={{ backgroundColor: theme.background }}><Text className="text-lg" style={{ color: theme.text }}>Brands cannot apply to campaigns.</Text></View>
     }
 
     // Render based on submission status
@@ -258,10 +258,10 @@ const SubmissionPage = () => {
             // No submission yet - show initial application form
             return (
                 <>
-                    <Text className="text-2xl font-bold mb-1">Submitting for:</Text>
-                    <Text className="text-3xl font-extrabold text-blue-600 mb-6">{campaign.title}</Text>
+                    <Text className="text-2xl font-bold mb-1" style={{ color: theme.text }}>Submitting for:</Text>
+                    <Text className="text-3xl font-extrabold mb-6" style={{ color: theme.primary }}>{campaign.title}</Text>
 
-                    <View className="items-center justify-center w-full h-64 bg-gray-100 border-2 border-dashed border-gray-300 rounded-lg">
+                    <View className="items-center justify-center w-full h-64 border-2 border-dashed rounded-lg" style={{ backgroundColor: theme.surfaceSecondary, borderColor: theme.border }}>
                         {selectedVideo ? (
                             <View className="w-full h-full rounded-lg overflow-hidden">
                                 <Video
@@ -278,22 +278,22 @@ const SubmissionPage = () => {
                             </View>
                         ) : (
                             <Pressable onPress={pickVideo} className="items-center">
-                                <Feather name="upload-cloud" size={48} color="gray" />
-                                <Text className="mt-2 text-lg font-semibold text-gray-600">Upload Your Video</Text>
-                                <Text className="text-sm text-gray-400">Max file size: 500MB</Text>
+                                <Feather name="upload-cloud" size={48} color={theme.textTertiary} />
+                                <Text className="mt-2 text-lg font-semibold" style={{ color: theme.textSecondary }}>Upload Your Video</Text>
+                                <Text className="text-sm" style={{ color: theme.textTertiary }}>Max file size: 500MB</Text>
                             </Pressable>
                         )}
                     </View>
 
                     {selectedVideo && (
                         <Pressable onPress={pickVideo} className="mt-2">
-                            <Text className="text-center text-blue-600 font-semibold">Change video</Text>
+                            <Text className="text-center font-semibold" style={{ color: theme.primary }}>Change video</Text>
                         </Pressable>
                     )}
 
-                    <View className="p-4 bg-white rounded-lg mt-4">
-                        <Text className="font-semibold mb-2">Content Requirements:</Text>
-                        <Text className="text-gray-600">{campaign.content_requirements || 'No specific requirements'}</Text>
+                    <View className="p-4 rounded-lg mt-4" style={{ backgroundColor: theme.surface }}>
+                        <Text className="font-semibold mb-2" style={{ color: theme.text }}>Content Requirements:</Text>
+                        <Text style={{ color: theme.textSecondary }}>{campaign.content_requirements || 'No specific requirements'}</Text>
                     </View>
                 </>
             );
@@ -304,43 +304,43 @@ const SubmissionPage = () => {
             case 'pending_review':
                 return (
                     <View className="flex-1 items-center justify-center p-6">
-                        <Feather name="clock" size={64} color="#F59E0B" />
-                        <Text className="text-2xl font-bold mt-4 text-center">Under Review</Text>
-                        <Text className="text-gray-600 text-center mt-2">Your submission is being reviewed by the brand. We'll notify you once they make a decision.</Text>
+                        <Feather name="clock" size={64} color={theme.warning} />
+                        <Text className="text-2xl font-bold mt-4 text-center" style={{ color: theme.text }}>Under Review</Text>
+                        <Text className="text-center mt-2" style={{ color: theme.textSecondary }}>Your submission is being reviewed by the brand. We'll notify you once they make a decision.</Text>
                     </View>
                 );
 
             case 'needs_revision':
                 return (
                     <>
-                        <View className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
+                        <View className="border rounded-lg p-4 mb-4" style={{ backgroundColor: theme.warningLight, borderColor: theme.warning }}>
                             <View className="flex-row items-center mb-2">
-                                <Feather name="alert-circle" size={24} color="#F59E0B" />
-                                <Text className="text-lg font-bold ml-2">Revision Requested</Text>
+                                <Feather name="alert-circle" size={24} color={theme.warning} />
+                                <Text className="text-lg font-bold ml-2" style={{ color: theme.text }}>Revision Requested</Text>
                             </View>
                             {submission.rating !== null && (
                                 <View className="flex-row items-center mb-2">
-                                    <Text className="font-semibold">Rating: </Text>
-                                    <Text className="text-yellow-600 font-bold">{submission.rating}/10</Text>
+                                    <Text className="font-semibold" style={{ color: theme.text }}>Rating: </Text>
+                                    <Text className="font-bold" style={{ color: theme.warning }}>{submission.rating}/10</Text>
                                 </View>
                             )}
                             {submission.message && (
                                 <View className="mb-2">
-                                    <Text className="font-semibold">Feedback:</Text>
-                                    <Text className="text-gray-700 mt-1">{submission.message}</Text>
+                                    <Text className="font-semibold" style={{ color: theme.text }}>Feedback:</Text>
+                                    <Text className="mt-1" style={{ color: theme.textSecondary }}>{submission.message}</Text>
                                 </View>
                             )}
                             {submission.justify && (
                                 <View>
-                                    <Text className="font-semibold">Details:</Text>
-                                    <Text className="text-gray-700 mt-1">{submission.justify}</Text>
+                                    <Text className="font-semibold" style={{ color: theme.text }}>Details:</Text>
+                                    <Text className="mt-1" style={{ color: theme.textSecondary }}>{submission.justify}</Text>
                                 </View>
                             )}
                         </View>
 
-                        <Text className="text-xl font-bold mb-4">Submit Revised Video</Text>
+                        <Text className="text-xl font-bold mb-4" style={{ color: theme.text }}>Submit Revised Video</Text>
 
-                        <View className="items-center justify-center w-full h-64 bg-gray-100 border-2 border-dashed border-gray-300 rounded-lg">
+                        <View className="items-center justify-center w-full h-64 border-2 border-dashed rounded-lg" style={{ backgroundColor: theme.surfaceSecondary, borderColor: theme.border }}>
                             {selectedVideo ? (
                                 <View className="w-full h-full rounded-lg overflow-hidden">
                                     <Video
@@ -357,15 +357,15 @@ const SubmissionPage = () => {
                                 </View>
                             ) : (
                                 <Pressable onPress={pickVideo} className="items-center">
-                                    <Feather name="upload-cloud" size={48} color="gray" />
-                                    <Text className="mt-2 text-lg font-semibold text-gray-600">Upload Revised Video</Text>
+                                    <Feather name="upload-cloud" size={48} color={theme.textTertiary} />
+                                    <Text className="mt-2 text-lg font-semibold" style={{ color: theme.textSecondary }}>Upload Revised Video</Text>
                                 </Pressable>
                             )}
                         </View>
 
                         {selectedVideo && (
                             <Pressable onPress={pickVideo} className="mt-2">
-                                <Text className="text-center text-blue-600 font-semibold">Change video</Text>
+                                <Text className="text-center font-semibold" style={{ color: theme.primary }}>Change video</Text>
                             </Pressable>
                         )}
                     </>
@@ -374,38 +374,40 @@ const SubmissionPage = () => {
             case 'approved':
                 return (
                     <>
-                        <View className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
+                        <View className="border rounded-lg p-4 mb-4" style={{ backgroundColor: theme.successLight, borderColor: theme.success }}>
                             <View className="flex-row items-center mb-2">
-                                <Feather name="check-circle" size={24} color="#10B981" />
-                                <Text className="text-lg font-bold ml-2 text-green-700">Approved!</Text>
+                                <Feather name="check-circle" size={24} color={theme.success} />
+                                <Text className="text-lg font-bold ml-2" style={{ color: theme.success }}>Approved!</Text>
                             </View>
                             {submission.rating !== null && (
                                 <View className="flex-row items-center mb-2">
-                                    <Text className="font-semibold">Rating: </Text>
-                                    <Text className="text-green-600 font-bold">{submission.rating}/10</Text>
+                                    <Text className="font-semibold" style={{ color: theme.text }}>Rating: </Text>
+                                    <Text className="font-bold" style={{ color: theme.success }}>{submission.rating}/10</Text>
                                 </View>
                             )}
                             {submission.message && (
-                                <Text className="text-gray-700 mt-2">{submission.message}</Text>
+                                <Text className="mt-2" style={{ color: theme.textSecondary }}>{submission.message}</Text>
                             )}
                         </View>
 
-                        <View className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
-                            <Text className="font-bold text-blue-900 mb-2">⏰ Action Required</Text>
-                            <Text className="text-gray-700 mb-1">Post your video on {campaign.target_platforms?.join(', ') || 'the platform'} within 24 hours.</Text>
+                        <View className="border rounded-lg p-4 mb-4" style={{ backgroundColor: theme.primaryLight, borderColor: theme.border }}>
+                            <Text className="font-bold mb-2" style={{ color: theme.primaryDark }}>⏰ Action Required</Text>
+                            <Text className="mb-1" style={{ color: theme.textSecondary }}>Post your video on {campaign.target_platforms?.join(', ') || 'the platform'} within 24 hours.</Text>
                             {submission.approved_at && (
-                                <Text className="text-sm text-red-600 font-semibold">{getTimeRemaining(submission.approved_at)}</Text>
+                                <Text className="text-sm font-semibold" style={{ color: theme.error }}>{getTimeRemaining(submission.approved_at)}</Text>
                             )}
                         </View>
 
-                        <Text className="text-lg font-semibold mb-2">Post URL</Text>
-                        <Text className="text-sm text-gray-600 mb-2">After posting, paste the link to your public post here:</Text>
+                        <Text className="text-lg font-semibold mb-2" style={{ color: theme.text }}>Post URL</Text>
+                        <Text className="text-sm mb-2" style={{ color: theme.textSecondary }}>After posting, paste the link to your public post here:</Text>
 
                         <TextInput
                             value={publicPostUrl}
                             onChangeText={setPublicPostUrl}
                             placeholder="https://tiktok.com/@user/video/..."
-                            className="border border-gray-300 rounded-lg p-3 mb-4 bg-white"
+                            className="border rounded-lg p-3 mb-4"
+                            style={{ backgroundColor: theme.surface, borderColor: theme.border, color: theme.text }}
+                            placeholderTextColor={theme.textTertiary}
                         />
                     </>
                 );
@@ -414,69 +416,70 @@ const SubmissionPage = () => {
             case 'completed':
                 return (
                     <>
-                        <View className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
+                        <View className="border rounded-lg p-4 mb-4" style={{ backgroundColor: theme.successLight, borderColor: theme.success }}>
                             <View className="flex-row items-center mb-2">
-                                <Feather name="check-circle" size={24} color="#10B981" />
-                                <Text className="text-lg font-bold ml-2 text-green-700">
+                                <Feather name="check-circle" size={24} color={theme.success} />
+                                <Text className="text-lg font-bold ml-2" style={{ color: theme.success }}>
                                     {submission.status === 'posted_live' ? 'Posted Live!' : 'Completed!'}
                                 </Text>
                             </View>
                             {submission.rating !== null && (
                                 <View className="flex-row items-center">
-                                    <Text className="font-semibold">Rating: </Text>
-                                    <Text className="text-green-600 font-bold">{submission.rating}/10</Text>
+                                    <Text className="font-semibold" style={{ color: theme.text }}>Rating: </Text>
+                                    <Text className="font-bold" style={{ color: theme.success }}>{submission.rating}/10</Text>
                                 </View>
                             )}
                         </View>
 
-                        <Text className="text-2xl font-bold mb-4">Performance Stats</Text>
+                        <Text className="text-2xl font-bold mb-4" style={{ color: theme.text }}>Performance Stats</Text>
 
-                        <View className="bg-white rounded-lg p-4 mb-3 border border-gray-200">
+                        <View className="rounded-lg p-4 mb-3 border" style={{ backgroundColor: theme.surface, borderColor: theme.border }}>
                             <View className="flex-row items-center justify-between">
                                 <View className="flex-row items-center">
-                                    <Feather name="eye" size={20} color="#6B7280" />
-                                    <Text className="ml-2 text-gray-600">Views</Text>
+                                    <Feather name="eye" size={20} color={theme.textSecondary} />
+                                    <Text className="ml-2" style={{ color: theme.textSecondary }}>Views</Text>
                                 </View>
-                                <Text className="text-xl font-bold">{submission.view_count?.toLocaleString() || '0'}</Text>
+                                <Text className="text-xl font-bold" style={{ color: theme.text }}>{submission.view_count?.toLocaleString() || '0'}</Text>
                             </View>
                         </View>
 
-                        <View className="bg-white rounded-lg p-4 mb-3 border border-gray-200">
+                        <View className="rounded-lg p-4 mb-3 border" style={{ backgroundColor: theme.surface, borderColor: theme.border }}>
                             <View className="flex-row items-center justify-between">
                                 <View className="flex-row items-center">
-                                    <Feather name="heart" size={20} color="#6B7280" />
-                                    <Text className="ml-2 text-gray-600">Likes</Text>
+                                    <Feather name="heart" size={20} color={theme.textSecondary} />
+                                    <Text className="ml-2" style={{ color: theme.textSecondary }}>Likes</Text>
                                 </View>
-                                <Text className="text-xl font-bold">{submission.like_count?.toLocaleString() || '0'}</Text>
+                                <Text className="text-xl font-bold" style={{ color: theme.text }}>{submission.like_count?.toLocaleString() || '0'}</Text>
                             </View>
                         </View>
 
-                        <View className="bg-white rounded-lg p-4 mb-3 border border-gray-200">
+                        <View className="rounded-lg p-4 mb-3 border" style={{ backgroundColor: theme.surface, borderColor: theme.border }}>
                             <View className="flex-row items-center justify-between">
                                 <View className="flex-row items-center">
-                                    <Feather name="message-circle" size={20} color="#6B7280" />
-                                    <Text className="ml-2 text-gray-600">Comments</Text>
+                                    <Feather name="message-circle" size={20} color={theme.textSecondary} />
+                                    <Text className="ml-2" style={{ color: theme.textSecondary }}>Comments</Text>
                                 </View>
-                                <Text className="text-xl font-bold">{submission.comment_count?.toLocaleString() || '0'}</Text>
+                                <Text className="text-xl font-bold" style={{ color: theme.text }}>{submission.comment_count?.toLocaleString() || '0'}</Text>
                             </View>
                         </View>
 
-                        <View className="bg-green-50 rounded-lg p-4 border border-green-200">
+                        <View className="rounded-lg p-4 border" style={{ backgroundColor: theme.successLight, borderColor: theme.success }}>
                             <View className="flex-row items-center justify-between">
                                 <View className="flex-row items-center">
-                                    <Feather name="dollar-sign" size={20} color="#10B981" />
-                                    <Text className="ml-2 text-gray-600">Earned</Text>
+                                    <Feather name="dollar-sign" size={20} color={theme.success} />
+                                    <Text className="ml-2" style={{ color: theme.textSecondary }}>Earned</Text>
                                 </View>
-                                <Text className="text-2xl font-bold text-green-600">${submission.earned_amount?.toFixed(2) || '0.00'}</Text>
+                                <Text className="text-2xl font-bold" style={{ color: theme.success }}>${submission.earned_amount?.toFixed(2) || '0.00'}</Text>
                             </View>
                         </View>
 
                         {submission.public_post_url && (
                             <Pressable
                                 onPress={() => Alert.alert('Open Post', 'Open in browser: ' + submission.public_post_url)}
-                                className="mt-4 bg-blue-600 py-3 rounded-lg"
+                                className="mt-4 py-3 rounded-lg"
+                                style={{ backgroundColor: theme.primary }}
                             >
-                                <Text className="text-white text-center font-semibold">View Public Post</Text>
+                                <Text className="text-center font-semibold" style={{ color: theme.surface }}>View Public Post</Text>
                             </Pressable>
                         )}
                     </>
@@ -493,13 +496,14 @@ const SubmissionPage = () => {
             return (
                 <Pressable
                     disabled={!selectedVideo || isSubmitting}
-                    className={`py-4 rounded-xl items-center justify-center shadow-lg ${(!selectedVideo || isSubmitting) ? 'bg-gray-400' : 'bg-blue-600'}`}
+                    className="py-4 rounded-xl items-center justify-center shadow-lg"
+                    style={{ backgroundColor: (!selectedVideo || isSubmitting) ? theme.textTertiary : theme.primary }}
                     onPress={handleSubmit}
                 >
                     {isSubmitting ? (
-                        <ActivityIndicator color="white" />
+                        <ActivityIndicator color={theme.surface} />
                     ) : (
-                        <Text className="text-white text-lg font-bold">Submit Application</Text>
+                        <Text className="text-lg font-bold" style={{ color: theme.surface }}>Submit Application</Text>
                     )}
                 </Pressable>
             );
@@ -509,13 +513,14 @@ const SubmissionPage = () => {
             return (
                 <Pressable
                     disabled={!selectedVideo || isSubmitting}
-                    className={`py-4 rounded-xl items-center justify-center shadow-lg ${(!selectedVideo || isSubmitting) ? 'bg-gray-400' : 'bg-blue-600'}`}
+                    className="py-4 rounded-xl items-center justify-center shadow-lg"
+                    style={{ backgroundColor: (!selectedVideo || isSubmitting) ? theme.textTertiary : theme.primary }}
                     onPress={handleResubmit}
                 >
                     {isSubmitting ? (
-                        <ActivityIndicator color="white" />
+                        <ActivityIndicator color={theme.surface} />
                     ) : (
-                        <Text className="text-white text-lg font-bold">Resubmit Video</Text>
+                        <Text className="text-lg font-bold" style={{ color: theme.surface }}>Resubmit Video</Text>
                     )}
                 </Pressable>
             );
@@ -525,13 +530,14 @@ const SubmissionPage = () => {
             return (
                 <Pressable
                     disabled={!publicPostUrl.trim() || isUpdatingUrl}
-                    className={`py-4 rounded-xl items-center justify-center shadow-lg ${(!publicPostUrl.trim() || isUpdatingUrl) ? 'bg-gray-400' : 'bg-green-600'}`}
+                    className="py-4 rounded-xl items-center justify-center shadow-lg"
+                    style={{ backgroundColor: (!publicPostUrl.trim() || isUpdatingUrl) ? theme.textTertiary : theme.success }}
                     onPress={handleUpdatePostUrl}
                 >
                     {isUpdatingUrl ? (
-                        <ActivityIndicator color="white" />
+                        <ActivityIndicator color={theme.surface} />
                     ) : (
-                        <Text className="text-white text-lg font-bold">Submit Post URL</Text>
+                        <Text className="text-lg font-bold" style={{ color: theme.surface }}>Submit Post URL</Text>
                     )}
                 </Pressable>
             );
@@ -541,13 +547,13 @@ const SubmissionPage = () => {
     };
 
     return (
-        <SafeAreaView className="flex-1 bg-gray-50" edges={['bottom']}>
+        <SafeAreaView className="flex-1" style={{ backgroundColor: theme.background }} edges={['bottom']}>
             <ScrollView className="flex-1" contentContainerStyle={{ padding: 16 }}>
                 {renderContent()}
             </ScrollView>
 
             {renderButton() && (
-                <View className="p-4 bg-white border-t border-gray-200">
+                <View className="p-4 border-t" style={{ backgroundColor: theme.surface, borderColor: theme.border }}>
                     {renderButton()}
                 </View>
             )}

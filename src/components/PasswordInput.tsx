@@ -1,20 +1,28 @@
 import React, { useState } from 'react';
-import { View, TextInput, TouchableOpacity } from 'react-native';
-import { Feather } from '@expo/vector-icons'; // Using Feather icons for the 'eye'
+import { View, TextInput, TouchableOpacity, TextInputProps } from 'react-native';
+import { Feather } from '@expo/vector-icons';
+import { useTheme } from '@/contexts/ThemeContext';
 
-const PasswordInput = ({ iconSize = 22, ...props }) => {
+interface PasswordInputProps extends TextInputProps {
+    iconSize?: number;
+}
+
+const PasswordInput: React.FC<PasswordInputProps> = ({ iconSize = 22, ...props }) => {
+    const { theme } = useTheme();
     // State to manage password visibility
     const [isSecure, setIsSecure] = useState(true);
 
     return (
         // The container holds the input and the icon, and carries the border styles.
-        <View className="w-full flex-row items-center bg-gray-50 border border-gray-300 rounded-lg mb-6">
+        <View className="w-full flex-row items-center rounded-lg mb-6" style={{ backgroundColor: theme.background, borderColor: theme.borderLight, borderWidth: 1 }}>
             <TextInput
                 // The TextInput takes up most of the space and has no border of its own.
-                className="flex-1 px-4 py-3 text-base text-gray-700"
+                className="flex-1 px-4 py-3 text-base"
+                style={{ color: theme.textSecondary }}
                 // The secureTextEntry prop is controlled by our state
                 secureTextEntry={isSecure}
                 autoCapitalize={'none'}
+                placeholderTextColor={theme.textTertiary}
                 // We pass down all other props (like value, onChangeText, placeholder)
                 {...props}
             />
@@ -27,7 +35,7 @@ const PasswordInput = ({ iconSize = 22, ...props }) => {
                 <Feather
                     name={isSecure ? 'eye-off' : 'eye'}
                     size={iconSize}
-                    color="gray"
+                    color={theme.textTertiary}
                 />
             </TouchableOpacity>
         </View>

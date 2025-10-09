@@ -1,14 +1,13 @@
-import { ActivityIndicator, StyleSheet, Text, View } from 'react-native'
+import { ActivityIndicator, View } from 'react-native'
 import React from 'react'
 import { Stack } from 'expo-router'
 import { useAuth } from '../../contexts/AuthContext'
+import { useTheme } from '../../contexts/ThemeContext';
 
 const Layout = () => {
 
     const { user, isLoading, profile } = useAuth();
-
-    //console.log("user", user)
-    //console.log("profile", profile)
+    const { theme } = useTheme();
 
     const isSignedIn = user ? true : false
     const hasProfile = profile && profile?.username && profile?.user_type ? true : false;
@@ -16,16 +15,29 @@ const Layout = () => {
 
     if (isLoading) {
         return (
-            <View className='flex-1 items-center justify-center'>
-                <ActivityIndicator size='large' color='#0000ff' />
+            <View className='flex-1 items-center justify-center' style={{ backgroundColor: theme.background }}>
+                <ActivityIndicator size='large' color={theme.primary} />
             </View>
         )
     }
 
-    console.log('✅ Rendering Stack');
+    //console.log('✅ Rendering Stack');
 
     return (
-        <Stack>
+        <Stack
+            screenOptions={{
+                headerStyle: {
+                    backgroundColor: theme.surface,
+                },
+                headerTintColor: theme.text,
+                headerTitleStyle: {
+                    fontWeight: 'bold',
+                },
+                contentStyle: {
+                    backgroundColor: theme.background
+                }
+            }}
+        >
             <Stack.Protected guard={isSignedIn && hasProfile}>
                 <Stack.Screen name='(tabs)' options={{ headerShown: false }} />
                 <Stack.Screen name='creators/[id]' options={{ headerShown: false }} />
@@ -46,4 +58,3 @@ const Layout = () => {
 
 
 export default Layout
-

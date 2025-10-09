@@ -1,9 +1,21 @@
 import { Stack } from 'expo-router';
 import React from 'react';
+import { useTheme } from '@/contexts/ThemeContext';
 
 export default function PaymentsLayout() {
+    const { theme } = useTheme();
     return (
-        <Stack>
+        <Stack
+            screenOptions={{
+                headerStyle: {
+                    backgroundColor: theme.surface,
+                },
+                headerTintColor: theme.text,
+                headerTitleStyle: {
+                    fontWeight: 'bold',
+                },
+            }}
+        >
             <Stack.Screen
                 name="index"
                 options={{

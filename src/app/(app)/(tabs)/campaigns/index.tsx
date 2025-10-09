@@ -1,18 +1,17 @@
-// campaigns.tsx
-import { Text, View, FlatList, RefreshControl, ActivityIndicator } from 'react-native';
+import { Text, View, FlatList, RefreshControl, ActivityIndicator, TouchableOpacity } from 'react-native';
 import React, { useMemo } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCampaigns } from '@/hooks/useCampaigns';
-import CampaignCard from '@/components/CampaignCard';
-import { Campaign } from '@/components/CampaignCard'; // Adjust import path
+import CampaignCard, { Campaign } from '@/components/CampaignCard';
 import AntDesign from '@expo/vector-icons/AntDesign';
-import { TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useTheme } from '@/contexts/ThemeContext';
 
 const Campaigns = () => {
     const router = useRouter();
     const { profile } = useAuth();
+    const { theme } = useTheme();
     const {
         campaigns,
         loading,
@@ -38,28 +37,29 @@ const Campaigns = () => {
     };
 
     return (
-        <SafeAreaView className="flex-1 bg-gray-50">
+        <SafeAreaView className="flex-1" style={{ backgroundColor: theme.background }}>
             {/* Header */}
-            <View className="p-4 bg-white border-b border-gray-200 flex-row justify-between items-center">
+            <View className="p-4 flex-row justify-between items-center" style={{ backgroundColor: theme.surface, borderBottomColor: theme.border, borderBottomWidth: 1 }}>
                 <View>
-                    <Text className="text-2xl font-bold text-gray-800">My Campaigns</Text>
-                    <Text className="text-sm text-gray-500">
+                    <Text className="text-2xl font-bold" style={{ color: theme.text }}>My Campaigns</Text>
+                    <Text className="text-sm" style={{ color: theme.textTertiary }}>
                         Manage and track your campaigns
                     </Text>
                 </View>
                 <TouchableOpacity
                     onPress={handleCreateCampaign}
-                    className="bg-blue-500 px-4 py-2 rounded-full flex-row items-center gap-2"
+                    className="px-4 py-2 rounded-full flex-row items-center gap-2"
+                    style={{ backgroundColor: theme.primary }}
                 >
-                    <AntDesign name="plus" size={16} color="white" />
-                    <Text className="text-white font-semibold">New</Text>
+                    <AntDesign name="plus" size={16} color={theme.surface} />
+                    <Text className="font-semibold" style={{ color: theme.surface }}>New</Text>
                 </TouchableOpacity>
             </View>
 
             {/* Campaign Count */}
             {!loading && (
-                <View className="px-4 py-2 bg-gray-50">
-                    <Text className="text-sm text-gray-600">
+                <View className="px-4 py-2" style={{ backgroundColor: theme.background }}>
+                    <Text className="text-sm" style={{ color: theme.textSecondary }}>
                         {uniqueCampaigns.length} {uniqueCampaigns.length === 1 ? 'campaign' : 'campaigns'}
                     </Text>
                 </View>
@@ -68,8 +68,8 @@ const Campaigns = () => {
             {/* Campaigns List */}
             {loading ? (
                 <View className="flex-1 justify-center items-center">
-                    <ActivityIndicator size="large" color="#3B82F6" />
-                    <Text className="mt-4 text-gray-500">Loading campaigns...</Text>
+                    <ActivityIndicator size="large" color={theme.primary} />
+                    <Text className="mt-4" style={{ color: theme.textTertiary }}>Loading campaigns...</Text>
                 </View>
             ) : (
                 <FlatList
@@ -81,19 +81,20 @@ const Campaigns = () => {
                     contentContainerStyle={{ paddingBottom: 20 }}
                     ListEmptyComponent={
                         <View className="flex-1 justify-center items-center p-8 mt-20">
-                            <AntDesign name="inbox" size={64} color="#D1D5DB" />
-                            <Text className="text-center mt-6 text-gray-700 text-xl font-semibold">
+                            <AntDesign name="inbox" size={64} color={theme.textTertiary} />
+                            <Text className="text-center mt-6 text-xl font-semibold" style={{ color: theme.textSecondary }}>
                                 No campaigns yet
                             </Text>
-                            <Text className="text-center mt-2 text-gray-500 text-base">
+                            <Text className="text-center mt-2 text-base" style={{ color: theme.textTertiary }}>
                                 Create your first campaign to start connecting with influencers
                             </Text>
                             <TouchableOpacity
                                 onPress={handleCreateCampaign}
-                                className="mt-6 bg-blue-500 px-8 py-4 rounded-full flex-row items-center gap-2"
+                                className="mt-6 px-8 py-4 rounded-full flex-row items-center gap-2"
+                                style={{ backgroundColor: theme.primary }}
                             >
-                                <AntDesign name="plus" size={20} color="white" />
-                                <Text className="text-white font-semibold text-base">
+                                <AntDesign name="plus" size={20} color={theme.surface} />
+                                <Text className="font-semibold text-base" style={{ color: theme.surface }}>
                                     Create Campaign
                                 </Text>
                             </TouchableOpacity>
@@ -103,8 +104,8 @@ const Campaigns = () => {
                         <RefreshControl
                             refreshing={refreshing}
                             onRefresh={refresh}
-                            colors={['#3B82F6']}
-                            tintColor="#3B82F6"
+                            colors={[theme.primary]}
+                            tintColor={theme.primary}
                         />
                     }
                     onEndReached={loadMore}
@@ -112,11 +113,11 @@ const Campaigns = () => {
                     ListFooterComponent={
                         loadingMore ? (
                             <View className="py-4">
-                                <ActivityIndicator size="small" color="#3B82F6" />
+                                <ActivityIndicator size="small" color={theme.primary} />
                             </View>
                         ) : !hasMore && uniqueCampaigns.length > 0 ? (
                             <View className="py-4">
-                                <Text className="text-center text-gray-500 text-sm">
+                                <Text className="text-center text-sm" style={{ color: theme.textTertiary }}>
                                     You've reached the end
                                 </Text>
                             </View>

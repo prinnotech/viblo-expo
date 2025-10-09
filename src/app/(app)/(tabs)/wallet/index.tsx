@@ -5,12 +5,12 @@ import { Feather } from '@expo/vector-icons';
 import { useWallet } from '@/hooks/useWallet';
 import { useRouter } from 'expo-router';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTheme } from '@/contexts/ThemeContext';
 
 const WalletScreen = () => {
     const { profile } = useAuth()
-
+    const { theme } = useTheme();
     const { totalEarnings, hasPayoutMethod, loading, error } = useWallet(profile?.id);
-
     const router = useRouter();
 
     // Helper function to calculate the next Friday
@@ -36,78 +36,79 @@ const WalletScreen = () => {
 
     if (loading) {
         return (
-            <SafeAreaView className="flex-1 bg-gray-50 justify-center items-center">
-                <ActivityIndicator size="large" color="#3b82f6" />
+            <SafeAreaView className="flex-1 justify-center items-center" style={{ backgroundColor: theme.background }}>
+                <ActivityIndicator size="large" color={theme.primary} />
             </SafeAreaView>
         );
     }
 
     if (error) {
         return (
-            <SafeAreaView className="flex-1 bg-gray-50 justify-center items-center p-4">
-                <Text className="text-red-500 text-center">Failed to load wallet data. Please try again.</Text>
+            <SafeAreaView className="flex-1 justify-center items-center p-4" style={{ backgroundColor: theme.background }}>
+                <Text style={{ color: theme.error, textAlign: 'center' }}>Failed to load wallet data. Please try again.</Text>
             </SafeAreaView>
         )
     }
 
     return (
-        <SafeAreaView className="flex-1 bg-gray-50">
+        <SafeAreaView className="flex-1" style={{ backgroundColor: theme.background }}>
             <ScrollView contentContainerStyle={{ padding: 24 }}>
                 <View className="mb-8">
-                    <Text className="text-center text-sm font-medium text-gray-500">
+                    <Text className="text-center text-sm font-medium" style={{ color: theme.textSecondary }}>
                         Available Balance
                     </Text>
-                    <Text className="text-center text-5xl font-bold text-gray-900 mt-2">
+                    <Text className="text-center text-5xl font-bold mt-2" style={{ color: theme.text }}>
                         {formatCurrency(totalEarnings)}
                     </Text>
                 </View>
 
                 {/* Payout Info Card */}
-                <View className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
+                <View className="rounded-xl p-6 border shadow-sm" style={{ backgroundColor: theme.surface, borderColor: theme.borderLight }}>
                     <View className="flex-row justify-between items-center">
                         <View>
-                            <Text className="text-sm font-medium text-gray-500">Next Payout</Text>
-                            <Text className="text-lg font-semibold text-gray-900 mt-1">
+                            <Text className="text-sm font-medium" style={{ color: theme.textSecondary }}>Next Payout</Text>
+                            <Text className="text-lg font-semibold mt-1" style={{ color: theme.text }}>
                                 {getNextPayoutDate()}
                             </Text>
                         </View>
-                        <View className="bg-blue-100 p-3 rounded-full">
-                            <Feather name="calendar" size={24} color="#3b82f6" />
+                        <View className="p-3 rounded-full" style={{ backgroundColor: theme.primaryLight }}>
+                            <Feather name="calendar" size={24} color={theme.primary} />
                         </View>
                     </View>
 
-                    <View className="border-t border-gray-100 my-4" />
+                    <View className="border-t my-4" style={{ borderColor: theme.borderLight }} />
 
                     <View className="flex-row justify-between items-center">
                         <View>
-                            <Text className="text-sm font-medium text-gray-500">Payout Method</Text>
-                            <Text className={`text-lg font-semibold mt-1 ${hasPayoutMethod ? 'text-green-600' : 'text-yellow-600'}`}>
+                            <Text className="text-sm font-medium" style={{ color: theme.textSecondary }}>Payout Method</Text>
+                            <Text className="text-lg font-semibold mt-1" style={{ color: hasPayoutMethod ? theme.success : theme.warning }}>
                                 {hasPayoutMethod ? 'Connected' : 'Not Connected'}
                             </Text>
                         </View>
-                        <View className={`p-3 rounded-full ${hasPayoutMethod ? 'bg-green-100' : 'bg-yellow-100'}`}>
-                            <Feather name={hasPayoutMethod ? "check-circle" : "alert-circle"} size={24} color={hasPayoutMethod ? '#16a34a' : '#f59e0b'} />
+                        <View className="p-3 rounded-full" style={{ backgroundColor: hasPayoutMethod ? theme.successLight : theme.warningLight }}>
+                            <Feather name={hasPayoutMethod ? "check-circle" : "alert-circle"} size={24} color={hasPayoutMethod ? theme.success : theme.warning} />
                         </View>
                     </View>
                 </View>
 
                 {/* Action Button */}
                 <TouchableOpacity
-                    className="bg-blue-600 rounded-lg py-4 mt-8"
+                    className="rounded-lg py-4 mt-8"
+                    style={{ backgroundColor: theme.primary }}
                     activeOpacity={0.8}
                     onPress={() => router.push('/wallet/connect')}
                 >
-                    <Text className="text-white text-center font-bold text-base">
+                    <Text className="text-center font-bold text-base" style={{ color: theme.surface }}>
                         Connect New Payout Method
                     </Text>
                 </TouchableOpacity>
 
                 {/* Payout History (Placeholder) */}
                 <View className="mt-10">
-                    <Text className="text-lg font-bold text-gray-800">Payout History</Text>
-                    <View className="bg-white rounded-xl p-6 mt-4 border border-gray-100 shadow-sm items-center">
-                        <Feather name="clock" size={32} color="#9ca3af" />
-                        <Text className="text-gray-500 mt-2">Your payout history will appear here.</Text>
+                    <Text className="text-lg font-bold" style={{ color: theme.text }}>Payout History</Text>
+                    <View className="rounded-xl p-6 mt-4 border shadow-sm items-center" style={{ backgroundColor: theme.surface, borderColor: theme.borderLight }}>
+                        <Feather name="clock" size={32} color={theme.textTertiary} />
+                        <Text className="mt-2" style={{ color: theme.textSecondary }}>Your payout history will appear here.</Text>
                     </View>
                 </View>
 

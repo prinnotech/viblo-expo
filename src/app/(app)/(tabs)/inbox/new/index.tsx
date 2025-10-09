@@ -14,23 +14,29 @@ import { useRouter } from 'expo-router';
 import { supabase } from '@/lib/supabase';
 import { Profile } from '@/lib/db_interface';
 import { debounce } from 'lodash';
+import { useTheme } from '@/contexts/ThemeContext';
 
 // A component for each search result item
-const BrandListItem = ({ item, onPress }: { item: Profile, onPress: (profile: Profile) => void }) => (
-    <TouchableOpacity
-        onPress={() => onPress(item)}
-        className="flex-row items-center p-3 border-b border-gray-100"
-    >
-        <Image
-            source={{ uri: item.avatar_url || 'https://placehold.co/100x100/E2E8F0/A0AEC0?text=?' }}
-            className="w-12 h-12 rounded-full mr-4 bg-gray-200"
-        />
-        <View>
-            <Text className="text-base font-semibold text-gray-900">{item.username}</Text>
-            <Text className="text-sm text-gray-500">{item.company_name || 'Brand'}</Text>
-        </View>
-    </TouchableOpacity>
-);
+const BrandListItem = ({ item, onPress }: { item: Profile, onPress: (profile: Profile) => void }) => {
+    const { theme } = useTheme();
+    return (
+        <TouchableOpacity
+            onPress={() => onPress(item)}
+            className="flex-row items-center p-3 border-b"
+            style={{ backgroundColor: theme.surface, borderColor: theme.borderLight }}
+        >
+            <Image
+                source={{ uri: item.avatar_url || 'https://placehold.co/100x100/E2E8F0/A0AEC0?text=?' }}
+                className="w-12 h-12 rounded-full mr-4"
+                style={{ backgroundColor: theme.surfaceSecondary }}
+            />
+            <View>
+                <Text className="text-base font-semibold" style={{ color: theme.text }}>{item.username}</Text>
+                <Text className="text-sm" style={{ color: theme.textSecondary }}>{item.company_name || 'Brand'}</Text>
+            </View>
+        </TouchableOpacity>
+    );
+};
 
 const NewConversationScreen = () => {
     const [searchTerm, setSearchTerm] = useState('');
@@ -38,6 +44,7 @@ const NewConversationScreen = () => {
     const [loading, setLoading] = useState(false);
     const [isCreating, setIsCreating] = useState(false);
     const router = useRouter();
+    const { theme } = useTheme();
 
     const searchBrands = async (query: string) => {
         if (query.length < 2) {
@@ -88,23 +95,24 @@ const NewConversationScreen = () => {
     };
 
     return (
-        <SafeAreaView edges={['top']} className="flex-1 bg-white">
+        <SafeAreaView edges={['top']} className="flex-1" style={{ backgroundColor: theme.surface }}>
 
             <View className="p-4">
-                <View className="flex-row items-center bg-gray-100 rounded-lg px-3">
-                    <Feather name="search" size={20} color="#6B7280" />
+                <View className="flex-row items-center rounded-lg px-3" style={{ backgroundColor: theme.surfaceSecondary }}>
+                    <Feather name="search" size={20} color={theme.textTertiary} />
                     <TextInput
                         value={searchTerm}
                         onChangeText={handleSearchChange}
                         placeholder="Search for a brand..."
-                        placeholderTextColor="#6B7280"
-                        className="flex-1 h-12 ml-2 text-base text-gray-900"
+                        placeholderTextColor={theme.textTertiary}
+                        className="flex-1 h-12 ml-2 text-base"
+                        style={{ color: theme.text }}
                     />
                 </View>
             </View>
 
-            {loading && <ActivityIndicator size="small" color="#3b82f6" className="mt-4" />}
-            {isCreating && <ActivityIndicator size="large" color="#3b82f6" className="absolute self-center top-1/2" />}
+            {loading && <ActivityIndicator size="small" color={theme.primary} className="mt-4" />}
+            {isCreating && <ActivityIndicator size="large" color={theme.primary} className="absolute self-center top-1/2" />}
 
             <FlatList
                 data={results}
@@ -113,7 +121,7 @@ const NewConversationScreen = () => {
                 ListEmptyComponent={() => (
                     !loading && searchTerm.length > 1 ? (
                         <View className="items-center justify-center mt-20">
-                            <Text className="text-gray-500">No brands found.</Text>
+                            <Text style={{ color: theme.textTertiary }}>No brands found.</Text>
                         </View>
                     ) : null
                 )}

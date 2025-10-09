@@ -14,23 +14,29 @@ import { useRouter } from 'expo-router';
 import { useUserProfile } from '@/hooks/useUserProfile';
 import { Feather } from '@expo/vector-icons';
 import { supabase } from '@/lib/supabase';
+import { useTheme } from '@/contexts/ThemeContext';
 
-const MenuItem = ({ icon, text, onPress }: { icon: any; text: string; onPress: () => void; }) => (
-    <TouchableOpacity
-        className="flex-row items-center p-4 bg-white border border-gray-100 rounded-xl"
-        onPress={onPress}
-        activeOpacity={0.6}
-    >
-        <Feather name={icon} size={22} color="#4b5563" />
-        <Text className="text-base text-gray-800 ml-4 flex-1">{text}</Text>
-        <Feather name="chevron-right" size={20} color="#9ca3af" />
-    </TouchableOpacity>
-);
+const MenuItem = ({ icon, text, onPress }: { icon: any; text: string; onPress: () => void; }) => {
+    const { theme } = useTheme();
+    return (
+        <TouchableOpacity
+            className="flex-row items-center p-4 rounded-xl border"
+            style={{ backgroundColor: theme.surface, borderColor: theme.borderLight }}
+            onPress={onPress}
+            activeOpacity={0.6}
+        >
+            <Feather name={icon} size={22} color={theme.textSecondary} />
+            <Text className="text-base ml-4 flex-1" style={{ color: theme.text }}>{text}</Text>
+            <Feather name="chevron-right" size={20} color={theme.textTertiary} />
+        </TouchableOpacity>
+    );
+};
 
 const ProfileScreen = () => {
     const { profile, loading, refetch } = useUserProfile();
     const router = useRouter();
     const [refreshing, setRefreshing] = useState(false);
+    const { theme } = useTheme();
 
     const isBrand = profile?.user_type === 'brand';
     const isInfluencer = profile?.user_type === 'influencer';
@@ -56,37 +62,38 @@ const ProfileScreen = () => {
 
     if (loading && !refreshing) {
         return (
-            <SafeAreaView className="flex-1 bg-gray-50 justify-center items-center">
-                <ActivityIndicator size="large" color="#3b82f6" />
+            <SafeAreaView className="flex-1 justify-center items-center" style={{ backgroundColor: theme.background }}>
+                <ActivityIndicator size="large" color={theme.primary} />
             </SafeAreaView>
         );
     }
 
     return (
-        <SafeAreaView className="flex-1 bg-gray-50">
+        <SafeAreaView className="flex-1" style={{ backgroundColor: theme.background }}>
             <ScrollView
                 refreshControl={
                     <RefreshControl
                         refreshing={refreshing}
                         onRefresh={onRefresh}
-                        tintColor="#3b82f6"
+                        tintColor={theme.primary}
+                        colors={[theme.primary]}
                     />
                 }
             >
                 {/* Profile Header */}
-                <View className="items-center p-6 bg-white border-b border-gray-200">
+                <View className="items-center p-6 border-b" style={{ backgroundColor: theme.surface, borderColor: theme.border }}>
                     <Image
                         source={{ uri: profile?.avatar_url || 'https://placehold.co/100x100/E2E8F0/A0AEC0?text=??' }}
                         className="w-24 h-24 rounded-full"
                     />
-                    <Text className="text-2xl font-bold text-gray-900 mt-4">
+                    <Text className="text-2xl font-bold mt-4" style={{ color: theme.text }}>
                         {isBrand ? profile?.company_name : profile?.first_name || profile?.username}
                     </Text>
-                    <Text className="text-sm text-gray-600 mt-1">
+                    <Text className="text-sm mt-1" style={{ color: theme.textSecondary }}>
                         @{profile?.username}
                     </Text>
                     {isBrand && profile?.industry && (
-                        <Text className="text-sm text-gray-500 mt-1">
+                        <Text className="text-sm mt-1" style={{ color: theme.textTertiary }}>
                             {profile.industry}
                         </Text>
                     )}
@@ -138,10 +145,11 @@ const ProfileScreen = () => {
                 <View className="p-4 mt-6">
                     <TouchableOpacity
                         onPress={signOut}
-                        className="w-full bg-white border border-red-200 py-3 rounded-lg flex-row justify-center items-center"
+                        className="w-full border py-3 rounded-lg flex-row justify-center items-center"
+                        style={{ backgroundColor: theme.surface, borderColor: theme.errorLight }}
                     >
-                        <Feather name="log-out" size={18} color="#ef4444" />
-                        <Text className="text-red-500 text-base font-semibold ml-2">Sign Out</Text>
+                        <Feather name="log-out" size={18} color={theme.error} />
+                        <Text className="text-base font-semibold ml-2" style={{ color: theme.error }}>Sign Out</Text>
                     </TouchableOpacity>
                 </View>
             </ScrollView>

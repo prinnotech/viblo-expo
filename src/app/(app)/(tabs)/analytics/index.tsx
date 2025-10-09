@@ -1,4 +1,3 @@
-// app/(app)/(tabs)/analytics/index.tsx
 import { Text, View, FlatList, ActivityIndicator, RefreshControl } from 'react-native';
 import React, { useState, useEffect, useCallback } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -6,6 +5,7 @@ import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import CampaignAnalyticsCard from '@/components/CampaignAnalyticsCard';
 import AntDesign from '@expo/vector-icons/AntDesign';
+import { useTheme } from '@/contexts/ThemeContext';
 
 interface CampaignWithStats {
     id: string;
@@ -20,6 +20,7 @@ interface CampaignWithStats {
 
 const AnalyticsPage = () => {
     const { profile } = useAuth();
+    const { theme } = useTheme();
     const [campaigns, setCampaigns] = useState<CampaignWithStats[]>([]);
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
@@ -89,19 +90,19 @@ const AnalyticsPage = () => {
 
     if (loading) {
         return (
-            <View className="flex-1 bg-gray-50 items-center justify-center">
-                <ActivityIndicator size="large" color="#3B82F6" />
-                <Text className="mt-4 text-gray-500">Loading analytics...</Text>
+            <View className="flex-1 items-center justify-center" style={{ backgroundColor: theme.background }}>
+                <ActivityIndicator size="large" color={theme.primary} />
+                <Text className="mt-4" style={{ color: theme.textTertiary }}>Loading analytics...</Text>
             </View>
         );
     }
 
     return (
-        <SafeAreaView className="flex-1 bg-gray-50">
+        <SafeAreaView className="flex-1" style={{ backgroundColor: theme.background }}>
             {/* Header */}
-            <View className="p-4 bg-white border-b border-gray-200">
-                <Text className="text-2xl font-bold text-gray-800">Campaign Analytics</Text>
-                <Text className="text-sm text-gray-500 mt-1">
+            <View className="p-4 border-b" style={{ backgroundColor: theme.surface, borderColor: theme.border }}>
+                <Text className="text-2xl font-bold" style={{ color: theme.text }}>Campaign Analytics</Text>
+                <Text className="text-sm mt-1" style={{ color: theme.textTertiary }}>
                     Track performance across all your campaigns
                 </Text>
             </View>
@@ -127,17 +128,17 @@ const AnalyticsPage = () => {
                     <RefreshControl
                         refreshing={refreshing}
                         onRefresh={onRefresh}
-                        colors={['#3B82F6']}
-                        tintColor="#3B82F6"
+                        colors={[theme.primary]}
+                        tintColor={theme.primary}
                     />
                 }
                 ListEmptyComponent={
                     <View className="flex-1 justify-center items-center p-8 mt-20">
-                        <AntDesign name="bar-chart" size={64} color="#D1D5DB" />
-                        <Text className="text-center mt-6 text-gray-700 text-xl font-semibold">
+                        <AntDesign name="bar-chart" size={64} color={theme.textTertiary} />
+                        <Text className="text-center mt-6 text-xl font-semibold" style={{ color: theme.textSecondary }}>
                             No campaigns yet
                         </Text>
-                        <Text className="text-center mt-2 text-gray-500 text-base">
+                        <Text className="text-center mt-2 text-base" style={{ color: theme.textTertiary }}>
                             Create your first campaign to see analytics here
                         </Text>
                     </View>

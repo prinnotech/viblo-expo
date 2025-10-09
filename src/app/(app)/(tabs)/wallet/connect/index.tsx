@@ -6,6 +6,7 @@ import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'expo-router';
 import { PayoutMethod } from '@/lib/db_interface';
+import { useTheme } from '@/contexts/ThemeContext';
 
 const revolut_img = require('@/../assets/bank_icons/revolut.png')
 const wise_img = require('@/../assets/bank_icons/wise.png')
@@ -16,6 +17,7 @@ const bank_img = require('@/../assets/bank_icons/transfer.png')
 const ConnectPage = () => {
     const { profile } = useAuth();
     const router = useRouter();
+    const { theme } = useTheme();
     const [methods, setMethods] = useState<PayoutMethod[]>([]);
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
@@ -81,7 +83,7 @@ const ConnectPage = () => {
     };
 
     const getMethodSubtitle = (method: PayoutMethod) => {
-        const details = method.details;
+        const details = method.details as any;
         switch (method.method_type) {
             case 'paypal':
                 return details?.email || 'PayPal Account';
@@ -100,26 +102,26 @@ const ConnectPage = () => {
 
     if (loading) {
         return (
-            <SafeAreaView className="flex-1 bg-gray-50">
+            <SafeAreaView className="flex-1" style={{ backgroundColor: theme.background }}>
                 <View className="flex-1 justify-center items-center">
-                    <ActivityIndicator size="large" color="#3b82f6" />
+                    <ActivityIndicator size="large" color={theme.primary} />
                 </View>
             </SafeAreaView>
         );
     }
 
     return (
-        <SafeAreaView className="flex-1 bg-gray-50">
+        <SafeAreaView className="flex-1" style={{ backgroundColor: theme.background }}>
             <ScrollView
                 className="flex-1"
                 refreshControl={
-                    <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+                    <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[theme.primary]} tintColor={theme.primary} />
                 }
             >
                 {/* Header */}
-                <View className="px-6 py-6 bg-white border-b border-gray-200">
-                    <Text className="text-2xl font-bold text-gray-900">Payout Methods</Text>
-                    <Text className="text-sm text-gray-600 mt-1">
+                <View className="px-6 py-6 border-b" style={{ backgroundColor: theme.surface, borderColor: theme.border }}>
+                    <Text className="text-2xl font-bold" style={{ color: theme.text }}>Payout Methods</Text>
+                    <Text className="text-sm mt-1" style={{ color: theme.textSecondary }}>
                         Manage how you receive payments
                     </Text>
                 </View>
@@ -133,51 +135,52 @@ const ConnectPage = () => {
                                     <TouchableOpacity
                                         key={method.id}
                                         onPress={() => router.push(`/wallet/${method.id}`)}
-                                        className="bg-white rounded-xl p-5 mb-3 border border-gray-200 shadow-sm"
+                                        className="rounded-xl p-5 mb-3 border shadow-sm"
+                                        style={{ backgroundColor: theme.surface, borderColor: theme.border }}
                                         activeOpacity={0.7}
                                     >
                                         <View className="flex-row items-center">
-                                            <View className={` rounded-full p-3 mr-4`}>
+                                            <View className="rounded-full p-3 mr-4">
                                                 <Image
                                                     source={getMethodIcon(method.method_type)}
-                                                    className="w-12 h-12 "
+                                                    className="w-12 h-12"
                                                     resizeMode="contain"
                                                 />
                                             </View>
 
                                             <View className="flex-1">
                                                 <View className="flex-row items-center">
-                                                    <Text className="text-lg font-semibold text-gray-900">
+                                                    <Text className="text-lg font-semibold" style={{ color: theme.text }}>
                                                         {getMethodTitle(method.method_type)}
                                                     </Text>
                                                     {method.is_primary && (
-                                                        <View className="ml-2 bg-blue-100 px-2 py-1 rounded-full">
-                                                            <Text className="text-xs font-semibold text-blue-600">
+                                                        <View className="ml-2 px-2 py-1 rounded-full" style={{ backgroundColor: theme.primaryLight }}>
+                                                            <Text className="text-xs font-semibold" style={{ color: theme.primary }}>
                                                                 Primary
                                                             </Text>
                                                         </View>
                                                     )}
                                                 </View>
-                                                <Text className="text-sm text-gray-600 mt-1">
+                                                <Text className="text-sm mt-1" style={{ color: theme.textSecondary }}>
                                                     {getMethodSubtitle(method)}
                                                 </Text>
                                             </View>
 
-                                            <Feather name="chevron-right" size={20} color="#9ca3af" />
+                                            <Feather name="chevron-right" size={20} color={theme.textTertiary} />
                                         </View>
                                     </TouchableOpacity>
                                 );
                             })}
                         </View>
                     ) : (
-                        <View className="bg-white rounded-xl p-8 mb-4 items-center border border-gray-200">
-                            <View className="bg-gray-100 rounded-full p-4 mb-3">
-                                <Feather name="credit-card" size={32} color="#9ca3af" />
+                        <View className="rounded-xl p-8 mb-4 items-center border" style={{ backgroundColor: theme.surface, borderColor: theme.border }}>
+                            <View className="rounded-full p-4 mb-3" style={{ backgroundColor: theme.surfaceSecondary }}>
+                                <Feather name="credit-card" size={32} color={theme.textTertiary} />
                             </View>
-                            <Text className="text-gray-900 font-semibold text-center mb-1">
+                            <Text className="font-semibold text-center mb-1" style={{ color: theme.text }}>
                                 No Payout Methods
                             </Text>
-                            <Text className="text-sm text-gray-600 text-center">
+                            <Text className="text-sm text-center" style={{ color: theme.textSecondary }}>
                                 Add a payout method to receive your earnings
                             </Text>
                         </View>
@@ -186,24 +189,25 @@ const ConnectPage = () => {
                     {/* Add New Method Button */}
                     <TouchableOpacity
                         onPress={() => router.push('/wallet/new')}
-                        className="bg-blue-600 rounded-xl p-5 flex-row items-center justify-center shadow-lg"
+                        className="rounded-xl p-5 flex-row items-center justify-center shadow-lg"
+                        style={{ backgroundColor: theme.primary }}
                         activeOpacity={0.8}
                     >
-                        <Feather name="plus-circle" size={20} color="white" />
-                        <Text className="text-white font-semibold text-base ml-2">
+                        <Feather name="plus-circle" size={20} color={theme.surface} />
+                        <Text className="font-semibold text-base ml-2" style={{ color: theme.surface }}>
                             Add New Method
                         </Text>
                     </TouchableOpacity>
 
                     {/* Info Card */}
-                    <View className="bg-blue-50 rounded-xl p-4 mt-4 border border-blue-100">
+                    <View className="rounded-xl p-4 mt-4 border" style={{ backgroundColor: theme.primaryLight, borderColor: theme.borderLight }}>
                         <View className="flex-row items-start">
-                            <Feather name="info" size={18} color="#2563eb" />
+                            <Feather name="info" size={18} color={theme.primaryDark} />
                             <View className="flex-1 ml-3">
-                                <Text className="text-sm text-blue-900 font-medium mb-1">
+                                <Text className="text-sm font-medium mb-1" style={{ color: theme.primaryDark }}>
                                     About Payouts
                                 </Text>
-                                <Text className="text-xs text-blue-700 leading-5">
+                                <Text className="text-xs leading-5" style={{ color: theme.primaryDark }}>
                                     Payments are processed every Friday. Make sure your payment details are up to date to avoid delays.
                                 </Text>
                             </View>

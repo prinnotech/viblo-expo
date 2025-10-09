@@ -6,7 +6,8 @@ import {
     TouchableOpacity,
     RefreshControl,
     ActivityIndicator,
-    TextInput
+    TextInput,
+    FlatList
 } from "react-native";
 import { supabase } from "@/lib/supabase";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -15,15 +16,15 @@ import { ContentSubmission } from "@/lib/db_interface";
 import { SubmissionStatus } from "@/lib/enum_types";
 import Feather from "@expo/vector-icons/Feather";
 import { useSubmissions } from "@/hooks/useSubmissions";
+import { useTheme } from "@/contexts/ThemeContext";
 
 export default function Page() {
     const [refreshing, setRefreshing] = useState(false);
     const [statusFilter, setStatusFilter] = useState<SubmissionStatus | "all">('all');
     const [searchQuery, setSearchQuery] = useState('');
-
+    const { theme } = useTheme();
     const router = useRouter();
 
-    // A map to hold user-friendly display names
     const STATUS_LABELS: Record<SubmissionStatus | 'all', string> = {
         all: 'All',
         pending_review: 'Pending Review',
@@ -46,32 +47,19 @@ export default function Page() {
 
     const onRefresh = () => {
         setRefreshing(true);
-        refetch();
+        refetch().finally(() => setRefreshing(false));
     };
 
-    const getStatusColor = (status: SubmissionStatus) => {
+    const getStatusStyle = (status: SubmissionStatus) => {
         switch (status) {
             case 'approved':
-                return 'bg-green-100 border-green-300';
+                return { backgroundColor: theme.successLight, borderColor: theme.success, textColor: theme.success };
             case 'needs_revision':
-                return 'bg-red-100 border-red-300';
+                return { backgroundColor: theme.errorLight, borderColor: theme.error, textColor: theme.error };
             case 'posted_live':
-                return 'bg-blue-100 border-blue-300';
+                return { backgroundColor: theme.primaryLight, borderColor: theme.primary, textColor: theme.primaryDark };
             default:
-                return 'bg-yellow-100 border-yellow-300';
-        }
-    };
-
-    const getStatusTextColor = (status: SubmissionStatus) => {
-        switch (status) {
-            case 'approved':
-                return 'text-green-700';
-            case 'needs_revision':
-                return 'text-red-700';
-            case 'posted_live':
-                return 'text-blue-700';
-            default:
-                return 'text-yellow-700';
+                return { backgroundColor: theme.warningLight, borderColor: theme.warning, textColor: theme.warning };
         }
     };
 
@@ -91,40 +79,41 @@ export default function Page() {
         return num.toString();
     };
 
-    if (loading) {
+    if (loading && !refreshing) {
         return (
-            <SafeAreaView className="flex-1 bg-gray-50">
+            <SafeAreaView className="flex-1 justify-center items-center" style={{ backgroundColor: theme.background }}>
                 <View className="flex-1 justify-center items-center">
-                    <ActivityIndicator size="large" color="#3b82f6" />
-                    <Text className="mt-4 text-gray-600">Loading submissions...</Text>
+                    <ActivityIndicator size="large" color={theme.primary} />
+                    <Text className="mt-4" style={{ color: theme.textSecondary }}>Loading submissions...</Text>
                 </View>
             </SafeAreaView>
         );
     }
 
     return (
-        <SafeAreaView className="flex-1 bg-gray-50">
-            <View className="px-6 py-4 bg-white border-b border-gray-200">
-                <Text className="text-2xl font-bold text-gray-900">My Submissions</Text>
-                <Text className="text-sm text-gray-600 mt-1">
+        <SafeAreaView className="flex-1" style={{ backgroundColor: theme.background }}>
+            <View className="px-6 py-4 border-b" style={{ backgroundColor: theme.surface, borderColor: theme.border }}>
+                <Text className="text-2xl font-bold" style={{ color: theme.text }}>My Submissions</Text>
+                <Text className="text-sm mt-1" style={{ color: theme.textSecondary }}>
                     {submissions.length} total submission{submissions.length !== 1 ? 's' : ''}
                 </Text>
             </View>
 
             {/* Search Bar */}
-            <View className="px-4 py-3 bg-white border-b border-gray-200">
-                <View className="flex-row items-center bg-gray-100 rounded-lg px-3 py-2">
-                    <Feather name="search" size={20} color="#6B7280" />
+            <View className="px-4 py-3 border-b" style={{ backgroundColor: theme.surface, borderColor: theme.border }}>
+                <View className="flex-row items-center rounded-lg px-3 py-2" style={{ backgroundColor: theme.surfaceSecondary }}>
+                    <Feather name="search" size={20} color={theme.textTertiary} />
                     <TextInput
                         value={searchQuery}
                         onChangeText={setSearchQuery}
                         placeholder="Search campaigns..."
-                        className="flex-1 ml-2 text-gray-900"
-                        placeholderTextColor="#9CA3AF"
+                        className="flex-1 ml-2"
+                        style={{ color: theme.text }}
+                        placeholderTextColor={theme.textTertiary}
                     />
                     {searchQuery.length > 0 && (
                         <TouchableOpacity onPress={() => setSearchQuery('')}>
-                            <Feather name="x" size={20} color="#6B7280" />
+                            <Feather name="x" size={20} color={theme.textTertiary} />
                         </TouchableOpacity>
                     )}
                 </View>
@@ -134,189 +123,125 @@ export default function Page() {
             <ScrollView
                 horizontal
                 showsHorizontalScrollIndicator={false}
-                className="px-1 py-4 max-h-20 "
-                contentContainerStyle={{ gap: 8 }}
+                className="py-4 max-h-20"
+                style={{ backgroundColor: theme.surface, borderBottomWidth: 1, borderBottomColor: theme.border }}
+                contentContainerStyle={{ paddingHorizontal: 16, gap: 8, alignItems: 'center' }}
             >
                 {Object.entries(STATUS_LABELS).map(([key, label]) => (
                     <TouchableOpacity
                         key={key}
-                        onPress={() => setStatusFilter(key as SubmissionStatus)}
-                        className={`border rounded-lg px-3 py-3 ${statusFilter === key
-                            ? 'bg-blue-600 border-blue-600'
-                            : 'bg-white border-gray-300'
-                            }`}
+                        onPress={() => setStatusFilter(key as SubmissionStatus | 'all')}
+                        className="border rounded-lg px-3 py-2"
+                        style={{
+                            backgroundColor: statusFilter === key ? theme.primary : theme.surface,
+                            borderColor: statusFilter === key ? theme.primary : theme.border
+                        }}
                         activeOpacity={0.7}
                     >
-                        <Text className={`text-sm font-medium ${statusFilter === key ? 'text-white' : 'text-gray-700'}`}>
+                        <Text className="text-sm font-medium" style={{ color: statusFilter === key ? theme.surface : theme.text }}>
                             {label}
                         </Text>
                     </TouchableOpacity>
                 ))}
             </ScrollView>
 
-            <ScrollView
+            <FlatList
+                data={filteredSubmissions}
+                keyExtractor={(item) => item.id}
                 className="flex-1"
+                contentContainerStyle={{ padding: 16 }}
                 refreshControl={
-                    <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+                    <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[theme.primary]} tintColor={theme.primary} />
                 }
-            >
-                {submissions.length === 0 ? (
+                ListEmptyComponent={
                     <View className="flex-1 justify-center items-center py-20">
                         <Text className="text-6xl mb-4">📝</Text>
-                        <Text className="text-lg font-semibold text-gray-900">
+                        <Text className="text-lg font-semibold" style={{ color: theme.text }}>
                             {searchQuery ? 'No results found' : 'No submissions yet'}
                         </Text>
-                        <Text className="text-gray-600 mt-2 text-center px-8">
+                        <Text className="mt-2 text-center px-8" style={{ color: theme.textSecondary }}>
                             {searchQuery
                                 ? `No submissions match "${searchQuery}"`
                                 : 'Your content submissions will appear here'
                             }
                         </Text>
                     </View>
-                ) : (
-                    <View className="px-4 py-4">
-                        {filteredSubmissions?.map((submission) => (
-                            <TouchableOpacity
-                                key={submission.id}
-                                className="bg-white rounded-lg p-4 mb-3 border border-gray-200 shadow-sm"
-                                onPress={() => {
-                                    if (typeof submission.campaign_id === 'object' && submission.campaign_id.id) {
-                                        router.push(`/submissions/${submission.campaign_id.id}`);
-                                    } else {
-                                        console.error('Invalid campaign_id:', submission.campaign_id);
-                                    }
-                                }}
-                                activeOpacity={0.7}
-                            >
-                                {/* Campaign Info */}
-                                <View className="flex-col gap-2 items-start mb-3">
-                                    <View className="flex-1">
-                                        <Text className="text-lg font-semibold text-gray-900" numberOfLines={1}>
-                                            {typeof submission.campaign_id === 'object' && submission.campaign_id?.title || 'Campaign Title'}
-                                        </Text>
-                                    </View>
-                                    <View className={`px-3 py-1 rounded-full border ${getStatusColor(submission.status)}`}>
-                                        <Text className={`text-xs font-semibold uppercase ${getStatusTextColor(submission.status)}`}>
-                                            {submission.status}
-                                        </Text>
-                                    </View>
-                                </View>
-
-                                {/* Metrics Row */}
-                                {submission.status === 'posted_live' && (
-                                    <View className="flex-row justify-between mb-3 py-2 border-t border-gray-100">
-                                        <View className="items-center">
-                                            <Text className="text-xs text-gray-500">Views</Text>
-                                            <Text className="text-sm font-semibold text-gray-900 mt-1">
-                                                {formatNumber(submission.view_count)}
-                                            </Text>
-                                        </View>
-                                        <View className="items-center">
-                                            <Text className="text-xs text-gray-500">Likes</Text>
-                                            <Text className="text-sm font-semibold text-gray-900 mt-1">
-                                                {formatNumber(submission.like_count)}
-                                            </Text>
-                                        </View>
-                                        <View className="items-center">
-                                            <Text className="text-xs text-gray-500">Comments</Text>
-                                            <Text className="text-sm font-semibold text-gray-900 mt-1">
-                                                {formatNumber(submission.comment_count)}
-                                            </Text>
-                                        </View>
-                                        <View className="items-center">
-                                            <Text className="text-xs text-gray-500">Earned</Text>
-                                            <Text className="text-sm font-semibold text-green-600 mt-1">
-                                                ${submission.earned_amount.toFixed(0)}
-                                            </Text>
-                                        </View>
-                                    </View>
-                                )}
-
-                                {/* Match & Rating (if approved) */}
-                                {(submission.status === 'approved' || submission.status === 'posted_live') && (
-                                    <View className="flex-row items-center mb-3 py-2 border-t border-gray-100">
-                                        <View className="flex-1">
-                                            <Text className="text-xs text-gray-500">Match Score</Text>
-                                            <View className="flex-row items-center mt-1">
-                                                <View className="flex-1 bg-gray-200 rounded-full h-2 mr-2">
-                                                    <View
-                                                        className="bg-blue-500 h-2 rounded-full"
-                                                        style={{ width: `${submission.match_percentage}%` }}
-                                                    />
-                                                </View>
-                                                <Text className="text-xs font-semibold text-gray-700">
-                                                    {submission.match_percentage}%
-                                                </Text>
-                                            </View>
-                                        </View>
-                                        {submission.rating > 0 && (
-                                            <View className="ml-4 items-center">
-                                                <Text className="text-xs text-gray-500">Rating</Text>
-                                                <Text className="text-sm font-semibold text-gray-900 mt-1">
-                                                    ⭐ {submission.rating}/5
-                                                </Text>
-                                            </View>
-                                        )}
-                                    </View>
-                                )}
-
-                                {/* Brand Feedback */}
-                                {submission.brand_feedback && (
-                                    <View className="bg-blue-50 rounded p-3 mb-3">
-                                        <Text className="text-xs font-semibold text-blue-900 mb-1">
-                                            Brand Feedback
-                                        </Text>
-                                        <Text className="text-xs text-blue-800" numberOfLines={2}>
-                                            {submission.brand_feedback}
-                                        </Text>
-                                    </View>
-                                )}
-
-                                {/* AI feedback */}
-                                {submission.status === 'needs_revision' && (
-                                    <View className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
-                                        <View className="flex-row items-center mb-2">
-                                            <Feather name="alert-circle" size={24} color="#F59E0B" />
-                                            <Text className="text-lg font-bold ml-2">Revision Requested</Text>
-                                        </View>
-                                        {submission.rating !== null && (
-                                            <View className="flex-row items-center mb-2">
-                                                <Text className="font-semibold">Rating: </Text>
-                                                <Text className="text-yellow-600 font-bold">{submission.rating}/10</Text>
-                                            </View>
-                                        )}
-                                        {submission.message && (
-                                            <View className="mb-2">
-                                                <Text className="font-semibold">Feedback:</Text>
-                                                <Text className="text-gray-700 mt-1">{submission.message}</Text>
-                                            </View>
-                                        )}
-                                        {submission.justify && (
-                                            <View>
-                                                <Text className="font-semibold">Details:</Text>
-                                                <Text className="text-gray-700 mt-1">{submission.justify}</Text>
-                                            </View>
-                                        )}
-                                    </View>
-
-                                )}
-
-                                {/* Date Info */}
-                                <View className="flex-row justify-between items-center pt-2 border-t border-gray-100">
-                                    <Text className="text-xs text-gray-500">
-                                        Submitted {formatDate(submission.submitted_at)}
+                }
+                renderItem={({ item: submission }) => {
+                    const statusStyles = getStatusStyle(submission.status);
+                    return (
+                        <TouchableOpacity
+                            key={submission.id}
+                            className="rounded-lg p-4 mb-3 border shadow-sm"
+                            style={{ backgroundColor: theme.surface, borderColor: theme.border }}
+                            onPress={() => {
+                                if (typeof submission.campaign_id === 'object' && submission.campaign_id.id) {
+                                    router.push(`/submissions/${submission.campaign_id.id}`);
+                                } else {
+                                    console.error('Invalid campaign_id:', submission.campaign_id);
+                                }
+                            }}
+                            activeOpacity={0.7}
+                        >
+                            {/* Campaign Info */}
+                            <View className="flex-col gap-2 items-start mb-3">
+                                <View className="flex-1">
+                                    <Text className="text-lg font-semibold" style={{ color: theme.text }} numberOfLines={1}>
+                                        {typeof submission.campaign_id === 'object' && submission.campaign_id?.title || 'Campaign Title'}
                                     </Text>
-                                    {submission.posted_at && (
-                                        <Text className="text-xs text-gray-500">
-                                            Posted {formatDate(submission.posted_at)}
-                                        </Text>
-                                    )}
                                 </View>
-                            </TouchableOpacity>
-                        ))}
-                    </View>
-                )}
-            </ScrollView>
+                                <View className="px-3 py-1 rounded-full border" style={{ backgroundColor: statusStyles.backgroundColor, borderColor: statusStyles.borderColor }}>
+                                    <Text className="text-xs font-semibold uppercase" style={{ color: statusStyles.textColor }}>
+                                        {submission.status.replace('_', ' ')}
+                                    </Text>
+                                </View>
+                            </View>
+
+                            {/* Metrics Row */}
+                            {submission.status === 'posted_live' && (
+                                <View className="flex-row justify-between mb-3 py-2 border-t" style={{ borderColor: theme.borderLight }}>
+                                    <View className="items-center">
+                                        <Text className="text-xs" style={{ color: theme.textSecondary }}>Views</Text>
+                                        <Text className="text-sm font-semibold mt-1" style={{ color: theme.text }}>
+                                            {formatNumber(submission.view_count)}
+                                        </Text>
+                                    </View>
+                                    <View className="items-center">
+                                        <Text className="text-xs" style={{ color: theme.textSecondary }}>Likes</Text>
+                                        <Text className="text-sm font-semibold mt-1" style={{ color: theme.text }}>
+                                            {formatNumber(submission.like_count)}
+                                        </Text>
+                                    </View>
+                                    <View className="items-center">
+                                        <Text className="text-xs" style={{ color: theme.textSecondary }}>Comments</Text>
+                                        <Text className="text-sm font-semibold mt-1" style={{ color: theme.text }}>
+                                            {formatNumber(submission.comment_count)}
+                                        </Text>
+                                    </View>
+                                    <View className="items-center">
+                                        <Text className="text-xs" style={{ color: theme.textSecondary }}>Earned</Text>
+                                        <Text className="text-sm font-semibold mt-1" style={{ color: theme.success }}>
+                                            ${submission.earned_amount.toFixed(0)}
+                                        </Text>
+                                    </View>
+                                </View>
+                            )}
+
+                            {/* Date Info */}
+                            <View className="flex-row justify-between items-center pt-2 border-t" style={{ borderColor: theme.borderLight }}>
+                                <Text className="text-xs" style={{ color: theme.textTertiary }}>
+                                    Submitted {formatDate(submission.submitted_at)}
+                                </Text>
+                                {submission.posted_at && (
+                                    <Text className="text-xs" style={{ color: theme.textTertiary }}>
+                                        Posted {formatDate(submission.posted_at)}
+                                    </Text>
+                                )}
+                            </View>
+                        </TouchableOpacity>
+                    );
+                }}
+            />
         </SafeAreaView>
     );
 }

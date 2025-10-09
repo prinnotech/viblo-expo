@@ -5,11 +5,13 @@ import { usePublicProfile } from '@/hooks/usePublicProfile';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { SocialIcon } from '@/components/getSocialIcons';
+import { useTheme } from '@/contexts/ThemeContext';
 
 const CreatorProfile = () => {
     const { id } = useLocalSearchParams<{ id: string }>();
     const router = useRouter();
     const { data, loading, error } = usePublicProfile(id);
+    const { theme } = useTheme();
 
     const formatNumber = (num: number): string => {
         if (num >= 1000000) {
@@ -30,7 +32,7 @@ const CreatorProfile = () => {
             case 'tiktok':
                 return ['#000000', '#69C9D0'];
             default:
-                return ['#667eea', '#764ba2'];
+                return [theme.primary, theme.primaryDark];
         }
     };
 
@@ -43,25 +45,26 @@ const CreatorProfile = () => {
 
     if (loading) {
         return (
-            <View className="flex-1 justify-center items-center bg-gray-50">
-                <ActivityIndicator size="large" color="#667eea" />
-                <Text className="mt-4 text-base text-gray-600">Loading profile...</Text>
+            <View className="flex-1 justify-center items-center" style={{ backgroundColor: theme.background }}>
+                <ActivityIndicator size="large" color={theme.primary} />
+                <Text className="mt-4 text-base" style={{ color: theme.textSecondary }}>Loading profile...</Text>
             </View>
         );
     }
 
     if (error || !data) {
         return (
-            <View className="flex-1 justify-center items-center bg-gray-50 px-5">
-                <Ionicons name="alert-circle-outline" size={64} color="#ef4444" />
-                <Text className="mt-4 text-base text-red-500 text-center">
+            <View className="flex-1 justify-center items-center px-5" style={{ backgroundColor: theme.background }}>
+                <Ionicons name="alert-circle-outline" size={64} color={theme.error} />
+                <Text className="mt-4 text-base text-center" style={{ color: theme.error }}>
                     {error || 'Profile not found'}
                 </Text>
                 <TouchableOpacity
                     onPress={() => router.back()}
-                    className="mt-6 bg-indigo-600 px-6 py-3 rounded-xl"
+                    className="mt-6 px-6 py-3 rounded-xl"
+                    style={{ backgroundColor: theme.primary }}
                 >
-                    <Text className="text-white font-semibold">Go Back</Text>
+                    <Text className="font-semibold" style={{ color: theme.surface }}>Go Back</Text>
                 </TouchableOpacity>
             </View>
         );
@@ -70,35 +73,36 @@ const CreatorProfile = () => {
     const { profile } = data;
 
     return (
-        <ScrollView className="flex-1 bg-gray-50">
+        <ScrollView className="flex-1" style={{ backgroundColor: theme.background }}>
             {/* Header with Back Button */}
-            <View className="bg-white px-5 pt-12 pb-4 border-b border-gray-200">
+            <View className="px-5 pt-12 pb-4 border-b" style={{ backgroundColor: theme.surface, borderColor: theme.border }}>
                 <TouchableOpacity onPress={() => router.back()} className="mb-4">
-                    <Ionicons name="arrow-back" size={24} color="#111827" />
+                    <Ionicons name="arrow-back" size={24} color={theme.text} />
                 </TouchableOpacity>
             </View>
 
             {/* Profile Header */}
-            <View className="bg-white px-5 pb-6">
+            <View className="px-5 pb-6" style={{ backgroundColor: theme.surface }}>
                 <View className="items-center -mt-16">
                     {profile.avatar_url ? (
                         <Image
                             source={{ uri: profile.avatar_url }}
-                            className="w-32 h-32 rounded-full border-4 border-white shadow-lg"
+                            className="w-32 h-32 rounded-full border-4 shadow-lg"
+                            style={{ borderColor: theme.surface }}
                         />
                     ) : (
-                        <View className="w-32 h-32 rounded-full border-4 border-white shadow-lg bg-indigo-100 items-center justify-center">
-                            <Ionicons name="person" size={48} color="#667eea" />
+                        <View className="w-32 h-32 rounded-full border-4 shadow-lg items-center justify-center" style={{ borderColor: theme.surface, backgroundColor: theme.surfaceSecondary }}>
+                            <Ionicons name="person" size={48} color={theme.primary} />
                         </View>
                     )}
 
-                    <Text className="text-2xl font-bold text-gray-900 mt-4">
+                    <Text className="text-2xl font-bold mt-4" style={{ color: theme.text }}>
                         {profile.first_name} {profile.last_name}
                     </Text>
-                    <Text className="text-base text-gray-600 mt-1">@{profile.username}</Text>
+                    <Text className="text-base mt-1" style={{ color: theme.textSecondary }}>@{profile.username}</Text>
 
                     {profile.bio && (
-                        <Text className="text-sm text-gray-700 text-center mt-4 px-6">
+                        <Text className="text-sm text-center mt-4 px-6" style={{ color: theme.textSecondary }}>
                             {profile.bio}
                         </Text>
                     )}
@@ -107,8 +111,8 @@ const CreatorProfile = () => {
                     <View className="flex-row flex-wrap justify-center items-center mt-4 gap-4">
                         {profile.location && (
                             <View className="flex-row items-center">
-                                <Ionicons name="location" size={16} color="#6b7280" />
-                                <Text className="text-sm text-gray-600 ml-1">{profile.location}</Text>
+                                <Ionicons name="location" size={16} color={theme.textSecondary} />
+                                <Text className="text-sm ml-1" style={{ color: theme.textSecondary }}>{profile.location}</Text>
                             </View>
                         )}
                         {profile.website_url && (
@@ -116,8 +120,8 @@ const CreatorProfile = () => {
                                 onPress={() => openURL(profile.website_url!)}
                                 className="flex-row items-center"
                             >
-                                <Ionicons name="globe" size={16} color="#667eea" />
-                                <Text className="text-sm text-indigo-600 ml-1 underline">
+                                <Ionicons name="globe" size={16} color={theme.primary} />
+                                <Text className="text-sm ml-1 underline" style={{ color: theme.primary }}>
                                     {profile.website_url}
                                 </Text>
                             </TouchableOpacity>
@@ -128,8 +132,8 @@ const CreatorProfile = () => {
 
             <View className="p-5">
                 {/* Stats Overview */}
-                <View className="bg-white rounded-2xl p-5 mb-4 shadow-sm">
-                    <Text className="text-lg font-bold text-gray-900 mb-4">Stats Overview</Text>
+                <View className="rounded-2xl p-5 mb-4 shadow-sm" style={{ backgroundColor: theme.surface }}>
+                    <Text className="text-lg font-bold mb-4" style={{ color: theme.text }}>Stats Overview</Text>
                     <View className="flex-row flex-wrap justify-between">
                         <View className="w-[48%] mb-4">
                             <View className="flex-row items-center mb-2">
@@ -140,10 +144,10 @@ const CreatorProfile = () => {
                                     <Ionicons name="people" size={20} color="#fff" />
                                 </LinearGradient>
                                 <View>
-                                    <Text className="text-2xl font-bold text-gray-900">
+                                    <Text className="text-2xl font-bold" style={{ color: theme.text }}>
                                         {formatNumber(data.totalFollowers)}
                                     </Text>
-                                    <Text className="text-xs text-gray-600">Followers</Text>
+                                    <Text className="text-xs" style={{ color: theme.textSecondary }}>Followers</Text>
                                 </View>
                             </View>
                         </View>
@@ -157,10 +161,10 @@ const CreatorProfile = () => {
                                     <Ionicons name="eye" size={20} color="#fff" />
                                 </LinearGradient>
                                 <View>
-                                    <Text className="text-2xl font-bold text-gray-900">
+                                    <Text className="text-2xl font-bold" style={{ color: theme.text }}>
                                         {formatNumber(data.totalViews)}
                                     </Text>
-                                    <Text className="text-xs text-gray-600">Views</Text>
+                                    <Text className="text-xs" style={{ color: theme.textSecondary }}>Views</Text>
                                 </View>
                             </View>
                         </View>
@@ -174,10 +178,10 @@ const CreatorProfile = () => {
                                     <Ionicons name="heart" size={20} color="#fff" />
                                 </LinearGradient>
                                 <View>
-                                    <Text className="text-2xl font-bold text-gray-900">
+                                    <Text className="text-2xl font-bold" style={{ color: theme.text }}>
                                         {formatNumber(data.totalLikes)}
                                     </Text>
-                                    <Text className="text-xs text-gray-600">Likes</Text>
+                                    <Text className="text-xs" style={{ color: theme.textSecondary }}>Likes</Text>
                                 </View>
                             </View>
                         </View>
@@ -191,10 +195,10 @@ const CreatorProfile = () => {
                                     <Ionicons name="chatbubble" size={20} color="#fff" />
                                 </LinearGradient>
                                 <View>
-                                    <Text className="text-2xl font-bold text-gray-900">
+                                    <Text className="text-2xl font-bold" style={{ color: theme.text }}>
                                         {formatNumber(data.totalComments)}
                                     </Text>
-                                    <Text className="text-xs text-gray-600">Comments</Text>
+                                    <Text className="text-xs" style={{ color: theme.textSecondary }}>Comments</Text>
                                 </View>
                             </View>
                         </View>
@@ -202,12 +206,12 @@ const CreatorProfile = () => {
                 </View>
 
                 {/* Connected Platforms */}
-                <Text className="text-lg font-bold text-gray-900 mb-3">Connected Platforms</Text>
+                <Text className="text-lg font-bold mb-3" style={{ color: theme.text }}>Connected Platforms</Text>
 
                 {data.platforms.length === 0 ? (
-                    <View className="bg-white rounded-2xl p-8 items-center shadow-sm">
-                        <Ionicons name="link-outline" size={48} color="#9ca3af" />
-                        <Text className="mt-4 text-base font-semibold text-gray-700">
+                    <View className="rounded-2xl p-8 items-center shadow-sm" style={{ backgroundColor: theme.surface }}>
+                        <Ionicons name="link-outline" size={48} color={theme.textTertiary} />
+                        <Text className="mt-4 text-base font-semibold" style={{ color: theme.textSecondary }}>
                             No platforms connected
                         </Text>
                     </View>
@@ -216,7 +220,8 @@ const CreatorProfile = () => {
                         <TouchableOpacity
                             key={platform.platform}
                             onPress={() => openURL(platform.profileUrl)}
-                            className="bg-white rounded-2xl mb-3 overflow-hidden shadow-sm"
+                            className="rounded-2xl mb-3 overflow-hidden shadow-sm"
+                            style={{ backgroundColor: theme.surface }}
                         >
                             <LinearGradient
                                 colors={getPlatformColors(platform.platform)}
@@ -229,44 +234,44 @@ const CreatorProfile = () => {
                                         <SocialIcon platform={platform.platform} color="white" />
                                         <View className="ml-3 flex-1">
                                             <Text className="text-base font-bold text-white">
-                                                {platform.platform.toUpperCase()}
+                                                {platform.platform.charAt(0).toUpperCase() + platform.platform.slice(1)}
                                             </Text>
-                                            <Text className="text-sm text-white/90">{platform.handle}</Text>
+                                            <Text className="text-sm" style={{ color: 'rgba(255,255,255,0.9)' }}>{platform.handle}</Text>
                                         </View>
                                     </View>
                                     <Ionicons name="arrow-forward" size={20} color="white" />
                                 </View>
                             </LinearGradient>
 
-                            <View className="flex-row flex-wrap p-4 bg-gray-50">
+                            <View className="flex-row flex-wrap p-4" style={{ backgroundColor: theme.background }}>
                                 <View className="w-1/2 py-2">
-                                    <Text className="text-xl font-bold text-gray-900">
+                                    <Text className="text-xl font-bold" style={{ color: theme.text }}>
                                         {formatNumber(platform.followers)}
                                     </Text>
-                                    <Text className="text-xs text-gray-600">Followers</Text>
+                                    <Text className="text-xs" style={{ color: theme.textSecondary }}>Followers</Text>
                                 </View>
 
                                 {platform.views > 0 && (
                                     <View className="w-1/2 py-2">
-                                        <Text className="text-xl font-bold text-gray-900">
+                                        <Text className="text-xl font-bold" style={{ color: theme.text }}>
                                             {formatNumber(platform.views)}
                                         </Text>
-                                        <Text className="text-xs text-gray-600">Views</Text>
+                                        <Text className="text-xs" style={{ color: theme.textSecondary }}>Views</Text>
                                     </View>
                                 )}
 
                                 <View className="w-1/2 py-2">
-                                    <Text className="text-xl font-bold text-gray-900">
+                                    <Text className="text-xl font-bold" style={{ color: theme.text }}>
                                         {formatNumber(platform.likes)}
                                     </Text>
-                                    <Text className="text-xs text-gray-600">Likes</Text>
+                                    <Text className="text-xs" style={{ color: theme.textSecondary }}>Likes</Text>
                                 </View>
 
                                 <View className="w-1/2 py-2">
-                                    <Text className="text-xl font-bold text-gray-900">
+                                    <Text className="text-xl font-bold" style={{ color: theme.text }}>
                                         {formatNumber(platform.comments)}
                                     </Text>
-                                    <Text className="text-xs text-gray-600">Comments</Text>
+                                    <Text className="text-xs" style={{ color: theme.textSecondary }}>Comments</Text>
                                 </View>
                             </View>
                         </TouchableOpacity>

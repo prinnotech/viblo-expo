@@ -1,4 +1,3 @@
-// app/campaigns/create/index.tsx
 import {
     Text,
     View,
@@ -16,6 +15,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import Slider from '@react-native-community/slider';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { useTheme } from '@/contexts/ThemeContext';
 
 type CampaignStatus = 'draft' | 'active';
 
@@ -35,6 +35,7 @@ const AVAILABLE_LOCATIONS = [
 const CreateCampaign = () => {
     const router = useRouter();
     const { profile } = useAuth();
+    const { theme } = useTheme();
     const [saving, setSaving] = useState(false);
 
     // Form fields
@@ -189,91 +190,94 @@ const CreateCampaign = () => {
     };
 
     return (
-        <SafeAreaView className="flex-1 bg-gray-50">
+        <SafeAreaView className="flex-1" style={{ backgroundColor: theme.background }}>
             <ScrollView className="flex-1" contentContainerStyle={{ padding: 16, paddingBottom: 100 }}>
                 {/* Header */}
                 <View className="mb-6">
-                    <Text className="text-sm text-gray-500 mt-1">
+                    <Text className="text-sm mt-1" style={{ color: theme.textTertiary }}>
                         Set up your campaign and start connecting with influencers
                     </Text>
                 </View>
 
                 {/* Title */}
                 <View className="mb-4">
-                    <Text className="text-sm font-semibold text-gray-700 mb-2">
-                        Campaign Title <Text className="text-red-500">*</Text>
+                    <Text className="text-sm font-semibold mb-2" style={{ color: theme.textSecondary }}>
+                        Campaign Title <Text style={{ color: theme.error }}>*</Text>
                     </Text>
                     <TextInput
-                        className="bg-white border border-gray-300 rounded-lg px-4 py-3 text-base text-gray-800"
+                        className="border rounded-lg px-4 py-3 text-base"
+                        style={{ backgroundColor: theme.surface, borderColor: theme.borderLight, color: theme.text }}
                         value={title}
                         onChangeText={setTitle}
                         placeholder="Enter campaign title"
-                        placeholderTextColor="#9CA3AF"
+                        placeholderTextColor={theme.textTertiary}
                     />
                 </View>
 
                 {/* Description */}
                 <View className="mb-4">
-                    <Text className="text-sm font-semibold text-gray-700 mb-2">Description</Text>
+                    <Text className="text-sm font-semibold mb-2" style={{ color: theme.textSecondary }}>Description</Text>
                     <TextInput
-                        className="bg-white border border-gray-300 rounded-lg px-4 py-3 text-base text-gray-800"
+                        className="border rounded-lg px-4 py-3 text-base"
+                        style={{ backgroundColor: theme.surface, borderColor: theme.borderLight, color: theme.text, height: 100, textAlignVertical: 'top' }}
                         value={description}
                         onChangeText={setDescription}
                         placeholder="Describe your campaign"
-                        placeholderTextColor="#9CA3AF"
+                        placeholderTextColor={theme.textTertiary}
                         multiline
                         numberOfLines={4}
-                        textAlignVertical="top"
                     />
                 </View>
 
                 {/* Content Requirements */}
                 <View className="mb-4">
-                    <Text className="text-sm font-semibold text-gray-700 mb-2">
+                    <Text className="text-sm font-semibold mb-2" style={{ color: theme.textSecondary }}>
                         Content Requirements
                     </Text>
                     <TextInput
-                        className="bg-white border border-gray-300 rounded-lg px-4 py-3 text-base text-gray-800"
+                        className="border rounded-lg px-4 py-3 text-base"
+                        style={{ backgroundColor: theme.surface, borderColor: theme.borderLight, color: theme.text, height: 100, textAlignVertical: 'top' }}
                         value={contentRequirements}
                         onChangeText={setContentRequirements}
                         placeholder="What should influencers include in their content?"
-                        placeholderTextColor="#9CA3AF"
+                        placeholderTextColor={theme.textTertiary}
                         multiline
                         numberOfLines={4}
-                        textAlignVertical="top"
                     />
                 </View>
 
                 {/* Status */}
                 <View className="mb-4">
-                    <Text className="text-sm font-semibold text-gray-700 mb-2">
-                        Campaign Status <Text className="text-red-500">*</Text>
+                    <Text className="text-sm font-semibold mb-2" style={{ color: theme.textSecondary }}>
+                        Campaign Status <Text style={{ color: theme.error }}>*</Text>
                     </Text>
                     <View className="flex-row gap-2">
                         <TouchableOpacity
                             onPress={() => setStatus('draft')}
-                            className={`flex-1 px-4 py-3 rounded-lg border ${status === 'draft'
-                                ? 'bg-blue-500 border-blue-500'
-                                : 'bg-white border-gray-300'
-                                }`}
+                            className="flex-1 px-4 py-3 rounded-lg border"
+                            style={{
+                                backgroundColor: status === 'draft' ? theme.primary : theme.surface,
+                                borderColor: status === 'draft' ? theme.primary : theme.borderLight
+                            }}
                         >
                             <Text
-                                className={`text-center text-sm font-medium ${status === 'draft' ? 'text-white' : 'text-gray-700'
-                                    }`}
+                                className="text-center text-sm font-medium"
+                                style={{ color: status === 'draft' ? theme.surface : theme.text }}
                             >
                                 Draft
                             </Text>
                         </TouchableOpacity>
                         <TouchableOpacity
                             onPress={() => setStatus('active')}
-                            className={`flex-1 px-4 py-3 rounded-lg border ${status === 'active'
-                                ? 'bg-blue-500 border-blue-500'
-                                : 'bg-white border-gray-300'
-                                }`}
+                            className="flex-1 px-4 py-3 rounded-lg border"
+                            style={{
+                                backgroundColor: status === 'active' ? theme.primary : theme.surface,
+                                borderColor: status === 'active' ? theme.primary : theme.borderLight
+                            }}
                         >
                             <Text
-                                className={`text-center text-sm font-medium ${status === 'active' ? 'text-white' : 'text-gray-700'
-                                    }`}
+                                className="text-center text-sm font-medium"
+                                style={{ color: status === 'active' ? theme.surface : theme.text }}
                             >
                                 Active
                             </Text>
@@ -282,24 +286,25 @@ const CreateCampaign = () => {
                 </View>
 
                 {/* Budget Calculator Section */}
-                <View className="mb-6 bg-gradient-to-br from-blue-50 to-purple-50 p-4 rounded-xl border-2 border-blue-200">
-                    <Text className="text-lg font-bold text-gray-800 mb-4">
+                <View className="mb-6 p-4 rounded-xl border-2" style={{ backgroundColor: theme.surfaceSecondary, borderColor: theme.primaryLight }}>
+                    <Text className="text-lg font-bold mb-4" style={{ color: theme.text }}>
                         💰 Budget Calculator
                     </Text>
 
                     {/* Total Budget Input */}
                     <View className="mb-4">
-                        <Text className="text-sm font-semibold text-gray-700 mb-2">
-                            Total Budget <Text className="text-red-500">*</Text>
+                        <Text className="text-sm font-semibold mb-2" style={{ color: theme.textSecondary }}>
+                            Total Budget <Text style={{ color: theme.error }}>*</Text>
                         </Text>
-                        <View className="flex-row items-center bg-white border-2 border-blue-300 rounded-lg px-4 py-3">
-                            <Text className="text-2xl font-bold text-gray-700 mr-2">$</Text>
+                        <View className="flex-row items-center border-2 rounded-lg px-4 py-3" style={{ backgroundColor: theme.surface, borderColor: theme.primary }}>
+                            <Text className="text-2xl font-bold mr-2" style={{ color: theme.textSecondary }}>$</Text>
                             <TextInput
-                                className="flex-1 text-2xl font-bold text-gray-800"
+                                className="flex-1 text-2xl font-bold"
+                                style={{ color: theme.text }}
                                 value={totalBudget}
                                 onChangeText={setTotalBudget}
                                 placeholder="0.00"
-                                placeholderTextColor="#9CA3AF"
+                                placeholderTextColor={theme.textTertiary}
                                 keyboardType="decimal-pad"
                             />
                         </View>
@@ -309,10 +314,10 @@ const CreateCampaign = () => {
                         <>
                             {/* Cost per 1k Views Slider */}
                             <View className="mb-4">
-                                <Text className="text-sm font-semibold text-gray-700 mb-2">
+                                <Text className="text-sm font-semibold mb-2" style={{ color: theme.textSecondary }}>
                                     Cost per 1,000 Views
                                 </Text>
-                                <View className="bg-white rounded-lg p-4 border-2 border-blue-300">
+                                <View className="rounded-lg p-4 border-2" style={{ backgroundColor: theme.surface, borderColor: theme.primaryLight }}>
                                     {/* Price Display with +/- Buttons */}
                                     <View className="flex-row items-center justify-center mb-2">
                                         <TouchableOpacity
@@ -322,13 +327,14 @@ const CreateCampaign = () => {
                                                     : Math.max(budgetCalculations.minCostPer1k, costPer1kViews - 0.5);
                                                 setCostPer1kViews(Math.round(newValue * 100) / 100);
                                             }}
-                                            className="bg-gray-100 p-3 rounded-lg"
+                                            className="p-3 rounded-lg"
+                                            style={{ backgroundColor: theme.surfaceSecondary }}
                                         >
-                                            <AntDesign name="minus" size={20} color="#4B5563" />
+                                            <AntDesign name="minus" size={20} color={theme.textSecondary} />
                                         </TouchableOpacity>
 
                                         <View className="flex-1 items-center mx-4">
-                                            <Text className="text-3xl font-bold text-blue-600 text-center">
+                                            <Text className="text-3xl font-bold text-center" style={{ color: theme.primary }}>
                                                 ${costPer1kViews.toFixed(2)}
                                             </Text>
                                         </View>
@@ -340,13 +346,14 @@ const CreateCampaign = () => {
                                                     : Math.min(budgetCalculations.maxCostPer1k, costPer1kViews + 0.5);
                                                 setCostPer1kViews(Math.round(newValue * 100) / 100);
                                             }}
-                                            className="bg-gray-100 p-3 rounded-lg"
+                                            className="p-3 rounded-lg"
+                                            style={{ backgroundColor: theme.surfaceSecondary }}
                                         >
-                                            <AntDesign name="plus" size={20} color="#4B5563" />
+                                            <AntDesign name="plus" size={20} color={theme.textSecondary} />
                                         </TouchableOpacity>
                                     </View>
 
-                                    <Text className="text-xs text-gray-500 text-center mb-3">
+                                    <Text className="text-xs text-center mb-3" style={{ color: theme.textTertiary }}>
                                         per 1,000 views
                                     </Text>
 
@@ -355,19 +362,15 @@ const CreateCampaign = () => {
                                         maximumValue={budgetCalculations.maxCostPer1k}
                                         value={costPer1kViews}
                                         onValueChange={(value) => {
-                                            // Dynamic step: 0.05 below $3, 0.50 at $3 and above
                                             let rounded;
                                             if (value < 3) {
-                                                // Round to nearest 0.05 (increments of 5 cents)
                                                 rounded = Math.round(value * 20) / 20;
                                             } else {
-                                                // Round to nearest 0.50 (increments of 50 cents)
                                                 rounded = Math.round(value * 2) / 2;
                                             }
                                             setCostPer1kViews(rounded);
                                         }}
                                         onSlidingComplete={(value) => {
-                                            // Ensure final value is properly rounded
                                             let rounded;
                                             if (value < 3) {
                                                 rounded = Math.round(value * 20) / 20;
@@ -377,55 +380,55 @@ const CreateCampaign = () => {
                                             setCostPer1kViews(rounded);
                                         }}
                                         step={0.01}
-                                        minimumTrackTintColor="#3B82F6"
-                                        maximumTrackTintColor="#E5E7EB"
-                                        thumbTintColor="#3B82F6"
+                                        minimumTrackTintColor={theme.primary}
+                                        maximumTrackTintColor={theme.border}
+                                        thumbTintColor={theme.primary}
                                     />
 
                                     <View className="flex-row justify-between mt-2">
-                                        <Text className="text-xs text-gray-500">
+                                        <Text className="text-xs" style={{ color: theme.textTertiary }}>
                                             ${budgetCalculations.minCostPer1k.toFixed(2)}
                                         </Text>
-                                        <Text className="text-xs text-gray-500">
+                                        <Text className="text-xs" style={{ color: theme.textTertiary }}>
                                             ${budgetCalculations.maxCostPer1k.toFixed(2)}
                                         </Text>
                                     </View>
-                                    <Text className="text-xs text-gray-400 text-center mt-2">
+                                    <Text className="text-xs text-center mt-2" style={{ color: theme.textTertiary }}>
                                         Increments: $0.05 below $3, then $0.50
                                     </Text>
                                 </View>
                             </View>
 
                             {/* Results Display */}
-                            <View className="bg-white rounded-lg p-4 border-2 border-green-300">
-                                <Text className="text-sm font-semibold text-gray-700 mb-3 text-center">
+                            <View className="rounded-lg p-4 border-2" style={{ backgroundColor: theme.surface, borderColor: theme.successLight }}>
+                                <Text className="text-sm font-semibold mb-3 text-center" style={{ color: theme.textSecondary }}>
                                     📊 Campaign Reach Estimate
                                 </Text>
 
-                                <View className="flex-row justify-between items-center mb-3 pb-3 border-b border-gray-200">
-                                    <Text className="text-sm text-gray-600">Total Views</Text>
-                                    <Text className="text-xl font-bold text-green-600">
+                                <View className="flex-row justify-between items-center mb-3 pb-3 border-b" style={{ borderColor: theme.border }}>
+                                    <Text className="text-sm" style={{ color: theme.textSecondary }}>Total Views</Text>
+                                    <Text className="text-xl font-bold" style={{ color: theme.success }}>
                                         {formatNumber(budgetCalculations.totalViews)}
                                     </Text>
                                 </View>
 
-                                <View className="flex-row justify-between items-center mb-3 pb-3 border-b border-gray-200">
-                                    <Text className="text-sm text-gray-600">1K View Blocks</Text>
-                                    <Text className="text-lg font-bold text-gray-800">
+                                <View className="flex-row justify-between items-center mb-3 pb-3 border-b" style={{ borderColor: theme.border }}>
+                                    <Text className="text-sm" style={{ color: theme.textSecondary }}>1K View Blocks</Text>
+                                    <Text className="text-lg font-bold" style={{ color: theme.text }}>
                                         {budgetCalculations.blocks1k.toLocaleString()}
                                     </Text>
                                 </View>
 
                                 <View className="flex-row justify-between items-center">
-                                    <Text className="text-sm text-gray-600">Rate per View</Text>
-                                    <Text className="text-sm font-semibold text-gray-800">
+                                    <Text className="text-sm" style={{ color: theme.textSecondary }}>Rate per View</Text>
+                                    <Text className="text-sm font-semibold" style={{ color: theme.text }}>
                                         ${budgetCalculations.ratePerView.toFixed(6)}
                                     </Text>
                                 </View>
 
                                 {/* Info Box */}
-                                <View className="mt-4 bg-blue-50 p-3 rounded-lg">
-                                    <Text className="text-xs text-blue-800">
+                                <View className="mt-4 p-3 rounded-lg" style={{ backgroundColor: theme.primaryLight }}>
+                                    <Text className="text-xs" style={{ color: theme.primary }}>
                                         💡 Influencers will be paid ${costPer1kViews.toFixed(2)} for every 1,000 views their content generates
                                     </Text>
                                 </View>
@@ -436,22 +439,23 @@ const CreateCampaign = () => {
 
                 {/* Target Niches */}
                 <View className="mb-4">
-                    <Text className="text-sm font-semibold text-gray-700 mb-2">
-                        Target Niches <Text className="text-red-500">*</Text>
+                    <Text className="text-sm font-semibold mb-2" style={{ color: theme.textSecondary }}>
+                        Target Niches <Text style={{ color: theme.error }}>*</Text>
                     </Text>
                     <View className="flex-row flex-wrap gap-2">
                         {AVAILABLE_NICHES.map((niche) => (
                             <TouchableOpacity
                                 key={niche}
                                 onPress={() => toggleNiche(niche)}
-                                className={`px-4 py-2 rounded-full border ${selectedNiches.includes(niche)
-                                    ? 'bg-purple-500 border-purple-500'
-                                    : 'bg-white border-gray-300'
-                                    }`}
+                                className="px-4 py-2 rounded-full border"
+                                style={{
+                                    backgroundColor: selectedNiches.includes(niche) ? theme.primary : theme.surface,
+                                    borderColor: selectedNiches.includes(niche) ? theme.primary : theme.borderLight
+                                }}
                             >
                                 <Text
-                                    className={`text-sm font-medium ${selectedNiches.includes(niche) ? 'text-white' : 'text-gray-700'
-                                        }`}
+                                    className="text-sm font-medium"
+                                    style={{ color: selectedNiches.includes(niche) ? theme.surface : theme.text }}
                                 >
                                     {niche}
                                 </Text>
@@ -462,22 +466,23 @@ const CreateCampaign = () => {
 
                 {/* Target Platforms */}
                 <View className="mb-4">
-                    <Text className="text-sm font-semibold text-gray-700 mb-2">
-                        Target Platforms <Text className="text-red-500">*</Text>
+                    <Text className="text-sm font-semibold mb-2" style={{ color: theme.textSecondary }}>
+                        Target Platforms <Text style={{ color: theme.error }}>*</Text>
                     </Text>
                     <View className="flex-row flex-wrap gap-2">
                         {AVAILABLE_PLATFORMS.map((platform) => (
                             <TouchableOpacity
                                 key={platform}
                                 onPress={() => togglePlatform(platform)}
-                                className={`px-4 py-2 rounded-full border ${selectedPlatforms.includes(platform)
-                                    ? 'bg-blue-500 border-blue-500'
-                                    : 'bg-white border-gray-300'
-                                    }`}
+                                className="px-4 py-2 rounded-full border"
+                                style={{
+                                    backgroundColor: selectedPlatforms.includes(platform) ? theme.primary : theme.surface,
+                                    borderColor: selectedPlatforms.includes(platform) ? theme.primary : theme.borderLight
+                                }}
                             >
                                 <Text
-                                    className={`text-sm font-medium capitalize ${selectedPlatforms.includes(platform) ? 'text-white' : 'text-gray-700'
-                                        }`}
+                                    className="text-sm font-medium capitalize"
+                                    style={{ color: selectedPlatforms.includes(platform) ? theme.surface : theme.text }}
                                 >
                                     {platform.replace('_', ' ')}
                                 </Text>
@@ -488,7 +493,7 @@ const CreateCampaign = () => {
 
                 {/* Target Locations */}
                 <View className="mb-4">
-                    <Text className="text-sm font-semibold text-gray-700 mb-2">
+                    <Text className="text-sm font-semibold mb-2" style={{ color: theme.textSecondary }}>
                         Target Locations (Optional)
                     </Text>
                     <ScrollView horizontal showsHorizontalScrollIndicator={false}>
@@ -497,14 +502,15 @@ const CreateCampaign = () => {
                                 <TouchableOpacity
                                     key={location}
                                     onPress={() => toggleLocation(location)}
-                                    className={`px-4 py-2 rounded-full border ${selectedLocations.includes(location)
-                                        ? 'bg-green-500 border-green-500'
-                                        : 'bg-white border-gray-300'
-                                        }`}
+                                    className="px-4 py-2 rounded-full border"
+                                    style={{
+                                        backgroundColor: selectedLocations.includes(location) ? theme.success : theme.surface,
+                                        borderColor: selectedLocations.includes(location) ? theme.success : theme.borderLight
+                                    }}
                                 >
                                     <Text
-                                        className={`text-sm font-medium ${selectedLocations.includes(location) ? 'text-white' : 'text-gray-700'
-                                            }`}
+                                        className="text-sm font-medium"
+                                        style={{ color: selectedLocations.includes(location) ? theme.surface : theme.text }}
                                     >
                                         {location}
                                     </Text>
@@ -516,26 +522,28 @@ const CreateCampaign = () => {
 
                 {/* Target Audience Age */}
                 <View className="mb-4">
-                    <Text className="text-sm font-semibold text-gray-700 mb-2">
+                    <Text className="text-sm font-semibold mb-2" style={{ color: theme.textSecondary }}>
                         Target Audience Age (Optional)
                     </Text>
                     <TextInput
-                        className="bg-white border border-gray-300 rounded-lg px-4 py-3 text-base text-gray-800"
+                        className="border rounded-lg px-4 py-3 text-base"
+                        style={{ backgroundColor: theme.surface, borderColor: theme.borderLight, color: theme.text }}
                         value={targetAudienceAge}
                         onChangeText={setTargetAudienceAge}
                         placeholder="e.g., 18-35"
-                        placeholderTextColor="#9CA3AF"
+                        placeholderTextColor={theme.textTertiary}
                     />
                 </View>
 
                 {/* Dates */}
                 <View className="mb-4">
-                    <Text className="text-sm font-semibold text-gray-700 mb-2">Start Date</Text>
+                    <Text className="text-sm font-semibold mb-2" style={{ color: theme.textSecondary }}>Start Date</Text>
                     <TouchableOpacity
                         onPress={() => setShowStartPicker(true)}
-                        className="bg-white border border-gray-300 rounded-lg px-4 py-3"
+                        className="border rounded-lg px-4 py-3"
+                        style={{ backgroundColor: theme.surface, borderColor: theme.borderLight }}
                     >
-                        <Text className="text-base text-gray-800">
+                        <Text className="text-base" style={{ color: startDate ? theme.text : theme.textTertiary }}>
                             {startDate ? startDate.toLocaleDateString() : 'Select start date'}
                         </Text>
                     </TouchableOpacity>
@@ -555,16 +563,17 @@ const CreateCampaign = () => {
             </ScrollView>
 
             {/* Fixed Bottom Create Button */}
-            <View className="absolute bottom-0 left-0 right-0 p-4 bg-white border-t border-gray-200">
+            <View className="absolute bottom-0 left-0 right-0 p-4 border-t" style={{ backgroundColor: theme.surface, borderColor: theme.border }}>
                 <TouchableOpacity
                     onPress={handleCreate}
                     disabled={saving}
-                    className="bg-blue-600 py-4 rounded-xl items-center justify-center"
+                    className="py-4 rounded-xl items-center justify-center"
+                    style={{ backgroundColor: saving ? theme.textTertiary : theme.primaryDark }}
                 >
                     {saving ? (
-                        <ActivityIndicator color="white" />
+                        <ActivityIndicator color={theme.surface} />
                     ) : (
-                        <Text className="text-white text-lg font-bold">Create Campaign</Text>
+                        <Text className="text-lg font-bold" style={{ color: theme.surface }}>Create Campaign</Text>
                     )}
                 </TouchableOpacity>
             </View>

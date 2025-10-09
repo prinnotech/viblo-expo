@@ -16,12 +16,11 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import { Ionicons } from '@expo/vector-icons';
 import { Profile as ProfileData } from '@/lib/db_interface';
-import { UserType } from '@/lib/enum_types';
 import { useRouter } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
-import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { registerForPushNotifications } from '@/hooks/usePushNotifications';
+import { useTheme } from '@/contexts/ThemeContext';
 
 // Constants
 const INFLUENCER_NICHES = [
@@ -39,6 +38,7 @@ const BRAND_INDUSTRIES = [
 const Onboarding = () => {
     const { user, getProfile } = useAuth();
     const router = useRouter();
+    const { theme } = useTheme();
 
     // State Management
     const [currentStep, setCurrentStep] = useState(1);
@@ -82,31 +82,26 @@ const Onboarding = () => {
 
     const pickImage = async () => {
         try {
-            // Request permissions
             const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
             if (status !== 'granted') {
                 Alert.alert('Permission needed', 'We need access to your photos to upload an avatar.');
                 return;
             }
 
-            // Launch image picker
             const result = await ImagePicker.launchImageLibraryAsync({
-                mediaTypes: ['images'],
+                mediaTypes: ImagePicker.MediaTypeOptions.Images,
                 allowsEditing: true,
-                aspect: [1, 1], // Square aspect ratio
+                aspect: [1, 1],
                 quality: 0.8,
                 base64: true,
             });
 
             if (!result.canceled && result.assets[0]) {
                 const asset = result.assets[0];
-
-                // Check file size (50MB = 50 * 1024 * 1024 bytes)
                 if (asset.fileSize && asset.fileSize > 50 * 1024 * 1024) {
                     Alert.alert('File too large', 'Please select an image smaller than 50MB.');
                     return;
                 }
-
                 await uploadAvatar(asset);
             }
         } catch (error) {
@@ -120,37 +115,28 @@ const Onboarding = () => {
             Alert.alert('Error', 'No image selected or user not logged in.');
             return;
         }
-
         setUploadingAvatar(true);
-
         try {
-            // Fetch the image data directly as an ArrayBuffer
             const response = await fetch(asset.uri);
             const arrayBuffer = await response.arrayBuffer();
-
-            // Generate a unique file path
             const fileExtension = asset.uri.split('.').pop()?.toLowerCase() || 'jpg';
             const filePath = `${user.id}/profile_image.${fileExtension}`;
 
-            const { data, error } = await supabase.storage
+            const { error } = await supabase.storage
                 .from('profile_avatars')
                 .upload(filePath, arrayBuffer, {
                     contentType: asset.mimeType || `image/${fileExtension}`,
-                    upsert: true, // Use upsert to allow overwriting if needed
+                    upsert: true,
                 });
 
-            if (error) {
-                throw error;
-            }
+            if (error) throw error;
 
-            // Get the public URL of the uploaded file
             const { data: publicUrlData } = supabase.storage
                 .from('profile_avatars')
                 .getPublicUrl(filePath);
 
             updateProfileData('avatar_url', publicUrlData.publicUrl);
             Alert.alert('Success', 'Avatar uploaded successfully!');
-
         } catch (err) {
             const error = err as Error;
             console.error('Error uploading avatar:', error.message);
@@ -162,7 +148,6 @@ const Onboarding = () => {
 
     const removeAvatar = async () => {
         if (!profileData.avatar_url) return;
-
         Alert.alert(
             'Remove Avatar',
             'Are you sure you want to remove your avatar?',
@@ -173,19 +158,14 @@ const Onboarding = () => {
                     style: 'destructive',
                     onPress: async () => {
                         try {
-                            // Extract file path from URL for deletion
                             if (profileData.avatar_url.includes('profile_avatars')) {
                                 const urlParts = profileData.avatar_url.split('/');
                                 const fileName = urlParts[urlParts.length - 1];
                                 const filePath = `${user?.id}/${fileName}`;
-
-                                // Delete from storage
                                 await supabase.storage
                                     .from('profile_avatars')
                                     .remove([filePath]);
                             }
-
-                            // Update profile data
                             updateProfileData('avatar_url', '');
                         } catch (error) {
                             console.error('Error removing avatar:', error);
@@ -195,8 +175,6 @@ const Onboarding = () => {
             ]
         );
     };
-
-
 
     // Validation Functions
     const validateStep = (step: number): boolean => {
@@ -212,7 +190,7 @@ const Onboarding = () => {
                 }
             case 3:
             case 4:
-                return true; // Optional steps
+                return true;
             default:
                 return false;
         }
@@ -224,21 +202,6 @@ const Onboarding = () => {
             Alert.alert('Error', 'Please fill in all required fields');
             return;
         }
-
-        /* if (currentStep === 2) {
-            // Check username availability
-            const { data: existingUser } = await supabase
-                .from('profiles')
-                .select('username')
-                .eq('username', profileData.username.trim())
-                .single();
-
-            if (existingUser) {
-                Alert.alert('Error', 'Username is already taken');
-                return;
-            }
-        } */
-
         if (currentStep < totalSteps) {
             setCurrentStep(currentStep + 1);
         } else {
@@ -266,13 +229,9 @@ const Onboarding = () => {
             Alert.alert('Error', 'Authentication error. Please try logging out and in again.');
             return;
         }
-
         setLoading(true);
-
         try {
             const pushToken = await registerForPushNotifications();
-            console.log('Push token:', pushToken);
-
             const dataToSave: any = {
                 id: user.id,
                 username: profileData.username.trim(),
@@ -283,7 +242,6 @@ const Onboarding = () => {
                 updated_at: new Date().toISOString(),
                 push_token: pushToken || null,
             };
-
             if (profileData.user_type === 'influencer') {
                 dataToSave.first_name = profileData.first_name.trim();
                 dataToSave.last_name = profileData.last_name.trim();
@@ -292,18 +250,12 @@ const Onboarding = () => {
                 dataToSave.company_name = profileData.company_name.trim();
                 dataToSave.industry = profileData.industry || null;
             }
-
-            const { error } = await supabase
-                .from('profiles')
-                .upsert(dataToSave);
-
+            const { error } = await supabase.from('profiles').upsert(dataToSave);
             if (error) {
                 console.error('Error saving profile:', error);
                 Alert.alert('Error', `Failed to save profile: ${error.message}`);
             } else {
-
                 await getProfile();
-                // Navigate to main app ONLY on success
                 router.replace('/(tabs)');
             }
         } catch (error) {
@@ -317,17 +269,17 @@ const Onboarding = () => {
 
     // Avatar Component
     const renderAvatarSection = () => (
-        <View className="items-center mb-6 my-6 bg-gray-100">
-            <Text className="text-gray-700 font-medium mb-4">Profile Picture</Text>
-
+        <View className="items-center mb-6 my-6">
+            <Text className="font-medium mb-4" style={{ color: theme.textSecondary }}>Profile Picture</Text>
             <View className="relative">
                 <TouchableOpacity
                     onPress={pickImage}
                     disabled={uploadingAvatar}
-                    className="w-24 h-24 rounded-full bg-gray-100 border-2 border-gray-300 border-dashed items-center justify-center overflow-hidden"
+                    className="w-24 h-24 rounded-full border-2 border-dashed items-center justify-center overflow-hidden"
+                    style={{ backgroundColor: theme.surfaceSecondary, borderColor: theme.borderLight }}
                 >
                     {uploadingAvatar ? (
-                        <ActivityIndicator size="small" color="#3B82F6" />
+                        <ActivityIndicator size="small" color={theme.primary} />
                     ) : profileData.avatar_url ? (
                         <Image
                             source={{ uri: profileData.avatar_url }}
@@ -336,8 +288,8 @@ const Onboarding = () => {
                         />
                     ) : (
                         <View className="items-center">
-                            <Ionicons name="camera" size={24} color="#6B7280" />
-                            <Text className="text-xs text-gray-500 mt-1">Add Photo</Text>
+                            <Ionicons name="camera" size={24} color={theme.textSecondary} />
+                            <Text className="text-xs mt-1" style={{ color: theme.textTertiary }}>Add Photo</Text>
                         </View>
                     )}
                 </TouchableOpacity>
@@ -345,92 +297,86 @@ const Onboarding = () => {
                 {profileData.avatar_url && !uploadingAvatar && (
                     <TouchableOpacity
                         onPress={removeAvatar}
-                        className="absolute -top-1 -right-1 w-6 h-6 bg-red-500 rounded-full items-center justify-center"
+                        className="absolute -top-1 -right-1 w-6 h-6 rounded-full items-center justify-center"
+                        style={{ backgroundColor: theme.error }}
                     >
-                        <Ionicons name="close" size={14} color="white" />
+                        <Ionicons name="close" size={14} color="#FFFFFF" />
                     </TouchableOpacity>
                 )}
             </View>
-
-            <Text className="text-xs text-gray-500 mt-2 text-center">
+            <Text className="text-xs mt-2 text-center" style={{ color: theme.textTertiary }}>
                 Upload a profile picture (max 50MB)
             </Text>
         </View>
     );
 
-
-
     // Step Components
     const renderUserTypeStep = () => (
         <View className="flex-1 p-6">
-            <Text className="text-2xl font-bold text-gray-800 mb-2">
+            <Text className="text-2xl font-bold mb-2" style={{ color: theme.text }}>
                 What best describes you?
             </Text>
-            <Text className="text-gray-600 mb-8">
+            <Text className="mb-8" style={{ color: theme.textSecondary }}>
                 This helps us customize your experience
             </Text>
-
             <View className="space-y-4 ">
-                {/* Influencer Option */}
                 <TouchableOpacity
                     onPress={() => updateProfileData('user_type', 'influencer')}
-                    className={`p-6 rounded-xl border-2 my-2 ${profileData.user_type === 'influencer'
-                        ? 'border-blue-500 bg-blue-50'
-                        : 'border-gray-200 bg-white'
-                        }`}
+                    className={`p-6 rounded-xl border-2 my-2`}
+                    style={{
+                        borderColor: profileData.user_type === 'influencer' ? theme.primary : theme.border,
+                        backgroundColor: profileData.user_type === 'influencer' ? theme.surface : theme.surface,
+                    }}
                 >
                     <View className="flex-row items-center">
-                        <View className={`w-12 h-12 rounded-full items-center justify-center mr-4 ${profileData.user_type === 'influencer' ? 'bg-blue-100' : 'bg-gray-100'
-                            }`}>
+                        <View className={`w-12 h-12 rounded-full items-center justify-center mr-4`}
+                            style={{ backgroundColor: theme.surfaceSecondary }}>
                             <Ionicons
                                 name="person"
                                 size={24}
-                                color={profileData.user_type === 'influencer' ? '#3B82F6' : '#6B7280'}
+                                color={profileData.user_type === 'influencer' ? theme.primary : theme.textSecondary}
                             />
                         </View>
                         <View className="flex-1">
-                            <Text className={`text-lg font-semibold ${profileData.user_type === 'influencer' ? 'text-blue-700' : 'text-gray-800'
-                                }`}>
+                            <Text className={`text-lg font-semibold`} style={{ color: profileData.user_type === 'influencer' ? theme.primary : theme.text }}>
                                 Influencer/Creator
                             </Text>
-                            <Text className="text-gray-600 mt-1">
+                            <Text className="mt-1" style={{ color: theme.textSecondary }}>
                                 Share content and collaborate with brands
                             </Text>
                         </View>
                         {profileData.user_type === 'influencer' && (
-                            <Ionicons name="checkmark-circle" size={24} color="#3B82F6" />
+                            <Ionicons name="checkmark-circle" size={24} color={theme.primary} />
                         )}
                     </View>
                 </TouchableOpacity>
-
-                {/* Brand Option */}
                 <TouchableOpacity
                     onPress={() => updateProfileData('user_type', 'brand')}
-                    className={`p-6 rounded-xl border-2 my-2 ${profileData.user_type === 'brand'
-                        ? 'border-blue-500 bg-blue-50'
-                        : 'border-gray-200 bg-white'
-                        }`}
+                    className={`p-6 rounded-xl border-2 my-2`}
+                    style={{
+                        borderColor: profileData.user_type === 'brand' ? theme.primary : theme.border,
+                        backgroundColor: theme.surface,
+                    }}
                 >
                     <View className="flex-row items-center">
-                        <View className={`w-12 h-12 rounded-full items-center justify-center mr-4 ${profileData.user_type === 'brand' ? 'bg-blue-100' : 'bg-gray-100'
-                            }`}>
+                        <View className={`w-12 h-12 rounded-full items-center justify-center mr-4`}
+                            style={{ backgroundColor: theme.surfaceSecondary }}>
                             <Ionicons
                                 name="business"
                                 size={24}
-                                color={profileData.user_type === 'brand' ? '#3B82F6' : '#6B7280'}
+                                color={profileData.user_type === 'brand' ? theme.primary : theme.textSecondary}
                             />
                         </View>
                         <View className="flex-1">
-                            <Text className={`text-lg font-semibold ${profileData.user_type === 'brand' ? 'text-blue-700' : 'text-gray-800'
-                                }`}>
+                            <Text className={`text-lg font-semibold`} style={{ color: profileData.user_type === 'brand' ? theme.primary : theme.text }}>
                                 Brand/Business
                             </Text>
-                            <Text className="text-gray-600 mt-1">
+                            <Text className="mt-1" style={{ color: theme.textSecondary }}>
                                 Connect with influencers and grow your brand
                             </Text>
                         </View>
                         {profileData.user_type === 'brand' && (
-                            <Ionicons name="checkmark-circle" size={24} color="#3B82F6" />
+                            <Ionicons name="checkmark-circle" size={24} color={theme.primary} />
                         )}
                     </View>
                 </TouchableOpacity>
@@ -440,145 +386,136 @@ const Onboarding = () => {
 
     const renderBasicInfoStep = () => (
         <ScrollView className="flex-1 p-6">
-            <Text className="text-2xl font-bold text-gray-800 mb-2">
+            <Text className="text-2xl font-bold mb-2" style={{ color: theme.text }}>
                 Basic Information
             </Text>
-            <Text className="text-gray-600 mb-8">
+            <Text className="mb-8" style={{ color: theme.textSecondary }}>
                 {profileData.user_type === 'influencer'
                     ? 'Tell us your name and choose a username'
-                    : 'Tell us about your business'
-                }
+                    : 'Tell us about your business'}
             </Text>
-
             <View className="gap-4">
-                {/* Username */}
                 <View>
-                    <Text className="text-gray-700 font-medium mb-2">Username *</Text>
+                    <Text className="font-medium mb-2" style={{ color: theme.textSecondary }}>Username *</Text>
                     <TextInput
                         value={profileData.username}
                         onChangeText={(text) => updateProfileData('username', text)}
                         placeholder="Choose a unique username"
-                        className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-base"
+                        placeholderTextColor={theme.textTertiary}
+                        className="w-full px-4 py-3 rounded-lg text-base"
+                        style={{ backgroundColor: theme.surface, borderColor: theme.borderLight, borderWidth: 1, color: theme.text }}
                         autoCapitalize="none"
                     />
                 </View>
-
                 {profileData.user_type === 'influencer' ? (
                     <>
-                        {/* First Name */}
                         <View>
-                            <Text className="text-gray-700 font-medium mb-2">First Name *</Text>
+                            <Text className="font-medium mb-2" style={{ color: theme.textSecondary }}>First Name *</Text>
                             <TextInput
                                 value={profileData.first_name}
                                 onChangeText={(text) => updateProfileData('first_name', text)}
                                 placeholder="Your first name"
-                                className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-base"
+                                placeholderTextColor={theme.textTertiary}
+                                className="w-full px-4 py-3 rounded-lg text-base"
+                                style={{ backgroundColor: theme.surface, borderColor: theme.borderLight, borderWidth: 1, color: theme.text }}
                             />
                         </View>
-
-                        {/* Last Name */}
                         <View>
-                            <Text className="text-gray-700 font-medium mb-2">Last Name *</Text>
+                            <Text className="font-medium mb-2" style={{ color: theme.textSecondary }}>Last Name *</Text>
                             <TextInput
                                 value={profileData.last_name}
                                 onChangeText={(text) => updateProfileData('last_name', text)}
                                 placeholder="Your last name"
-                                className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-base"
+                                placeholderTextColor={theme.textTertiary}
+                                className="w-full px-4 py-3 rounded-lg text-base"
+                                style={{ backgroundColor: theme.surface, borderColor: theme.borderLight, borderWidth: 1, color: theme.text }}
                             />
                         </View>
                     </>
                 ) : (
-                    /* Company Name for brands */
                     <View>
-                        <Text className="text-gray-700 font-medium mb-2">Company Name *</Text>
+                        <Text className="font-medium mb-2" style={{ color: theme.textSecondary }}>Company Name *</Text>
                         <TextInput
                             value={profileData.company_name}
                             onChangeText={(text) => updateProfileData('company_name', text)}
                             placeholder="Your company name"
-                            className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-base"
+                            placeholderTextColor={theme.textTertiary}
+                            className="w-full px-4 py-3 rounded-lg text-base"
+                            style={{ backgroundColor: theme.surface, borderColor: theme.borderLight, borderWidth: 1, color: theme.text }}
                         />
                     </View>
                 )}
             </View>
-
-            {/* Avatar Upload Section */}
             {renderAvatarSection()}
-
         </ScrollView>
     );
 
     const renderProfileDetailsStep = () => (
         <View className="flex-1 p-6">
-            <Text className="text-2xl font-bold text-gray-800 mb-2">
+            <Text className="text-2xl font-bold mb-2" style={{ color: theme.text }}>
                 Profile Details
             </Text>
-            <Text className="text-gray-600 mb-8">
+            <Text className="mb-8" style={{ color: theme.textSecondary }}>
                 Add some details to help others discover you
             </Text>
-
             <View className="space-y-4 gap-4">
-                {/* Bio */}
                 <View>
-                    <Text className="text-gray-700 font-medium mb-2">Bio</Text>
+                    <Text className="font-medium mb-2" style={{ color: theme.textSecondary }}>Bio</Text>
                     <TextInput
                         value={profileData.bio}
                         onChangeText={(text) => updateProfileData('bio', text)}
                         placeholder={`Tell us about ${profileData.user_type === 'influencer' ? 'yourself' : 'your business'}...`}
-                        className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-base h-24"
+                        placeholderTextColor={theme.textTertiary}
+                        className="w-full px-4 py-3 rounded-lg text-base h-24"
+                        style={{ backgroundColor: theme.surface, borderColor: theme.borderLight, borderWidth: 1, color: theme.text }}
                         multiline
                         numberOfLines={4}
                         textAlignVertical="top"
                     />
                 </View>
-
-                {/* Website */}
                 <View>
-                    <Text className="text-gray-700 font-medium mb-2">Website</Text>
+                    <Text className="font-medium mb-2" style={{ color: theme.textSecondary }}>Website</Text>
                     <TextInput
                         value={profileData.website_url}
                         onChangeText={(text) => updateProfileData('website_url', text)}
                         placeholder="https://yourwebsite.com"
-                        className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-base"
+                        placeholderTextColor={theme.textTertiary}
+                        className="w-full px-4 py-3 rounded-lg text-base"
+                        style={{ backgroundColor: theme.surface, borderColor: theme.borderLight, borderWidth: 1, color: theme.text }}
                         autoCapitalize="none"
                         keyboardType="url"
                     />
                 </View>
-
-                {/* Location */}
                 <View style={{ zIndex: 1 }}>
-                    <Text className="text-gray-700 font-medium mb-2">Location</Text>
+                    <Text className="font-medium mb-2" style={{ color: theme.textSecondary }}>Location</Text>
                     <GooglePlacesAutocomplete
                         placeholder='City, Country'
                         onPress={(data, details = null) => {
-                            console.log(data, details);
                             updateProfileData('location', data.description);
                         }}
                         onFail={(error) => console.error("Google Places API Error:", error)}
-                        predefinedPlaces={[]}
                         query={{
-                            key: 'AIzaSyCd35P5ccI0kfDFY3DS-urVwBik4TLWA_c',
+                            key: process.env.EXPO_PUBLIC_GOOGLE_PLACES_API_KEY,
                             language: 'en',
                             types: '(cities)',
                         }}
                         fetchDetails={false}
                         debounce={300}
-                        textInputProps={{
-                            autoCorrect: false,
-                        }}
                         styles={{
                             textInput: {
                                 height: 48,
                                 borderRadius: 8,
                                 borderWidth: 1,
-                                borderColor: '#d1d5db',
-                                backgroundColor: '#ffffff',
+                                borderColor: theme.borderLight,
+                                backgroundColor: theme.surface,
                                 paddingHorizontal: 16,
                                 fontSize: 16,
+                                color: theme.text
                             },
                             listView: {
                                 borderWidth: 1,
-                                borderColor: '#d1d5db',
-                                backgroundColor: '#ffffff',
+                                borderColor: theme.borderLight,
+                                backgroundColor: theme.surface,
                                 borderRadius: 8,
                                 marginTop: 8,
                             },
@@ -591,70 +528,55 @@ const Onboarding = () => {
 
     const renderPreferencesStep = () => (
         <ScrollView className="flex-1 p-6">
-            <Text className="text-2xl font-bold text-gray-800 mb-2">
+            <Text className="text-2xl font-bold mb-2" style={{ color: theme.text }}>
                 {profileData.user_type === 'influencer' ? 'Content Preferences' : 'Business Details'}
             </Text>
-            <Text className="text-gray-600 mb-8">
+            <Text className="mb-8" style={{ color: theme.textSecondary }}>
                 {profileData.user_type === 'influencer'
                     ? 'Select up to 5 niches that match your content'
-                    : 'Choose your industry to connect with relevant influencers'
-                }
+                    : 'Choose your industry to connect with relevant influencers'}
             </Text>
-
             {profileData.user_type === 'influencer' ? (
                 <View>
-                    <Text className="text-gray-700 font-medium mb-4">
+                    <Text className="font-medium mb-4" style={{ color: theme.textSecondary }}>
                         Content Niches (Select up to 5)
                     </Text>
                     <View className="flex-row flex-wrap">
-                        {/* * NOTE on UI "blur" issue: The logic here is correct. The "blurry" effect you see
-                          * is likely the default opacity feedback from TouchableOpacity. When you press it,
-                          * it becomes semi-transparent. The state update triggers a re-render, changing the
-                          * background color, and the final style appears. This can feel like a flicker or blur.
-                          * This is a visual effect, not a logic bug. Using `Pressable` instead of `TouchableOpacity`
-                          * could offer more control over the press-in styling if you wish to change this behavior.
-                        */}
                         {INFLUENCER_NICHES.map((niche) => (
                             <TouchableOpacity
                                 key={niche}
                                 onPress={() => toggleNiche(niche)}
-                                className={`px-3 py-2 rounded-full mr-2 mb-2 border ${profileData.niches.includes(niche)
-                                    ? 'bg-blue-100 border-blue-500'
-                                    : 'bg-white border-gray-300'
-                                    }`}
+                                className={`px-3 py-2 rounded-full mr-2 mb-2 border`}
+                                style={{
+                                    backgroundColor: profileData.niches.includes(niche) ? theme.surfaceSecondary : theme.surface,
+                                    borderColor: profileData.niches.includes(niche) ? theme.primary : theme.borderLight
+                                }}
                             >
-                                <Text className={`text-sm ${profileData.niches.includes(niche)
-                                    ? 'text-blue-700'
-                                    : 'text-gray-700'
-                                    }`}>
+                                <Text className={`text-sm`} style={{ color: profileData.niches.includes(niche) ? theme.primary : theme.textSecondary }}>
                                     {niche}
                                 </Text>
                             </TouchableOpacity>
                         ))}
                     </View>
-                    <Text className="text-gray-500 text-sm mt-2">
+                    <Text className="text-sm mt-2" style={{ color: theme.textTertiary }}>
                         Selected: {profileData.niches.length}/5
                     </Text>
                 </View>
             ) : (
                 <View>
-                    <Text className="text-gray-700 font-medium mb-4">Industry</Text>
+                    <Text className="font-medium mb-4" style={{ color: theme.textSecondary }}>Industry</Text>
                     <View className="flex-row flex-wrap">
                         {BRAND_INDUSTRIES.map((industry) => (
                             <TouchableOpacity
                                 key={industry}
-                                onPress={() => updateProfileData('industry',
-                                    profileData.industry === industry ? '' : industry
-                                )}
-                                className={`px-3 py-2 rounded-full mr-2 mb-2 border ${profileData.industry === industry
-                                    ? 'bg-blue-100 border-blue-500'
-                                    : 'bg-white border-gray-300'
-                                    }`}
+                                onPress={() => updateProfileData('industry', profileData.industry === industry ? '' : industry)}
+                                className={`px-3 py-2 rounded-full mr-2 mb-2 border`}
+                                style={{
+                                    backgroundColor: profileData.industry === industry ? theme.surfaceSecondary : theme.surface,
+                                    borderColor: profileData.industry === industry ? theme.primary : theme.borderLight
+                                }}
                             >
-                                <Text className={`text-sm ${profileData.industry === industry
-                                    ? 'text-blue-700'
-                                    : 'text-gray-700'
-                                    }`}>
+                                <Text className={`text-sm`} style={{ color: profileData.industry === industry ? theme.primary : theme.textSecondary }}>
                                     {industry}
                                 </Text>
                             </TouchableOpacity>
@@ -667,94 +589,84 @@ const Onboarding = () => {
 
     const renderStepContent = () => {
         switch (currentStep) {
-            case 1:
-                return renderUserTypeStep();
-            case 2:
-                return renderBasicInfoStep();
-            case 3:
-                return renderProfileDetailsStep();
-            case 4:
-                return renderPreferencesStep();
-            default:
-                return null;
+            case 1: return renderUserTypeStep();
+            case 2: return renderBasicInfoStep();
+            case 3: return renderProfileDetailsStep();
+            case 4: return renderPreferencesStep();
+            default: return null;
         }
     };
 
-
     if (loading) {
         return (
-            <SafeAreaView className="flex-1 justify-center items-center bg-gray-100">
-                <ActivityIndicator size="large" color="#3B82F6" />
+            <SafeAreaView className="flex-1 justify-center items-center" style={{ backgroundColor: theme.background }}>
+                <ActivityIndicator size="large" color={theme.primary} />
             </SafeAreaView>
         );
     }
 
-
-
     return (
-        <SafeAreaView className="flex-1 bg-gray-100">
+        <SafeAreaView className="flex-1" style={{ backgroundColor: theme.background }}>
             <KeyboardAvoidingView
                 behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
                 className="flex-1"
             >
-                {/* Progress Bar */}
-                <View className="px-6 py-4 bg-white">
+                <View className="px-6 py-4" style={{ backgroundColor: theme.surface }}>
                     <View className="flex-row justify-between items-center mb-2">
-                        <Text className="text-sm text-gray-600">
+                        <Text className="text-sm" style={{ color: theme.textSecondary }}>
                             Step {currentStep} of {totalSteps}
                         </Text>
-                        <Text className="text-sm text-gray-600">
+                        <Text className="text-sm" style={{ color: theme.textSecondary }}>
                             {Math.round((currentStep / totalSteps) * 100)}%
                         </Text>
                     </View>
-                    <View className="w-full bg-gray-200 rounded-full h-2">
+                    <View className="w-full h-2 rounded-full" style={{ backgroundColor: theme.surfaceSecondary }}>
                         <View
-                            className="bg-blue-600 h-2 rounded-full"
-                            style={{ width: `${(currentStep / totalSteps) * 100}%` }}
+                            className="h-2 rounded-full"
+                            style={{
+                                width: `${(currentStep / totalSteps) * 100}%`,
+                                backgroundColor: theme.primary
+                            }}
                         />
                     </View>
                 </View>
 
-                {/* Step Content */}
                 {renderStepContent()}
 
-                {/* Navigation Buttons */}
-                <View className="p-6 bg-white border-t border-gray-200">
+                <View className="p-6 border-t" style={{ backgroundColor: theme.surface, borderColor: theme.border }}>
                     <View className="flex-row space-x-3">
                         {currentStep > 1 && (
                             <TouchableOpacity
                                 onPress={prevStep}
-                                className="flex-1 bg-gray-200 py-3 rounded-lg mx-1"
+                                className="flex-1 py-3 rounded-lg mx-1"
+                                style={{ backgroundColor: theme.surfaceSecondary }}
                             >
-                                <Text className="text-gray-700 text-center font-medium">
+                                <Text className="text-center font-medium" style={{ color: theme.textSecondary }}>
                                     Back
                                 </Text>
                             </TouchableOpacity>
                         )}
-
                         {currentStep > 2 && (
                             <TouchableOpacity
                                 onPress={skipStep}
-                                className="flex-1 bg-gray-100 py-3 rounded-lg mx-1"
+                                className="flex-1 py-3 rounded-lg mx-1"
+                                style={{ backgroundColor: theme.surfaceSecondary }}
                             >
-                                <Text className="text-gray-600 text-center font-medium">
+                                <Text className="text-center font-medium" style={{ color: theme.textSecondary }}>
                                     Skip
                                 </Text>
                             </TouchableOpacity>
                         )}
-
                         <TouchableOpacity
                             onPress={nextStep}
                             disabled={loading || !validateStep(currentStep)}
-                            className={`flex-1 py-3 rounded-lg mx-1 ${validateStep(currentStep) && !loading
-                                ? 'bg-blue-600'
-                                : 'bg-gray-400'
-                                }`}
+                            className={`flex-1 py-3 rounded-lg mx-1`}
+                            style={{ backgroundColor: validateStep(currentStep) && !loading ? theme.primary : theme.textTertiary }}
                         >
                             {loading ? (
-                                <ActivityIndicator color="#fff" />
+                                <ActivityIndicator color="#FFFFFF" />
                             ) : (
-                                <Text className="text-white text-center font-medium">
+                                <Text className="text-center font-medium" style={{ color: '#FFFFFF' }}>
                                     {currentStep === totalSteps ? 'Complete' : 'Next'}
                                 </Text>
                             )}

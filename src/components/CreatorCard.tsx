@@ -5,8 +5,10 @@ import { Link } from 'expo-router';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { Influencer } from '@/lib/enum_types';
 import { SocialIcon } from '@/components/getSocialIcons';
+import { useTheme } from '@/contexts/ThemeContext';
 
 const CreatorCard = ({ influencer }: { influencer: Influencer }) => {
+    const { theme } = useTheme();
     const formatNumber = (num: number) => {
         if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
         if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
@@ -18,30 +20,30 @@ const CreatorCard = ({ influencer }: { influencer: Influencer }) => {
 
     return (
         <Link href={`/creators/${influencer.id}`} asChild>
-            <TouchableOpacity className="m-4 bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+            <TouchableOpacity className="m-4 rounded-2xl shadow-sm overflow-hidden" style={{ backgroundColor: theme.surface, borderColor: theme.border, borderWidth: 1 }}>
                 {/* Header with Avatar and Info */}
                 <View className="p-4">
                     <View className="flex-row items-start gap-4 mb-4">
-                        <Image source={{ uri: avatarUrl }} className="w-16 h-16 rounded-full border-2 border-blue-500" />
+                        <Image source={{ uri: avatarUrl }} className="w-16 h-16 rounded-full" style={{ borderWidth: 2, borderColor: theme.primary }} />
                         <View className="flex-1">
                             <View className="flex-row items-center gap-2 mb-1">
-                                <Text className="text-lg font-bold text-gray-800" numberOfLines={1}>
+                                <Text className="text-lg font-bold" style={{ color: theme.text }} numberOfLines={1}>
                                     {fullName}
                                 </Text>
                                 {influencer.is_verified && (
-                                    <AntDesign name="check-circle" size={14} color="#3B82F6" />
+                                    <AntDesign name="check-circle" size={14} color={theme.primary} />
                                 )}
                             </View>
-                            <Text className="text-sm text-gray-500 mb-1">@{influencer.username}</Text>
+                            <Text className="text-sm mb-1" style={{ color: theme.textTertiary }}>@{influencer.username}</Text>
                             {influencer.location && (
-                                <Text className="text-xs text-gray-400">📍 {influencer.location}</Text>
+                                <Text className="text-xs" style={{ color: theme.textTertiary }}>📍 {influencer.location}</Text>
                             )}
                         </View>
                     </View>
 
                     {/* Bio */}
                     {influencer.bio && (
-                        <Text className="text-sm text-gray-600 mb-3" numberOfLines={2}>
+                        <Text className="text-sm mb-3" style={{ color: theme.textSecondary }} numberOfLines={2}>
                             {influencer.bio}
                         </Text>
                     )}
@@ -50,8 +52,9 @@ const CreatorCard = ({ influencer }: { influencer: Influencer }) => {
                     {influencer.niches && influencer.niches.length > 0 && (
                         <View className="flex-row flex-wrap gap-2 mb-3">
                             {influencer.niches.slice(0, 3).map((niche) => (
-                                <View key={niche} className="bg-purple-100 px-2 py-1 rounded-full">
-                                    <Text className="text-purple-800 text-xs font-medium">{niche}</Text>
+                                // Using primaryLight as a substitute for purple-100
+                                <View key={niche} className="px-2 py-1 rounded-full" style={{ backgroundColor: theme.primaryLight }}>
+                                    <Text className="text-xs font-medium" style={{ color: theme.primary }}>{niche}</Text>
                                 </View>
                             ))}
                         </View>
@@ -62,8 +65,8 @@ const CreatorCard = ({ influencer }: { influencer: Influencer }) => {
                         <View className="flex-row gap-4 mb-3 flex-wrap">
                             {influencer.social_links.slice(0, 4).map((link) => (
                                 <View key={link.id} className="flex-row items-center gap-1">
-                                    <SocialIcon platform={link.platform} color="#6B7280" />
-                                    <Text className="text-xs font-semibold text-gray-700">
+                                    <SocialIcon platform={link.platform} color={theme.textSecondary} />
+                                    <Text className="text-xs font-semibold" style={{ color: theme.textSecondary }}>
                                         {formatNumber(link.follower_count || 0)}
                                     </Text>
                                 </View>
@@ -72,26 +75,26 @@ const CreatorCard = ({ influencer }: { influencer: Influencer }) => {
                     )}
 
                     {/* Stats Bar */}
-                    <View className="flex-row justify-between items-center pt-3 border-t border-gray-200">
+                    <View className="flex-row justify-between items-center pt-3" style={{ borderTopColor: theme.border, borderTopWidth: 1 }}>
                         <View className="flex-1">
-                            <Text className="text-xs text-gray-500">Followers</Text>
-                            <Text className="text-sm font-bold text-gray-800">
+                            <Text className="text-xs" style={{ color: theme.textTertiary }}>Followers</Text>
+                            <Text className="text-sm font-bold" style={{ color: theme.text }}>
                                 {formatNumber(influencer.total_followers)}
                             </Text>
                         </View>
                         <View className="flex-1">
-                            <Text className="text-xs text-gray-500">Views</Text>
-                            <Text className="text-sm font-bold text-gray-800">
+                            <Text className="text-xs" style={{ color: theme.textTertiary }}>Views</Text>
+                            <Text className="text-sm font-bold" style={{ color: theme.text }}>
                                 {formatNumber(influencer.total_views)}
                             </Text>
                         </View>
                         <View className="flex-1">
-                            <Text className="text-xs text-gray-500">Likes</Text>
-                            <Text className="text-sm font-bold text-gray-800">
+                            <Text className="text-xs" style={{ color: theme.textTertiary }}>Likes</Text>
+                            <Text className="text-sm font-bold" style={{ color: theme.text }}>
                                 {formatNumber(influencer.total_likes)}
                             </Text>
                         </View>
-                        <AntDesign name="arrow-right" size={20} color="#9CA3AF" />
+                        <AntDesign name="arrow-right" size={20} color={theme.textTertiary} />
                     </View>
                 </View>
             </TouchableOpacity>

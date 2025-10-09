@@ -1,80 +1,72 @@
 import { Stack } from 'expo-router';
 import React from 'react';
+import { useTheme } from '@/contexts/ThemeContext';
 
 export default function CampaignsLayout() {
+    const { theme } = useTheme();
+
     return (
-        <Stack>
+        <Stack
+            screenOptions={{
+                headerStyle: {
+                    backgroundColor: theme.surface,
+                },
+                headerTintColor: theme.text,
+                headerTitleStyle: {
+                    color: theme.text,
+                },
+            }}
+        >
             {/* This screen is for your main campaigns list (index.tsx) */}
             {/* We hide its header because it's the base screen. */}
             <Stack.Screen name="index" options={{ headerShown: false }} />
 
-            {/* This screen is for your details page ([id].tsx) */}
+            {/* This screen is for your details page ([id]/index.tsx) */}
             <Stack.Screen
                 name="[id]/index"
                 options={{
-                    // This makes the screen slide up from the bottom
                     presentation: 'modal',
-
-                    // This ensures the header is visible
                     headerShown: true,
-
-                    // Set a default title that shows while data is loading
                     title: 'Loading Campaign...',
                 }}
             />
-            {/* This screen is for apply page ([id].tsx/apply) */}
+
+            {/* This screen is for apply page ([id]/apply.tsx) */}
             <Stack.Screen
                 name="[id]/apply"
                 options={{
-                    // This makes the screen slide up from the bottom
                     presentation: 'modal',
-
-                    // This ensures the header is visible
                     headerShown: true,
-
-                    // Set a default title that shows while data is loading
-                    title: 'Loading Campaign...',
+                    title: 'Apply to Campaign',
                 }}
             />
-            {/* This screen is for apply page ([id].tsx/apply) */}
+
+            {/* This screen is for edit page ([id]/edit.tsx) */}
             <Stack.Screen
                 name="[id]/edit"
                 options={{
-                    // This makes the screen slide up from the bottom
                     presentation: 'modal',
-
-                    // This ensures the header is visible
                     headerShown: true,
-
-                    // Set a default title that shows while data is loading
-                    title: 'Loading Campaign...',
+                    title: 'Edit Campaign',
                 }}
             />
 
+            {/* This screen is for the create campaign page (create/index.tsx) */}
             <Stack.Screen
                 name="create/index"
                 options={{
-                    // This makes the screen slide up from the bottom
                     presentation: 'modal',
-
-                    // This ensures the header is visible
                     headerShown: true,
-
-                    // Set a default title that shows while data is loading
                     title: 'Create Campaign',
                 }}
             />
 
+            {/* This screen is for the payment page ([id]/payment.tsx) */}
             <Stack.Screen
                 name="[id]/payment"
                 options={{
-                    // This makes the screen slide up from the bottom
                     presentation: 'modal',
-
-                    // This ensures the header is visible
                     headerShown: false,
-
-                    // Set a default title that shows while data is loading
                     title: 'Checkout',
                 }}
             />
