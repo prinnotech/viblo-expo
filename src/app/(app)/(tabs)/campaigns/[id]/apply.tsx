@@ -1,4 +1,4 @@
-import { ActivityIndicator, Text, View, Pressable, Alert, ScrollView, TextInput } from 'react-native';
+import { ActivityIndicator, Text, View, Pressable, Alert, ScrollView, TextInput, Image } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -11,6 +11,20 @@ import { SubmissionStatus } from '@/lib/enum_types';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import { Campaign } from '@/lib/db_interface';
+
+// Add these interfaces at the top of your file
+interface VideoItem {
+    id: string;
+    platform: 'tiktok' | 'youtube' | 'instagram';
+    title: string;
+    description: string | null;
+    thumbnail_url: string;
+    url: string;
+    view_count: number | null;
+    like_count: number | null;
+    comment_count: number | null;
+    published_at: string;
+}
 
 
 const ApplyPage = () => {
@@ -33,6 +47,13 @@ const ApplyPage = () => {
     // State for public post URL
     const [publicPostUrl, setPublicPostUrl] = useState('');
     const [isUpdatingUrl, setIsUpdatingUrl] = useState(false);
+
+    //states for the video list
+    const [selectedPlatform, setSelectedPlatform] = useState<string>('');
+    const [videos, setVideos] = useState<VideoItem[]>([]);
+    const [loadingVideos, setLoadingVideos] = useState(false);
+    const [selectedVideoApproved, setSelectedVideoApproved] = useState<VideoItem | null>(null);
+
 
     // Fetch campaign details and existing submission
     useEffect(() => {
@@ -75,6 +96,50 @@ const ApplyPage = () => {
 
         fetchData();
     }, [campaignId, profile, navigation]);
+
+    useEffect(() => {
+        if (!selectedPlatform || !profile || submission?.status !== 'approved') return;
+
+        const fetchVideos = async () => {
+            setLoadingVideos(true);
+            setSelectedVideoApproved(null);
+
+            try {
+                const backendUrl = process.env.EXPO_PUBLIC_BACKEND_URL;
+                const response = await fetch(
+                    `${backendUrl}/api/video-list/${selectedPlatform}?user_id=${profile.id}`,
+                    {
+                        headers: {
+                            'x-api-key': process.env.EXPO_PUBLIC_API_KEY || '',
+                        },
+                    }
+                );
+
+                if (!response.ok) {
+                    throw new Error('Failed to fetch videos');
+                }
+
+                const data = await response.json();
+                setVideos(data);
+            } catch (err) {
+                console.error('Error fetching videos:', err);
+                Alert.alert('Error', `Failed to load ${selectedPlatform} videos. Please try again.`);
+                setVideos([]);
+            } finally {
+                setLoadingVideos(false);
+            }
+        };
+
+        fetchVideos();
+    }, [selectedPlatform, profile, submission?.status]);
+
+    // Initialize selectedPlatform when submission becomes approved
+    useEffect(() => {
+        if (submission?.status === 'approved' && campaign?.target_platforms && !selectedPlatform) {
+            setSelectedPlatform(campaign.target_platforms[0]);
+        }
+    }, [submission?.status, campaign?.target_platforms, selectedPlatform]);
+
 
     const pickVideo = async () => {
         const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -166,9 +231,11 @@ const ApplyPage = () => {
         }
     };
 
+    // Replace the handleUpdatePostUrl function with this:
+
     const handleUpdatePostUrl = async () => {
-        if (!publicPostUrl.trim() || !submission) {
-            Alert.alert("Error", "Please enter a valid URL.");
+        if (!selectedVideoApproved || !submission) {
+            Alert.alert("Error", "Please select a video.");
             return;
         }
         setIsUpdatingUrl(true);
@@ -176,7 +243,9 @@ const ApplyPage = () => {
             const { error: updateError } = await supabase
                 .from('content_submissions')
                 .update({
-                    public_post_url: publicPostUrl,
+                    video_id: selectedVideoApproved.id,
+                    platform: selectedVideoApproved.platform,
+                    public_post_url: selectedVideoApproved.url,
                     status: 'posted_live',
                     posted_at: new Date().toISOString(),
                 })
@@ -184,7 +253,8 @@ const ApplyPage = () => {
 
             if (updateError) throw updateError;
 
-            Alert.alert("Success!", "Your post URL has been submitted.");
+            Alert.alert("Success!", "Your post has been submitted and is now live!");
+
             // Refresh submission data
             const { data } = await supabase
                 .from('content_submissions')
@@ -195,12 +265,13 @@ const ApplyPage = () => {
 
         } catch (err) {
             const error = err as Error;
-            console.error("URL update failed:", error.message);
+            console.error("Video selection failed:", error.message);
             Alert.alert("Update Failed", "There was an error. Please try again.");
         } finally {
             setIsUpdatingUrl(false);
         }
     };
+
 
     const uploadVideoToStorage = async (asset: ImagePicker.ImagePickerAsset) => {
         if (!profile) return null;
@@ -392,23 +463,103 @@ const ApplyPage = () => {
 
                         <View className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
                             <Text className="font-bold text-blue-900 mb-2">⏰ Action Required</Text>
-                            <Text className="text-gray-700 mb-1">Post your video on {campaign.target_platforms?.join(', ') || 'the platform'} within 24 hours.</Text>
+                            <Text className="text-gray-700 mb-1">
+                                Post your video on {campaign.target_platforms?.join(', ') || 'the platform'} within 24 hours,
+                                then select it from your videos below.
+                            </Text>
                             {submission.approved_at && (
                                 <Text className="text-sm text-red-600 font-semibold">{getTimeRemaining(submission.approved_at)}</Text>
                             )}
                         </View>
 
-                        <Text className="text-lg font-semibold mb-2">Post URL</Text>
-                        <Text className="text-sm text-gray-600 mb-2">After posting, paste the link to your public post here:</Text>
+                        {/* Platform Tabs */}
+                        {campaign.target_platforms && campaign.target_platforms.length > 0 && (
+                            <View className="mb-4">
+                                <Text className="text-lg font-semibold mb-2">Select Platform:</Text>
+                                <View className="flex-row">
+                                    {campaign.target_platforms.map((platform) => (
+                                        <Pressable
+                                            key={platform}
+                                            onPress={() => setSelectedPlatform(platform)}
+                                            className={`flex-1 py-3 rounded-lg mr-2 ${selectedPlatform === platform
+                                                ? 'bg-blue-600'
+                                                : 'bg-white border border-gray-300'
+                                                }`}
+                                        >
+                                            <Text
+                                                className={`text-center font-semibold capitalize ${selectedPlatform === platform ? 'text-white' : 'text-gray-700'
+                                                    }`}
+                                            >
+                                                {platform}
+                                            </Text>
+                                        </Pressable>
+                                    ))}
+                                </View>
+                            </View>
+                        )}
 
-                        <TextInput
-                            value={publicPostUrl}
-                            onChangeText={setPublicPostUrl}
-                            placeholder="https://tiktok.com/@user/video/..."
-                            className="border border-gray-300 rounded-lg p-3 mb-4 bg-white"
-                        />
+                        {/* Video List */}
+                        <Text className="text-lg font-semibold mb-2">Select Your Posted Video:</Text>
+
+                        {loadingVideos ? (
+                            <View className="items-center justify-center py-8">
+                                <ActivityIndicator size="large" color="#3B82F6" />
+                                <Text className="text-gray-600 mt-2">Loading your {selectedPlatform} videos...</Text>
+                            </View>
+                        ) : videos.length === 0 ? (
+                            <View className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
+                                <Text className="text-gray-700">
+                                    No videos found. Make sure you've posted the video on {selectedPlatform} and
+                                    connected your {selectedPlatform} account.
+                                </Text>
+                            </View>
+                        ) : (
+                            <View className="mb-4">
+                                {videos.map((video) => (
+                                    <Pressable
+                                        key={video.id}
+                                        onPress={() => setSelectedVideoApproved(video)}
+                                        className={`mb-3 bg-white rounded-lg overflow-hidden border-2 ${selectedVideoApproved?.id === video.id ? 'border-blue-500' : 'border-gray-200'
+                                            }`}
+                                    >
+                                        <View className="flex-row">
+                                            <Image
+                                                source={{ uri: video.thumbnail_url }}
+                                                className="w-32 h-24"
+                                                resizeMode="cover"
+                                            />
+                                            <View className="flex-1 p-3">
+                                                <Text className="font-semibold text-sm mb-1" numberOfLines={2}>
+                                                    {video.title}
+                                                </Text>
+                                                <View className="flex-row items-center mt-auto">
+                                                    <View className="flex-row items-center mr-3">
+                                                        <Feather name="eye" size={14} color="#6B7280" />
+                                                        <Text className="text-xs text-gray-600 ml-1">
+                                                            {video.view_count?.toLocaleString() || '0'}
+                                                        </Text>
+                                                    </View>
+                                                    <View className="flex-row items-center">
+                                                        <Feather name="heart" size={14} color="#6B7280" />
+                                                        <Text className="text-xs text-gray-600 ml-1">
+                                                            {video.like_count?.toLocaleString() || '0'}
+                                                        </Text>
+                                                    </View>
+                                                </View>
+                                            </View>
+                                            {selectedVideoApproved?.id === video.id && (
+                                                <View className="absolute top-2 right-2 bg-blue-500 rounded-full p-1">
+                                                    <Feather name="check" size={16} color="white" />
+                                                </View>
+                                            )}
+                                        </View>
+                                    </Pressable>
+                                ))}
+                            </View>
+                        )}
                     </>
                 );
+
 
             case 'posted_live':
             case 'completed':
@@ -524,14 +675,17 @@ const ApplyPage = () => {
         if (submission.status === 'approved') {
             return (
                 <Pressable
-                    disabled={!publicPostUrl.trim() || isUpdatingUrl}
-                    className={`py-4 rounded-xl items-center justify-center shadow-lg ${(!publicPostUrl.trim() || isUpdatingUrl) ? 'bg-gray-400' : 'bg-green-600'}`}
+                    disabled={!selectedVideoApproved || isUpdatingUrl}
+                    className={`py-4 rounded-xl items-center justify-center shadow-lg ${(!selectedVideoApproved || isUpdatingUrl) ? 'bg-gray-400' : 'bg-green-600'
+                        }`}
                     onPress={handleUpdatePostUrl}
                 >
                     {isUpdatingUrl ? (
                         <ActivityIndicator color="white" />
                     ) : (
-                        <Text className="text-white text-lg font-bold">Submit Post URL</Text>
+                        <Text className="text-white text-lg font-bold">
+                            {selectedVideoApproved ? 'Submit Selected Video' : 'Select a Video'}
+                        </Text>
                     )}
                 </Pressable>
             );

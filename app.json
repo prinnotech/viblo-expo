@@ -4,9 +4,6 @@
         "userInterfaceStyle": "automatic",
         "orientation": "default",
         "icon": "./assets/icon.png",
-        "web": {
-            "output": "server"
-        },
         "plugins": [
             [
                 "expo-router",
