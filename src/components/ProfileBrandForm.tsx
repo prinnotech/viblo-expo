@@ -19,6 +19,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { registerForPushNotifications } from '@/hooks/usePushNotifications';
 import { Profile } from '@/lib/db_interface';
 import { useTheme } from '@/contexts/ThemeContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const FormInput = ({ label, value, onChangeText, placeholder, multiline = false }: {
     label: string;
@@ -54,6 +55,7 @@ const ProfileBrandForm = ({ profile }: { profile: Profile }) => {
     const router = useRouter();
     const { session } = useAuth();
     const { theme } = useTheme();
+    const { t } = useLanguage();
 
     const [companyName, setCompanyName] = useState('');
     const [industry, setIndustry] = useState('');
@@ -79,7 +81,7 @@ const ProfileBrandForm = ({ profile }: { profile: Profile }) => {
     const pickImage = async () => {
         const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
         if (status !== 'granted') {
-            Alert.alert('Permission needed', 'We need access to your photos to upload an avatar.');
+            Alert.alert(t('profileBrandForm.permission_needed'), t('profileBrandForm.permission_needed_description'));
             return;
         }
 
@@ -99,7 +101,7 @@ const ProfileBrandForm = ({ profile }: { profile: Profile }) => {
         if (!session?.user) return;
 
         if (!companyName.trim()) {
-            Alert.alert('Validation Error', 'Company name is required');
+            Alert.alert(t('profileBrandForm.validation_error'), t('profileBrandForm.company_name_required'));
             return;
         }
 
@@ -144,11 +146,11 @@ const ProfileBrandForm = ({ profile }: { profile: Profile }) => {
 
             if (updateError) throw updateError;
 
-            Alert.alert("Success", "Your profile has been updated.");
+            Alert.alert(t('profileBrandForm.success'), t('profileBrandForm.profile_updated'));
             router.back();
         } catch (error: any) {
             console.error('Error:', error);
-            Alert.alert("Error", error.message || "Failed to update profile.");
+            Alert.alert(t('profileBrandForm.error'), error.message || t('profileBrandForm.failed_update_profile'));
         } finally {
             setUpdating(false);
         }
@@ -166,13 +168,13 @@ const ProfileBrandForm = ({ profile }: { profile: Profile }) => {
                     .eq('id', session?.user?.id);
 
                 if (error) {
-                    Alert.alert('Error', 'Failed to enable notifications');
+                    Alert.alert(t('profileBrandForm.error'), t('profileBrandForm.failed_enable_notifications'));
                     setNotificationsEnabled(false);
                 } else {
-                    Alert.alert('Success', 'Notifications enabled!');
+                    Alert.alert(t('profileBrandForm.success'), t('profileBrandForm.notifications_enabled'));
                 }
             } else {
-                Alert.alert('Permission Denied', 'Please enable notifications in your device settings');
+                Alert.alert(t('profileBrandForm.permission_denied'), t('profileBrandForm.enable_notifications_settings'));
                 setNotificationsEnabled(false);
             }
         } else {
@@ -180,7 +182,7 @@ const ProfileBrandForm = ({ profile }: { profile: Profile }) => {
                 .from('profiles')
                 .update({ push_token: null })
                 .eq('id', session?.user?.id);
-            Alert.alert('Success', 'Notifications disabled');
+            Alert.alert(t('profileBrandForm.success'), t('profileBrandForm.notifications_disabled'));
         }
     };
 
@@ -194,50 +196,50 @@ const ProfileBrandForm = ({ profile }: { profile: Profile }) => {
                         className="w-28 h-28 rounded-full"
                     />
                     <TouchableOpacity onPress={pickImage} className="mt-4">
-                        <Text className="font-semibold" style={{ color: theme.primary }}>Change Photo</Text>
+                        <Text className="font-semibold" style={{ color: theme.primary }}>{t('profileBrandForm.change_photo')}</Text>
                     </TouchableOpacity>
                 </View>
 
                 {/* Form Inputs */}
                 <FormInput
-                    label="Company Name *"
+                    label={t('profileBrandForm.company_name')}
                     value={companyName}
                     onChangeText={setCompanyName}
-                    placeholder="Your company name"
+                    placeholder={t('profileBrandForm.company_name_placeholder')}
                 />
                 <FormInput
-                    label="Industry"
+                    label={t('profileBrandForm.industry')}
                     value={industry}
                     onChangeText={setIndustry}
-                    placeholder="e.g., Technology, Fashion, Food"
+                    placeholder={t('profileBrandForm.industry_placeholder')}
                 />
                 <FormInput
-                    label="Username"
+                    label={t('profileBrandForm.username')}
                     value={username}
                     onChangeText={setUsername}
-                    placeholder="Your public username"
+                    placeholder={t('profileBrandForm.username_placeholder')}
                 />
                 <FormInput
-                    label="Bio"
+                    label={t('profileBrandForm.bio')}
                     value={bio}
                     onChangeText={setBio}
-                    placeholder="Tell us about your company"
+                    placeholder={t('profileBrandForm.bio_placeholder')}
                     multiline
                 />
                 <FormInput
-                    label="Website"
+                    label={t('profileBrandForm.website')}
                     value={website}
                     onChangeText={setWebsite}
-                    placeholder="https://yourcompany.com"
+                    placeholder={t('profileBrandForm.website_placeholder')}
                 />
 
                 {/* Notifications Toggle */}
                 <View className="mb-6 rounded-lg px-4 py-4" style={{ backgroundColor: theme.surface, borderColor: theme.borderLight, borderWidth: 1 }}>
                     <View className="flex-row justify-between items-center">
                         <View className="flex-1 mr-4">
-                            <Text className="text-base font-semibold" style={{ color: theme.text }}>Push Notifications</Text>
+                            <Text className="text-base font-semibold" style={{ color: theme.text }}>{t('profileBrandForm.push_notifications')}</Text>
                             <Text className="text-sm mt-1" style={{ color: theme.textSecondary }}>
-                                Receive updates about campaigns and messages
+                                {t('profileBrandForm.push_notifications_description')}
                             </Text>
                         </View>
                         <Switch
@@ -261,7 +263,7 @@ const ProfileBrandForm = ({ profile }: { profile: Profile }) => {
                     ) : (
                         <>
                             <Feather name="save" size={18} color="#FFFFFF" />
-                            <Text className="text-base font-semibold ml-2" style={{ color: '#FFFFFF' }}>Save Changes</Text>
+                            <Text className="text-base font-semibold ml-2" style={{ color: '#FFFFFF' }}>{t('profileBrandForm.save_changes')}</Text>
                         </>
                     )}
                 </TouchableOpacity>

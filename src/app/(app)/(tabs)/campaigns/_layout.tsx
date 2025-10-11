@@ -1,9 +1,11 @@
 import { Stack } from 'expo-router';
 import React from 'react';
 import { useTheme } from '@/contexts/ThemeContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 export default function CampaignsLayout() {
     const { theme } = useTheme();
+    const { t } = useLanguage();
 
     return (
         <Stack
@@ -27,7 +29,7 @@ export default function CampaignsLayout() {
                 options={{
                     presentation: 'modal',
                     headerShown: true,
-                    title: 'Loading Campaign...',
+                    title: t('campaignsLayout.loading_campaign'),
                 }}
             />
 
@@ -37,7 +39,7 @@ export default function CampaignsLayout() {
                 options={{
                     presentation: 'modal',
                     headerShown: true,
-                    title: 'Apply to Campaign',
+                    title: t('campaignsLayout.apply_to_campaign'),
                 }}
             />
 
@@ -47,7 +49,7 @@ export default function CampaignsLayout() {
                 options={{
                     presentation: 'modal',
                     headerShown: true,
-                    title: 'Edit Campaign',
+                    title: t('campaignsLayout.edit_campaign'),
                 }}
             />
 
@@ -57,7 +59,7 @@ export default function CampaignsLayout() {
                 options={{
                     presentation: 'modal',
                     headerShown: true,
-                    title: 'Create Campaign',
+                    title: t('campaignsLayout.create_campaign'),
                 }}
             />
 
@@ -67,7 +69,7 @@ export default function CampaignsLayout() {
                 options={{
                     presentation: 'modal',
                     headerShown: false,
-                    title: 'Checkout',
+                    title: t('campaignsLayout.checkout'),
                 }}
             />
         </Stack>

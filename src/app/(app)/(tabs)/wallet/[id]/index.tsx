@@ -16,6 +16,7 @@ import { useRouter, useLocalSearchParams } from 'expo-router';
 import { PayoutMethodType } from '@/lib/enum_types';
 import { PayoutMethod } from '@/lib/db_interface';
 import { useTheme } from '@/contexts/ThemeContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const revolut_img = require('@/../assets/bank_icons/revolut.png');
 const wise_img = require('@/../assets/bank_icons/wise.png');
@@ -27,6 +28,7 @@ const PayoutMethodPage = () => {
     const router = useRouter();
     const { id } = useLocalSearchParams();
     const { theme } = useTheme();
+    const { t } = useLanguage();
 
     const [method, setMethod] = useState<PayoutMethod | null>(null);
     const [loading, setLoading] = useState(true);
@@ -62,7 +64,7 @@ const PayoutMethodPage = () => {
             populateFields(data);
         } catch (error) {
             console.error('Error fetching payout method:', error);
-            Alert.alert('Error', 'Failed to load payout method');
+            Alert.alert(t('walletId.error'), t('walletId.failed_load_payout_method'));
             router.back();
         } finally {
             setLoading(false);
@@ -114,13 +116,13 @@ const PayoutMethodPage = () => {
     const getMethodTitle = (type: PayoutMethodType) => {
         switch (type) {
             case 'paypal':
-                return 'PayPal';
+                return t('walletId.paypal');
             case 'wise':
-                return 'Wise';
+                return t('walletId.wise');
             case 'revolut':
-                return 'Revolut';
+                return t('walletId.revolut');
             case 'bank_transfer':
-                return 'Bank Transfer';
+                return t('walletId.bank_transfer');
         }
     };
 
@@ -135,7 +137,7 @@ const PayoutMethodPage = () => {
             switch (method.method_type) {
                 case 'paypal':
                     if (!name || !email) {
-                        Alert.alert('Error', 'Please fill in all required fields');
+                        Alert.alert(t('walletId.error'), t('walletId.fill_required_fields'));
                         setSubmitting(false);
                         return;
                     }
@@ -143,7 +145,7 @@ const PayoutMethodPage = () => {
                     break;
                 case 'wise':
                     if (!name || !email || !tagId) {
-                        Alert.alert('Error', 'Please fill in all required fields');
+                        Alert.alert(t('walletId.error'), t('walletId.fill_required_fields'));
                         setSubmitting(false);
                         return;
                     }
@@ -151,7 +153,7 @@ const PayoutMethodPage = () => {
                     break;
                 case 'revolut':
                     if (!name || !email || !tagId) {
-                        Alert.alert('Error', 'Please fill in all required fields');
+                        Alert.alert(t('walletId.error'), t('walletId.fill_required_fields'));
                         setSubmitting(false);
                         return;
                     }
@@ -159,7 +161,7 @@ const PayoutMethodPage = () => {
                     break;
                 case 'bank_transfer':
                     if (!iban || !accountOwner || !swift || !bankName || !bankAddress) {
-                        Alert.alert('Error', 'Please fill in all required fields');
+                        Alert.alert(t('walletId.error'), t('walletId.fill_required_fields'));
                         setSubmitting(false);
                         return;
                     }
@@ -183,13 +185,13 @@ const PayoutMethodPage = () => {
 
             if (error) throw error;
 
-            Alert.alert('Success', 'Payout method updated successfully', [
-                { text: 'OK', onPress: () => router.back() }
+            Alert.alert(t('walletId.success'), t('walletId.payout_method_updated'), [
+                { text: t('walletId.ok'), onPress: () => router.back() }
             ]);
 
         } catch (error) {
             console.error('Error updating payout method:', error);
-            Alert.alert('Error', 'Failed to update payout method. Please try again.');
+            Alert.alert(t('walletId.error'), t('walletId.failed_update'));
         } finally {
             setSubmitting(false);
         }
@@ -197,12 +199,12 @@ const PayoutMethodPage = () => {
 
     const handleDelete = () => {
         Alert.alert(
-            'Delete Payout Method',
-            'Are you sure you want to delete this payout method? This action cannot be undone.',
+            t('walletId.delete_payout_method'),
+            t('walletId.delete_confirm'),
             [
-                { text: 'Cancel', style: 'cancel' },
+                { text: t('walletId.cancel'), style: 'cancel' },
                 {
-                    text: 'Delete',
+                    text: t('walletId.delete'),
                     style: 'destructive',
                     onPress: async () => {
                         try {
@@ -213,12 +215,12 @@ const PayoutMethodPage = () => {
 
                             if (error) throw error;
 
-                            Alert.alert('Deleted', 'Payout method deleted successfully', [
-                                { text: 'OK', onPress: () => router.back() }
+                            Alert.alert(t('walletId.deleted'), t('walletId.payout_method_deleted'), [
+                                { text: t('walletId.ok'), onPress: () => router.back() }
                             ]);
                         } catch (error) {
                             console.error('Error deleting payout method:', error);
-                            Alert.alert('Error', 'Failed to delete payout method');
+                            Alert.alert(t('walletId.error'), t('walletId.failed_delete'));
                         }
                     }
                 }
@@ -246,7 +248,7 @@ const PayoutMethodPage = () => {
                     {method.is_primary && (
                         <View className="px-3 py-1 rounded-full" style={{ backgroundColor: theme.primaryLight }}>
                             <Text className="text-xs font-semibold" style={{ color: theme.primary }}>
-                                Primary Method
+                                {t('walletId.primary_method')}
                             </Text>
                         </View>
                     )}
@@ -254,38 +256,38 @@ const PayoutMethodPage = () => {
 
                 {/* Details Card */}
                 <View className="rounded-xl p-5 mb-4 border" style={{ backgroundColor: theme.surface, borderColor: theme.border }}>
-                    <Text className="text-lg font-semibold mb-4" style={{ color: theme.text }}>Details</Text>
+                    <Text className="text-lg font-semibold mb-4" style={{ color: theme.text }}>{t('walletId.details')}</Text>
 
                     {method.method_type === 'paypal' && (
                         <>
-                            <DetailRow label="Name" value={details.name} />
-                            <DetailRow label="Email" value={details.email} isLast />
+                            <DetailRow label={t('walletId.name')} value={details.name} />
+                            <DetailRow label={t('walletId.email')} value={details.email} isLast />
                         </>
                     )}
 
                     {method.method_type === 'wise' && (
                         <>
-                            <DetailRow label="Name" value={details.name} />
-                            <DetailRow label="Email" value={details.email} />
-                            <DetailRow label="Wise ID" value={details.wise_id} isLast />
+                            <DetailRow label={t('walletId.name')} value={details.name} />
+                            <DetailRow label={t('walletId.email')} value={details.email} />
+                            <DetailRow label={t('walletId.wise_id')} value={details.wise_id} isLast />
                         </>
                     )}
 
                     {method.method_type === 'revolut' && (
                         <>
-                            <DetailRow label="Name" value={details.name} />
-                            <DetailRow label="Email" value={details.email} />
-                            <DetailRow label="Revolut Tag" value={details.revolut_tag} isLast />
+                            <DetailRow label={t('walletId.name')} value={details.name} />
+                            <DetailRow label={t('walletId.email')} value={details.email} />
+                            <DetailRow label={t('walletId.revolut_tag')} value={details.revolut_tag} isLast />
                         </>
                     )}
 
                     {method.method_type === 'bank_transfer' && (
                         <>
-                            <DetailRow label="Account Owner" value={details.account_owner} />
-                            <DetailRow label="IBAN" value={details.iban} />
-                            <DetailRow label="SWIFT/BIC" value={details.swift_bic} />
-                            <DetailRow label="Bank Name" value={details.bank_name} />
-                            <DetailRow label="Bank Address" value={details.bank_address} isLast />
+                            <DetailRow label={t('walletId.account_owner')} value={details.account_owner} />
+                            <DetailRow label={t('walletId.iban')} value={details.iban} />
+                            <DetailRow label={t('walletId.swift_bic')} value={details.swift_bic} />
+                            <DetailRow label={t('walletId.bank_name')} value={details.bank_name} />
+                            <DetailRow label={t('walletId.bank_address')} value={details.bank_address} isLast />
                         </>
                     )}
                 </View>
@@ -298,7 +300,7 @@ const PayoutMethodPage = () => {
                     activeOpacity={0.8}
                 >
                     <Text className="font-semibold text-base text-center" style={{ color: theme.surface }}>
-                        Edit Details
+                        {t('walletId.edit_details')}
                     </Text>
                 </TouchableOpacity>
 
@@ -309,7 +311,7 @@ const PayoutMethodPage = () => {
                     activeOpacity={0.8}
                 >
                     <Text className="font-semibold text-base text-center" style={{ color: theme.error }}>
-                        Delete Method
+                        {t('walletId.delete_method')}
                     </Text>
                 </TouchableOpacity>
             </View>
@@ -322,13 +324,13 @@ const PayoutMethodPage = () => {
         return (
             <View className="px-4 py-6">
                 <Text className="text-lg font-semibold mb-4" style={{ color: theme.text }}>
-                    Edit Payment Details
+                    {t('walletId.edit_payment_details')}
                 </Text>
 
                 {method.method_type === 'paypal' && (
                     <View className="flex-col gap-2 space-y-4">
                         <View>
-                            <Text className="text-sm font-medium mb-2" style={{ color: theme.textSecondary }}>Full Name *</Text>
+                            <Text className="text-sm font-medium mb-2" style={{ color: theme.textSecondary }}>{t('walletId.full_name')}</Text>
                             <TextInput
                                 value={name}
                                 onChangeText={setName}
@@ -338,7 +340,7 @@ const PayoutMethodPage = () => {
                             />
                         </View>
                         <View>
-                            <Text className="text-sm font-medium mb-2" style={{ color: theme.textSecondary }}>Email *</Text>
+                            <Text className="text-sm font-medium mb-2" style={{ color: theme.textSecondary }}>{t('walletId.email_label')}</Text>
                             <TextInput
                                 value={email}
                                 onChangeText={setEmail}
@@ -355,7 +357,7 @@ const PayoutMethodPage = () => {
                 {(method.method_type === 'wise' || method.method_type === 'revolut') && (
                     <View className="flex-col gap-2 space-y-4">
                         <View>
-                            <Text className="text-sm font-medium mb-2" style={{ color: theme.textSecondary }}>Full Name *</Text>
+                            <Text className="text-sm font-medium mb-2" style={{ color: theme.textSecondary }}>{t('walletId.full_name')}</Text>
                             <TextInput
                                 value={name}
                                 onChangeText={setName}
@@ -365,7 +367,7 @@ const PayoutMethodPage = () => {
                             />
                         </View>
                         <View>
-                            <Text className="text-sm font-medium mb-2" style={{ color: theme.textSecondary }}>Email *</Text>
+                            <Text className="text-sm font-medium mb-2" style={{ color: theme.textSecondary }}>{t('walletId.email_label')}</Text>
                             <TextInput
                                 value={email}
                                 onChangeText={setEmail}
@@ -378,7 +380,7 @@ const PayoutMethodPage = () => {
                         </View>
                         <View>
                             <Text className="text-sm font-medium mb-2" style={{ color: theme.textSecondary }}>
-                                {method.method_type === 'wise' ? 'Wise ID' : 'Revolut Tag'} *
+                                {method.method_type === 'wise' ? t('walletId.wise_id_label') : t('walletId.revolut_tag_label')}
                             </Text>
                             <TextInput
                                 value={tagId}
@@ -395,7 +397,7 @@ const PayoutMethodPage = () => {
                 {method.method_type === 'bank_transfer' && (
                     <View className="flex-col gap-2 space-y-4">
                         <View>
-                            <Text className="text-sm font-medium mb-2" style={{ color: theme.textSecondary }}>Account Owner *</Text>
+                            <Text className="text-sm font-medium mb-2" style={{ color: theme.textSecondary }}>{t('walletId.account_owner_label')}</Text>
                             <TextInput
                                 value={accountOwner}
                                 onChangeText={setAccountOwner}
@@ -405,7 +407,7 @@ const PayoutMethodPage = () => {
                             />
                         </View>
                         <View>
-                            <Text className="text-sm font-medium mb-2" style={{ color: theme.textSecondary }}>IBAN *</Text>
+                            <Text className="text-sm font-medium mb-2" style={{ color: theme.textSecondary }}>{t('walletId.iban_label')}</Text>
                             <TextInput
                                 value={iban}
                                 onChangeText={setIban}
@@ -416,7 +418,7 @@ const PayoutMethodPage = () => {
                             />
                         </View>
                         <View>
-                            <Text className="text-sm font-medium mb-2" style={{ color: theme.textSecondary }}>SWIFT/BIC *</Text>
+                            <Text className="text-sm font-medium mb-2" style={{ color: theme.textSecondary }}>{t('walletId.swift_bic_label')}</Text>
                             <TextInput
                                 value={swift}
                                 onChangeText={setSwift}
@@ -427,7 +429,7 @@ const PayoutMethodPage = () => {
                             />
                         </View>
                         <View>
-                            <Text className="text-sm font-medium mb-2" style={{ color: theme.textSecondary }}>Bank Name *</Text>
+                            <Text className="text-sm font-medium mb-2" style={{ color: theme.textSecondary }}>{t('walletId.bank_name_label')}</Text>
                             <TextInput
                                 value={bankName}
                                 onChangeText={setBankName}
@@ -437,7 +439,7 @@ const PayoutMethodPage = () => {
                             />
                         </View>
                         <View>
-                            <Text className="text-sm font-medium mb-2" style={{ color: theme.textSecondary }}>Bank Address *</Text>
+                            <Text className="text-sm font-medium mb-2" style={{ color: theme.textSecondary }}>{t('walletId.bank_address_label')}</Text>
                             <TextInput
                                 value={bankAddress}
                                 onChangeText={setBankAddress}
@@ -467,7 +469,7 @@ const PayoutMethodPage = () => {
                     >
                         {isPrimary && <Feather name="check" size={16} color={theme.surface} />}
                     </View>
-                    <Text className="font-medium" style={{ color: theme.text }}>Set as primary payout method</Text>
+                    <Text className="font-medium" style={{ color: theme.text }}>{t('walletId.set_as_primary')}</Text>
                 </TouchableOpacity>
             </View>
         );
@@ -503,7 +505,7 @@ const PayoutMethodPage = () => {
                             <ActivityIndicator color={theme.surface} />
                         ) : (
                             <Text className="font-semibold text-base" style={{ color: theme.surface }}>
-                                Save Changes
+                                {t('walletId.save_changes')}
                             </Text>
                         )}
                     </TouchableOpacity>
@@ -518,7 +520,7 @@ const PayoutMethodPage = () => {
                         activeOpacity={0.8}
                     >
                         <Text className="font-semibold text-base text-center" style={{ color: theme.textSecondary }}>
-                            Cancel
+                            {t('walletId.cancel')}
                         </Text>
                     </TouchableOpacity>
                 </View>
@@ -538,4 +540,3 @@ const DetailRow = ({ label, value, isLast = false }: { label: string; value: str
 };
 
 export default PayoutMethodPage;
-

@@ -5,6 +5,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { supabase } from '@/lib/supabase';
 import { Feather } from '@expo/vector-icons';
 import { useTheme } from '@/contexts/ThemeContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface PaymentDetail {
     id: string;
@@ -23,6 +24,7 @@ const PaymentDetailPage = () => {
     const router = useRouter();
     const { id } = useLocalSearchParams();
     const { theme } = useTheme();
+    const { t } = useLanguage();
     const paymentId = Array.isArray(id) ? id[0] : id;
 
     const [payment, setPayment] = useState<PaymentDetail | null>(null);
@@ -93,7 +95,7 @@ const PaymentDetailPage = () => {
     if (!payment) {
         return (
             <SafeAreaView className="flex-1 justify-center items-center p-4" style={{ backgroundColor: theme.background }}>
-                <Text style={{ color: theme.error }}>Payment not found</Text>
+                <Text style={{ color: theme.error }}>{t('profilePaymentsId.payment_not_found')}</Text>
             </SafeAreaView>
         );
     }
@@ -120,58 +122,58 @@ const PaymentDetailPage = () => {
                     <Text className="text-2xl font-bold mb-1" style={{ color: theme.text }}>
                         {formatCurrency(parseFloat(payment.amount as any))}
                     </Text>
-                    <Text className="text-base capitalize" style={{ color: theme.textSecondary }}>{payment.status}</Text>
+                    <Text className="text-base capitalize" style={{ color: theme.textSecondary }}>{t(`profilePaymentsId.${payment.status}`)}</Text>
                 </View>
 
                 {/* Payment Details */}
                 <View className="rounded-2xl p-4 mb-4 border" style={{ backgroundColor: theme.surface, borderColor: theme.border }}>
-                    <Text className="text-lg font-bold mb-4" style={{ color: theme.text }}>Payment Details</Text>
+                    <Text className="text-lg font-bold mb-4" style={{ color: theme.text }}>{t('profilePaymentsId.payment_details')}</Text>
 
                     <View className="mb-3 pb-3 border-b" style={{ borderColor: theme.border }}>
-                        <Text className="text-sm mb-1" style={{ color: theme.textSecondary }}>Campaign</Text>
+                        <Text className="text-sm mb-1" style={{ color: theme.textSecondary }}>{t('profilePaymentsId.campaign')}</Text>
                         <TouchableOpacity
                             onPress={() => payment.campaign && router.push(`/(tabs)/campaigns/${payment.campaign.id}`)}
                         >
                             <Text className="text-base font-semibold" style={{ color: theme.primary }}>
-                                {payment.campaign?.title || 'Deleted Campaign'}
+                                {payment.campaign?.title || t('profilePaymentsId.deleted_campaign')}
                             </Text>
                         </TouchableOpacity>
                     </View>
 
                     <View className="mb-3 pb-3 border-b" style={{ borderColor: theme.border }}>
-                        <Text className="text-sm mb-1" style={{ color: theme.textSecondary }}>Transaction ID</Text>
+                        <Text className="text-sm mb-1" style={{ color: theme.textSecondary }}>{t('profilePaymentsId.transaction_id')}</Text>
                         <Text className="text-base font-mono" style={{ color: theme.text }}>
                             {payment.processor_payment_id}
                         </Text>
                     </View>
 
                     <View className="mb-3 pb-3 border-b" style={{ borderColor: theme.border }}>
-                        <Text className="text-sm mb-1" style={{ color: theme.textSecondary }}>Date</Text>
+                        <Text className="text-sm mb-1" style={{ color: theme.textSecondary }}>{t('profilePaymentsId.date')}</Text>
                         <Text className="text-base" style={{ color: theme.text }}>{formatDate(payment.created_at)}</Text>
                     </View>
 
                     <View>
-                        <Text className="text-sm mb-1" style={{ color: theme.textSecondary }}>Payment Method</Text>
-                        <Text className="text-base" style={{ color: theme.text }}>Credit Card (Stripe)</Text>
+                        <Text className="text-sm mb-1" style={{ color: theme.textSecondary }}>{t('profilePaymentsId.payment_method')}</Text>
+                        <Text className="text-base" style={{ color: theme.text }}>{t('profilePaymentsId.credit_card_stripe')}</Text>
                     </View>
                 </View>
 
                 {/* Breakdown */}
                 <View className="rounded-2xl p-4 border" style={{ backgroundColor: theme.surface, borderColor: theme.border }}>
-                    <Text className="text-lg font-bold mb-4" style={{ color: theme.text }}>Breakdown</Text>
+                    <Text className="text-lg font-bold mb-4" style={{ color: theme.text }}>{t('profilePaymentsId.breakdown')}</Text>
 
                     <View className="flex-row justify-between mb-2">
-                        <Text className="text-base" style={{ color: theme.textSecondary }}>Campaign Budget</Text>
+                        <Text className="text-base" style={{ color: theme.textSecondary }}>{t('profilePaymentsId.campaign_budget')}</Text>
                         <Text className="text-base" style={{ color: theme.text }}>{formatCurrency(subtotal)}</Text>
                     </View>
 
                     <View className="flex-row justify-between mb-3 pb-3 border-b" style={{ borderColor: theme.border }}>
-                        <Text className="text-base" style={{ color: theme.textSecondary }}>Processing Fee (3%)</Text>
+                        <Text className="text-base" style={{ color: theme.textSecondary }}>{t('profilePaymentsId.processing_fee')}</Text>
                         <Text className="text-base" style={{ color: theme.text }}>{formatCurrency(processingFee)}</Text>
                     </View>
 
                     <View className="flex-row justify-between">
-                        <Text className="text-lg font-bold" style={{ color: theme.text }}>Total</Text>
+                        <Text className="text-lg font-bold" style={{ color: theme.text }}>{t('profilePaymentsId.total')}</Text>
                         <Text className="text-lg font-bold" style={{ color: theme.text }}>
                             {formatCurrency(parseFloat(payment.amount as any))}
                         </Text>

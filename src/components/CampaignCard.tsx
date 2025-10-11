@@ -5,6 +5,7 @@ import AntDesign from '@expo/vector-icons/AntDesign';
 import { supabase } from '@/lib/supabase';
 import { Profile } from '@/lib/db_interface';
 import { useTheme } from '@/contexts/ThemeContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 // Updated Campaign type to include total_paid
 export type Campaign = {
@@ -22,6 +23,7 @@ export type Campaign = {
 // --- New Progress Bar Component ---
 const BudgetProgressBar = ({ total, paid }: { total: number; paid: number }) => {
     const { theme } = useTheme();
+    const { t } = useLanguage();
     // FIX: Default 'paid' to 0 if it's null or undefined to prevent NaN result.
     const percentage = total > 0 ? ((paid || 0) / total) * 100 : 0;
 
@@ -35,7 +37,7 @@ const BudgetProgressBar = ({ total, paid }: { total: number; paid: number }) => 
     return (
         <View className="mb-4">
             <View className="flex-row justify-between items-center mb-1">
-                <Text className="text-xs font-medium" style={{ color: theme.textTertiary }}>Budget Used  ${paid}</Text>
+                <Text className="text-xs font-medium" style={{ color: theme.textTertiary }}>{t('campaignCard.budget_used')}  ${paid}</Text>
                 <Text className="text-xs font-bold" style={{ color: theme.textSecondary }}>{Math.round(percentage)}%</Text>
             </View>
             <View className="w-full rounded-full h-2.5" style={{ backgroundColor: theme.border }}>
@@ -53,6 +55,7 @@ const CampaignCard = ({ campaign }: { campaign: Campaign }) => {
     const [brand, setBrand] = useState<Profile | null>(null);
     const [loading, setLoading] = useState(true);
     const { theme } = useTheme();
+    const { t } = useLanguage();
 
     useEffect(() => {
         const fetchBrandProfile = async () => {
@@ -110,7 +113,7 @@ const CampaignCard = ({ campaign }: { campaign: Campaign }) => {
                 {/* Card Body */}
                 <View className="p-4">
                     <Text className="text-base mb-4" style={{ color: theme.textSecondary }} numberOfLines={2}>
-                        {campaign.description || 'No description provided.'}
+                        {campaign.description || t('campaignCard.no_description')}
                     </Text>
                     {campaign.target_niches && campaign.target_niches.length > 0 && (
                         <View className="flex-row flex-wrap gap-2 mb-4">
@@ -133,18 +136,18 @@ const CampaignCard = ({ campaign }: { campaign: Campaign }) => {
                             <Text className="text-sm font-semibold" style={{ color: theme.text }}>
                                 {formatCurrency(campaign.total_budget, { notation: 'compact' })}
                             </Text>
-                            <Text className="text-xs" style={{ color: theme.textTertiary }}>Budget</Text>
+                            <Text className="text-xs" style={{ color: theme.textTertiary }}>{t('campaignCard.budget')}</Text>
                         </View>
                         {/* Rate Per View */}
                         <View>
                             <Text className="text-sm font-semibold" style={{ color: theme.text }}>
                                 {formatCurrency(campaign.rate_per_view, { maximumFractionDigits: 4 })}
                             </Text>
-                            <Text className="text-xs" style={{ color: theme.textTertiary }}>Rate/View</Text>
+                            <Text className="text-xs" style={{ color: theme.textTertiary }}>{t('campaignCard.rate_view')}</Text>
                         </View>
                     </View>
                     <View className="flex-row items-center gap-2">
-                        <Text className="text-sm" style={{ color: theme.textSecondary }}>View Details</Text>
+                        <Text className="text-sm" style={{ color: theme.textSecondary }}>{t('campaignCard.view_details')}</Text>
                         <AntDesign name="arrow-right" size={16} color={theme.textSecondary} />
                     </View>
                 </View>

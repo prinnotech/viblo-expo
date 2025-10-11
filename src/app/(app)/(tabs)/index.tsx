@@ -11,6 +11,7 @@ import { useCreators } from '@/hooks/useCreators';
 import { Influencer } from '@/lib/enum_types';
 import CreatorCard from '@/components/CreatorCard';
 import { useTheme } from '@/contexts/ThemeContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 // Main Page Component
 export default function Page() {
@@ -30,6 +31,7 @@ export default function Page() {
 function InfluencerDiscover() {
     const { profile } = useAuth();
     const { theme } = useTheme();
+    const { t } = useLanguage();
     const {
         campaigns,
         loading,
@@ -66,7 +68,7 @@ function InfluencerDiscover() {
 
     const renderListEmptyComponent = () => (
         <View className="flex-1 justify-center items-center mt-12">
-            {!loading && <Text className="text-base" style={{ color: theme.textTertiary }}>No campaigns found. Try adjusting your filters.</Text>}
+            {!loading && <Text className="text-base" style={{ color: theme.textTertiary }}>{t('tabsIndex.no_campaigns_found')}</Text>}
         </View>
     );
 
@@ -77,10 +79,17 @@ function InfluencerDiscover() {
 
     return (
         <View className="flex-1">
+
+            {/* Header */}
+            <View className="p-4 border-b" style={{ backgroundColor: theme.surface, borderColor: theme.border }}>
+                <Text className="text-2xl font-bold mb-1" style={{ color: theme.text }}>{t('tabsIndex.discover_campaigns')}</Text>
+                <Text className="text-sm" style={{ color: theme.textTertiary }}>{t('tabsIndex.find_perfect_campaign')}</Text>
+            </View>
+
             {/* Header with Search and Filters */}
             <View className="p-4 border-b" style={{ backgroundColor: theme.surface, borderColor: theme.border }}>
                 <TextInput
-                    placeholder="Search campaigns, brands..."
+                    placeholder={t('tabsIndex.search_placeholder_campaigns')}
                     value={searchTerm}
                     onChangeText={setSearchTerm}
                     className="px-4 py-3 rounded-full text-base"
@@ -90,12 +99,12 @@ function InfluencerDiscover() {
                 <View className="flex-row justify-around mt-3">
                     <TouchableOpacity onPress={() => setModalVisible(true)} className="flex-row items-center">
                         <AntDesign name="filter" size={18} color={theme.textSecondary} />
-                        <Text className="ml-1.5" style={{ color: theme.textSecondary }}>Filter Niches</Text>
+                        <Text className="ml-1.5" style={{ color: theme.textSecondary }}>{t('tabsIndex.filter_niches')}</Text>
                     </TouchableOpacity>
                     <TouchableOpacity onPress={() => setSort(sort === 'created_at' ? 'rate_per_view' : 'created_at')} className="flex-row items-center">
                         <AntDesign name="swap" size={18} color={theme.textSecondary} />
                         <Text className="ml-1.5" style={{ color: theme.textSecondary }}>
-                            Sort by: {sort === 'created_at' ? 'Newest' : 'Rate'}
+                            {t('tabsIndex.sort_by')} {sort === 'created_at' ? t('tabsIndex.newest') : t('tabsIndex.rate')}
                         </Text>
                     </TouchableOpacity>
                 </View>
@@ -127,7 +136,7 @@ function InfluencerDiscover() {
             >
                 <View className="flex-1 justify-end" style={{ backgroundColor: theme.overlay }}>
                     <View className="rounded-t-2xl p-5" style={{ backgroundColor: theme.surface }}>
-                        <Text className="text-lg font-bold mb-5" style={{ color: theme.text }}>Select Niches</Text>
+                        <Text className="text-lg font-bold mb-5" style={{ color: theme.text }}>{t('tabsIndex.select_niches')}</Text>
                         <View className="flex-row flex-wrap gap-2.5 mb-4">
                             {allNiches.map(niche => (
                                 <TouchableOpacity
@@ -140,7 +149,7 @@ function InfluencerDiscover() {
                                 </TouchableOpacity>
                             ))}
                         </View>
-                        <Button title="Done" onPress={() => setModalVisible(false)} color={theme.primary} />
+                        <Button title={t('tabsIndex.done')} onPress={() => setModalVisible(false)} color={theme.primary} />
                     </View>
                 </View>
             </Modal>
@@ -152,6 +161,7 @@ function InfluencerDiscover() {
 function BrandDashboard() {
     const { profile } = useAuth();
     const { theme } = useTheme();
+    const { t } = useLanguage();
     const {
         influencers,
         loading,
@@ -196,8 +206,8 @@ function BrandDashboard() {
         <View className="flex-1" style={{ backgroundColor: theme.background }}>
             {/* Header */}
             <View className="p-4 border-b" style={{ backgroundColor: theme.surface, borderColor: theme.border }}>
-                <Text className="text-2xl font-bold mb-1" style={{ color: theme.text }}>Discover Creators</Text>
-                <Text className="text-sm" style={{ color: theme.textTertiary }}>Find the perfect influencers for your brand</Text>
+                <Text className="text-2xl font-bold mb-1" style={{ color: theme.text }}>{t('tabsIndex.discover_creators')}</Text>
+                <Text className="text-sm" style={{ color: theme.textTertiary }}>{t('tabsIndex.find_perfect_influencers')}</Text>
             </View>
 
             {/* Search Bar */}
@@ -207,7 +217,7 @@ function BrandDashboard() {
                     <TextInput
                         className="flex-1 ml-2 text-base"
                         style={{ color: theme.text }}
-                        placeholder="Search by name, username, or bio..."
+                        placeholder={t('tabsIndex.search_placeholder_creators')}
                         placeholderTextColor={theme.textTertiary}
                         value={searchTerm}
                         onChangeText={setSearchTerm}
@@ -223,11 +233,11 @@ function BrandDashboard() {
             {/* Filters */}
             <View className="border-b px-4 py-3" style={{ backgroundColor: theme.surface, borderColor: theme.border }}>
                 <View className="flex-row justify-between items-center mb-3">
-                    <Text className="text-sm font-semibold" style={{ color: theme.textSecondary }}>FILTERS</Text>
+                    <Text className="text-sm font-semibold" style={{ color: theme.textSecondary }}>{t('tabsIndex.filters')}</Text>
                     {(selectedNiches.length > 0 || searchTerm.length > 0) && (
                         <TouchableOpacity onPress={clearFilters} className="flex-row items-center gap-1">
                             <AntDesign name="close" size={14} color={theme.error} />
-                            <Text className="text-sm font-medium" style={{ color: theme.error }}>Clear All</Text>
+                            <Text className="text-sm font-medium" style={{ color: theme.error }}>{t('tabsIndex.clear_all')}</Text>
                         </TouchableOpacity>
                     )}
                 </View>
@@ -242,7 +252,7 @@ function BrandDashboard() {
                         }}
                     >
                         <Text className="text-sm font-medium" style={{ color: sort === 'total_followers' ? theme.surface : theme.textSecondary }}>
-                            Most Followers
+                            {t('tabsIndex.most_followers')}
                         </Text>
                     </TouchableOpacity>
                     <TouchableOpacity
@@ -254,7 +264,7 @@ function BrandDashboard() {
                         }}
                     >
                         <Text className="text-sm font-medium" style={{ color: sort === 'created_at' ? theme.surface : theme.textSecondary }}>
-                            Recently Joined
+                            {t('tabsIndex.recently_joined')}
                         </Text>
                     </TouchableOpacity>
                 </ScrollView>
@@ -269,7 +279,7 @@ function BrandDashboard() {
                         }}
                     >
                         <Text className="text-sm font-medium" style={{ color: selectedNiches.length === 0 ? theme.surface : theme.textSecondary }}>
-                            All
+                            {t('tabsIndex.all')}
                         </Text>
                     </TouchableOpacity>
                     {availableNiches.map((niche) => (
@@ -294,7 +304,7 @@ function BrandDashboard() {
             {!loading && (
                 <View className="px-4 py-2" style={{ backgroundColor: theme.background }}>
                     <Text className="text-sm" style={{ color: theme.textSecondary }}>
-                        {uniqueInfluencers.length} {uniqueInfluencers.length === 1 ? 'creator' : 'creators'} found
+                        {uniqueInfluencers.length} {uniqueInfluencers.length === 1 ? t('tabsIndex.creator') : t('tabsIndex.creators')} {t('tabsIndex.found')}
                     </Text>
                 </View>
             )}
@@ -303,7 +313,7 @@ function BrandDashboard() {
             {loading ? (
                 <View className="flex-1 justify-center items-center">
                     <ActivityIndicator size="large" color={theme.primary} />
-                    <Text className="mt-4" style={{ color: theme.textTertiary }}>Loading creators...</Text>
+                    <Text className="mt-4" style={{ color: theme.textTertiary }}>{t('tabsIndex.loading_creators')}</Text>
                 </View>
             ) : (
                 <FlatList
@@ -314,10 +324,10 @@ function BrandDashboard() {
                         <View className="flex-1 justify-center items-center p-8">
                             <AntDesign name="frown" size={48} color={theme.textTertiary} />
                             <Text className="text-center mt-4 text-lg font-medium" style={{ color: theme.textSecondary }}>
-                                No creators found
+                                {t('tabsIndex.no_creators_found')}
                             </Text>
                             <Text className="text-center mt-2" style={{ color: theme.textTertiary }}>
-                                Try adjusting your filters or search terms
+                                {t('tabsIndex.try_adjusting_filters')}
                             </Text>
                             {(selectedNiches.length > 0 || searchTerm.length > 0) && (
                                 <TouchableOpacity
@@ -325,7 +335,7 @@ function BrandDashboard() {
                                     className="mt-4 px-6 py-3 rounded-full"
                                     style={{ backgroundColor: theme.primary }}
                                 >
-                                    <Text className="font-semibold" style={{ color: theme.surface }}>Clear Filters</Text>
+                                    <Text className="font-semibold" style={{ color: theme.surface }}>{t('tabsIndex.clear_filters')}</Text>
                                 </TouchableOpacity>
                             )}
                         </View>
@@ -348,7 +358,7 @@ function BrandDashboard() {
                         ) : !hasMore && uniqueInfluencers.length > 0 ? (
                             <View className="py-4">
                                 <Text className="text-center text-sm" style={{ color: theme.textTertiary }}>
-                                    You've reached the end
+                                    {t('tabsIndex.reached_end')}
                                 </Text>
                             </View>
                         ) : null

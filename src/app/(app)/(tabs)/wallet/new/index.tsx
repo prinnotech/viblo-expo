@@ -16,6 +16,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'expo-router';
 import { PayoutMethodType } from '@/lib/enum_types';
 import { useTheme } from '@/contexts/ThemeContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 
 const revolut_img = require('@/../assets/bank_icons/revolut.png')
@@ -28,6 +29,7 @@ const NewMethodPayoutPage = () => {
     const { profile } = useAuth();
     const router = useRouter();
     const { theme } = useTheme();
+    const { t } = useLanguage();
 
     const [selectedType, setSelectedType] = useState<PayoutMethodType | null>(null);
     const [isPrimary, setIsPrimary] = useState(false);
@@ -51,44 +53,44 @@ const NewMethodPayoutPage = () => {
     }> = [
             {
                 type: 'paypal',
-                title: 'PayPal',
+                title: t('walletNew.paypal'),
                 icon: paypal_img,
-                timing: 'Within 24 hours'
+                timing: t('walletNew.within_24_hours')
             },
             {
                 type: 'wise',
-                title: 'Wise',
+                title: t('walletNew.wise'),
                 icon: wise_img,
-                timing: 'Within 24 hours'
+                timing: t('walletNew.within_24_hours')
             },
             {
                 type: 'revolut',
-                title: 'Revolut',
+                title: t('walletNew.revolut'),
                 icon: revolut_img,
-                timing: 'Within 24 hours'
+                timing: t('walletNew.within_24_hours')
             },
             {
                 type: 'bank_transfer',
-                title: 'Bank Transfer',
+                title: t('walletNew.bank_transfer'),
                 icon: bank_img,
-                timing: '3-5 business days'
+                timing: t('walletNew.business_days_3_5')
             }
         ];
 
     const validateForm = () => {
         if (!selectedType) {
-            Alert.alert('Error', 'Please select a payout method');
+            Alert.alert(t('walletNew.error'), t('walletNew.select_payout_method'));
             return false;
         }
 
         switch (selectedType) {
             case 'paypal':
                 if (!name || !email) {
-                    Alert.alert('Error', 'Please fill in all required fields');
+                    Alert.alert(t('walletNew.error'), t('walletNew.fill_required_fields'));
                     return false;
                 }
                 if (!email.includes('@')) {
-                    Alert.alert('Error', 'Please enter a valid email address');
+                    Alert.alert(t('walletNew.error'), t('walletNew.enter_valid_email'));
                     return false;
                 }
                 break;
@@ -96,18 +98,18 @@ const NewMethodPayoutPage = () => {
             case 'wise':
             case 'revolut':
                 if (!name || !email || !tagId) {
-                    Alert.alert('Error', 'Please fill in all required fields');
+                    Alert.alert(t('walletNew.error'), t('walletNew.fill_required_fields'));
                     return false;
                 }
                 if (!email.includes('@')) {
-                    Alert.alert('Error', 'Please enter a valid email address');
+                    Alert.alert(t('walletNew.error'), t('walletNew.enter_valid_email'));
                     return false;
                 }
                 break;
 
             case 'bank_transfer':
                 if (!iban || !accountOwner || !swift || !bankName || !bankAddress) {
-                    Alert.alert('Error', 'Please fill in all required fields');
+                    Alert.alert(t('walletNew.error'), t('walletNew.fill_required_fields'));
                     return false;
                 }
                 break;
@@ -156,13 +158,13 @@ const NewMethodPayoutPage = () => {
 
             if (error) throw error;
 
-            Alert.alert('Success', 'Payout method added successfully', [
-                { text: 'OK', onPress: () => router.back() }
+            Alert.alert(t('walletNew.success'), t('walletNew.payout_method_added'), [
+                { text: t('walletNew.ok'), onPress: () => router.back() }
             ]);
 
         } catch (error) {
             console.error('Error adding payout method:', error);
-            Alert.alert('Error', 'Failed to add payout method. Please try again.');
+            Alert.alert(t('walletNew.error'), t('walletNew.failed_add_payout_method'));
         } finally {
             setSubmitting(false);
         }
@@ -171,7 +173,7 @@ const NewMethodPayoutPage = () => {
     const renderMethodSelection = () => (
         <View className="mb-6">
             <Text className="text-lg font-semibold mb-3" style={{ color: theme.text }}>
-                Select Payment Method
+                {t('walletNew.select_payment_method')}
             </Text>
             <View className="flex-col space-y-3 gap-2">
                 {payoutMethods.map((method) => (
@@ -216,11 +218,11 @@ const NewMethodPayoutPage = () => {
     const renderPayPalForm = () => (
         <View className="flex-col gap-2 space-y-4">
             <View>
-                <Text className="text-sm font-medium mb-2" style={{ color: theme.textSecondary }}>Full Name *</Text>
+                <Text className="text-sm font-medium mb-2" style={{ color: theme.textSecondary }}>{t('walletNew.full_name')}</Text>
                 <TextInput
                     value={name}
                     onChangeText={setName}
-                    placeholder="John Doe"
+                    placeholder={t('walletNew.full_name_placeholder')}
                     className="border rounded-lg px-4 py-3"
                     style={{ backgroundColor: theme.surface, borderColor: theme.border, color: theme.text }}
                     placeholderTextColor={theme.textTertiary}
@@ -228,11 +230,11 @@ const NewMethodPayoutPage = () => {
             </View>
 
             <View>
-                <Text className="text-sm font-medium mb-2" style={{ color: theme.textSecondary }}>PayPal Email *</Text>
+                <Text className="text-sm font-medium mb-2" style={{ color: theme.textSecondary }}>{t('walletNew.paypal_email')}</Text>
                 <TextInput
                     value={email}
                     onChangeText={setEmail}
-                    placeholder="your@email.com"
+                    placeholder={t('walletNew.email_placeholder')}
                     keyboardType="email-address"
                     autoCapitalize="none"
                     className="border rounded-lg px-4 py-3"
@@ -246,11 +248,11 @@ const NewMethodPayoutPage = () => {
     const renderWiseRevolutForm = () => (
         <View className="flex-col gap-2 space-y-4">
             <View>
-                <Text className="text-sm font-medium mb-2" style={{ color: theme.textSecondary }}>Full Name *</Text>
+                <Text className="text-sm font-medium mb-2" style={{ color: theme.textSecondary }}>{t('walletNew.full_name')}</Text>
                 <TextInput
                     value={name}
                     onChangeText={setName}
-                    placeholder="John Doe"
+                    placeholder={t('walletNew.full_name_placeholder')}
                     className="border rounded-lg px-4 py-3"
                     style={{ backgroundColor: theme.surface, borderColor: theme.border, color: theme.text }}
                     placeholderTextColor={theme.textTertiary}
@@ -258,11 +260,11 @@ const NewMethodPayoutPage = () => {
             </View>
 
             <View>
-                <Text className="text-sm font-medium mb-2" style={{ color: theme.textSecondary }}>Email *</Text>
+                <Text className="text-sm font-medium mb-2" style={{ color: theme.textSecondary }}>{t('walletNew.email')}</Text>
                 <TextInput
                     value={email}
                     onChangeText={setEmail}
-                    placeholder="your@email.com"
+                    placeholder={t('walletNew.email_placeholder')}
                     keyboardType="email-address"
                     autoCapitalize="none"
                     className="border rounded-lg px-4 py-3"
@@ -273,12 +275,12 @@ const NewMethodPayoutPage = () => {
 
             <View>
                 <Text className="text-sm font-medium mb-2" style={{ color: theme.textSecondary }}>
-                    {selectedType === 'wise' ? 'Wise ID' : 'Revolut Tag'} *
+                    {selectedType === 'wise' ? t('walletNew.wise_id') : t('walletNew.revolut_tag')}
                 </Text>
                 <TextInput
                     value={tagId}
                     onChangeText={setTagId}
-                    placeholder={selectedType === 'wise' ? 'P12345678' : '@yourtag'}
+                    placeholder={selectedType === 'wise' ? t('walletNew.wise_id_placeholder') : t('walletNew.revolut_tag_placeholder')}
                     autoCapitalize="none"
                     className="border rounded-lg px-4 py-3"
                     style={{ backgroundColor: theme.surface, borderColor: theme.border, color: theme.text }}
@@ -291,11 +293,11 @@ const NewMethodPayoutPage = () => {
     const renderBankTransferForm = () => (
         <View className="flex-col gap-2 space-y-4">
             <View>
-                <Text className="text-sm font-medium mb-2" style={{ color: theme.textSecondary }}>Account Owner Name *</Text>
+                <Text className="text-sm font-medium mb-2" style={{ color: theme.textSecondary }}>{t('walletNew.account_owner_name')}</Text>
                 <TextInput
                     value={accountOwner}
                     onChangeText={setAccountOwner}
-                    placeholder="John Doe"
+                    placeholder={t('walletNew.full_name_placeholder')}
                     className="border rounded-lg px-4 py-3"
                     style={{ backgroundColor: theme.surface, borderColor: theme.border, color: theme.text }}
                     placeholderTextColor={theme.textTertiary}
@@ -303,11 +305,11 @@ const NewMethodPayoutPage = () => {
             </View>
 
             <View>
-                <Text className="text-sm font-medium mb-2" style={{ color: theme.textSecondary }}>IBAN *</Text>
+                <Text className="text-sm font-medium mb-2" style={{ color: theme.textSecondary }}>{t('walletNew.iban')}</Text>
                 <TextInput
                     value={iban}
                     onChangeText={setIban}
-                    placeholder="DE89370400440532013000"
+                    placeholder={t('walletNew.iban_placeholder')}
                     autoCapitalize="characters"
                     className="border rounded-lg px-4 py-3"
                     style={{ backgroundColor: theme.surface, borderColor: theme.border, color: theme.text }}
@@ -316,11 +318,11 @@ const NewMethodPayoutPage = () => {
             </View>
 
             <View>
-                <Text className="text-sm font-medium mb-2" style={{ color: theme.textSecondary }}>SWIFT/BIC Code *</Text>
+                <Text className="text-sm font-medium mb-2" style={{ color: theme.textSecondary }}>{t('walletNew.swift_bic_code')}</Text>
                 <TextInput
                     value={swift}
                     onChangeText={setSwift}
-                    placeholder="DEUTDEFF"
+                    placeholder={t('walletNew.swift_placeholder')}
                     autoCapitalize="characters"
                     className="border rounded-lg px-4 py-3"
                     style={{ backgroundColor: theme.surface, borderColor: theme.border, color: theme.text }}
@@ -329,11 +331,11 @@ const NewMethodPayoutPage = () => {
             </View>
 
             <View>
-                <Text className="text-sm font-medium mb-2" style={{ color: theme.textSecondary }}>Bank Name *</Text>
+                <Text className="text-sm font-medium mb-2" style={{ color: theme.textSecondary }}>{t('walletNew.bank_name')}</Text>
                 <TextInput
                     value={bankName}
                     onChangeText={setBankName}
-                    placeholder="Deutsche Bank"
+                    placeholder={t('walletNew.bank_name_placeholder')}
                     className="border rounded-lg px-4 py-3"
                     style={{ backgroundColor: theme.surface, borderColor: theme.border, color: theme.text }}
                     placeholderTextColor={theme.textTertiary}
@@ -341,11 +343,11 @@ const NewMethodPayoutPage = () => {
             </View>
 
             <View>
-                <Text className="text-sm font-medium mb-2" style={{ color: theme.textSecondary }}>Bank Address *</Text>
+                <Text className="text-sm font-medium mb-2" style={{ color: theme.textSecondary }}>{t('walletNew.bank_address')}</Text>
                 <TextInput
                     value={bankAddress}
                     onChangeText={setBankAddress}
-                    placeholder="123 Bank Street, City, Country"
+                    placeholder={t('walletNew.bank_address_placeholder')}
                     multiline
                     numberOfLines={2}
                     className="border rounded-lg px-4 py-3"
@@ -362,7 +364,7 @@ const NewMethodPayoutPage = () => {
         return (
             <View className="mb-6">
                 <Text className="text-lg font-semibold mb-4" style={{ color: theme.text }}>
-                    Payment Details
+                    {t('walletNew.payment_details')}
                 </Text>
 
                 {selectedType === 'paypal' && renderPayPalForm()}
@@ -374,9 +376,7 @@ const NewMethodPayoutPage = () => {
                     <View className="flex-row items-center">
                         <Feather name="clock" size={16} color={theme.primaryDark} />
                         <Text className="text-sm ml-2 font-medium" style={{ color: theme.primaryDark }}>
-                            Expected processing time: {
-                                payoutMethods.find(m => m.type === selectedType)?.timing
-                            }
+                            {t('walletNew.expected_processing_time').replace('{{timing}}', payoutMethods.find(m => m.type === selectedType)?.timing || '')}
                         </Text>
                     </View>
                 </View>
@@ -397,7 +397,7 @@ const NewMethodPayoutPage = () => {
                     >
                         {isPrimary && <Feather name="check" size={16} color={theme.surface} />}
                     </View>
-                    <Text className="font-medium" style={{ color: theme.text }}>Set as primary payout method</Text>
+                    <Text className="font-medium" style={{ color: theme.text }}>{t('walletNew.set_as_primary')}</Text>
                 </TouchableOpacity>
             </View>
         );
@@ -426,7 +426,7 @@ const NewMethodPayoutPage = () => {
                             <ActivityIndicator color={theme.surface} />
                         ) : (
                             <Text className="font-semibold text-base" style={{ color: theme.surface }}>
-                                Add Payout Method
+                                {t('walletNew.add_payout_method')}
                             </Text>
                         )}
                     </TouchableOpacity>

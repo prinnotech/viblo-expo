@@ -6,9 +6,12 @@ import AntDesign from '@expo/vector-icons/AntDesign';
 import { Influencer } from '@/lib/enum_types';
 import { SocialIcon } from '@/components/getSocialIcons';
 import { useTheme } from '@/contexts/ThemeContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const CreatorCard = ({ influencer }: { influencer: Influencer }) => {
     const { theme } = useTheme();
+    const { t } = useLanguage();
+
     const formatNumber = (num: number) => {
         if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
         if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
@@ -77,19 +80,19 @@ const CreatorCard = ({ influencer }: { influencer: Influencer }) => {
                     {/* Stats Bar */}
                     <View className="flex-row justify-between items-center pt-3" style={{ borderTopColor: theme.border, borderTopWidth: 1 }}>
                         <View className="flex-1">
-                            <Text className="text-xs" style={{ color: theme.textTertiary }}>Followers</Text>
+                            <Text className="text-xs" style={{ color: theme.textTertiary }}>{t('creatorCard.followers')}</Text>
                             <Text className="text-sm font-bold" style={{ color: theme.text }}>
                                 {formatNumber(influencer.total_followers)}
                             </Text>
                         </View>
                         <View className="flex-1">
-                            <Text className="text-xs" style={{ color: theme.textTertiary }}>Views</Text>
+                            <Text className="text-xs" style={{ color: theme.textTertiary }}>{t('creatorCard.views')}</Text>
                             <Text className="text-sm font-bold" style={{ color: theme.text }}>
                                 {formatNumber(influencer.total_views)}
                             </Text>
                         </View>
                         <View className="flex-1">
-                            <Text className="text-xs" style={{ color: theme.textTertiary }}>Likes</Text>
+                            <Text className="text-xs" style={{ color: theme.textTertiary }}>{t('creatorCard.likes')}</Text>
                             <Text className="text-sm font-bold" style={{ color: theme.text }}>
                                 {formatNumber(influencer.total_likes)}
                             </Text>

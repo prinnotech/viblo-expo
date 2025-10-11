@@ -6,12 +6,14 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { SocialIcon } from '@/components/getSocialIcons';
 import { useTheme } from '@/contexts/ThemeContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const CreatorProfile = () => {
     const { id } = useLocalSearchParams<{ id: string }>();
     const router = useRouter();
     const { data, loading, error } = usePublicProfile(id);
     const { theme } = useTheme();
+    const { t } = useLanguage();
 
     const formatNumber = (num: number): string => {
         if (num >= 1000000) {
@@ -47,7 +49,7 @@ const CreatorProfile = () => {
         return (
             <View className="flex-1 justify-center items-center" style={{ backgroundColor: theme.background }}>
                 <ActivityIndicator size="large" color={theme.primary} />
-                <Text className="mt-4 text-base" style={{ color: theme.textSecondary }}>Loading profile...</Text>
+                <Text className="mt-4 text-base" style={{ color: theme.textSecondary }}>{t('creatorsId.loading_profile')}</Text>
             </View>
         );
     }
@@ -57,14 +59,14 @@ const CreatorProfile = () => {
             <View className="flex-1 justify-center items-center px-5" style={{ backgroundColor: theme.background }}>
                 <Ionicons name="alert-circle-outline" size={64} color={theme.error} />
                 <Text className="mt-4 text-base text-center" style={{ color: theme.error }}>
-                    {error || 'Profile not found'}
+                    {error || t('creatorsId.profile_not_found')}
                 </Text>
                 <TouchableOpacity
                     onPress={() => router.back()}
                     className="mt-6 px-6 py-3 rounded-xl"
                     style={{ backgroundColor: theme.primary }}
                 >
-                    <Text className="font-semibold" style={{ color: theme.surface }}>Go Back</Text>
+                    <Text className="font-semibold" style={{ color: theme.surface }}>{t('creatorsId.go_back')}</Text>
                 </TouchableOpacity>
             </View>
         );
@@ -133,7 +135,7 @@ const CreatorProfile = () => {
             <View className="p-5">
                 {/* Stats Overview */}
                 <View className="rounded-2xl p-5 mb-4 shadow-sm" style={{ backgroundColor: theme.surface }}>
-                    <Text className="text-lg font-bold mb-4" style={{ color: theme.text }}>Stats Overview</Text>
+                    <Text className="text-lg font-bold mb-4" style={{ color: theme.text }}>{t('creatorsId.stats_overview')}</Text>
                     <View className="flex-row flex-wrap justify-between">
                         <View className="w-[48%] mb-4">
                             <View className="flex-row items-center mb-2">
@@ -147,7 +149,7 @@ const CreatorProfile = () => {
                                     <Text className="text-2xl font-bold" style={{ color: theme.text }}>
                                         {formatNumber(data.totalFollowers)}
                                     </Text>
-                                    <Text className="text-xs" style={{ color: theme.textSecondary }}>Followers</Text>
+                                    <Text className="text-xs" style={{ color: theme.textSecondary }}>{t('creatorsId.followers')}</Text>
                                 </View>
                             </View>
                         </View>
@@ -164,7 +166,7 @@ const CreatorProfile = () => {
                                     <Text className="text-2xl font-bold" style={{ color: theme.text }}>
                                         {formatNumber(data.totalViews)}
                                     </Text>
-                                    <Text className="text-xs" style={{ color: theme.textSecondary }}>Views</Text>
+                                    <Text className="text-xs" style={{ color: theme.textSecondary }}>{t('creatorsId.views')}</Text>
                                 </View>
                             </View>
                         </View>
@@ -181,7 +183,7 @@ const CreatorProfile = () => {
                                     <Text className="text-2xl font-bold" style={{ color: theme.text }}>
                                         {formatNumber(data.totalLikes)}
                                     </Text>
-                                    <Text className="text-xs" style={{ color: theme.textSecondary }}>Likes</Text>
+                                    <Text className="text-xs" style={{ color: theme.textSecondary }}>{t('creatorsId.likes')}</Text>
                                 </View>
                             </View>
                         </View>
@@ -198,7 +200,7 @@ const CreatorProfile = () => {
                                     <Text className="text-2xl font-bold" style={{ color: theme.text }}>
                                         {formatNumber(data.totalComments)}
                                     </Text>
-                                    <Text className="text-xs" style={{ color: theme.textSecondary }}>Comments</Text>
+                                    <Text className="text-xs" style={{ color: theme.textSecondary }}>{t('creatorsId.comments')}</Text>
                                 </View>
                             </View>
                         </View>
@@ -206,13 +208,13 @@ const CreatorProfile = () => {
                 </View>
 
                 {/* Connected Platforms */}
-                <Text className="text-lg font-bold mb-3" style={{ color: theme.text }}>Connected Platforms</Text>
+                <Text className="text-lg font-bold mb-3" style={{ color: theme.text }}>{t('creatorsId.connected_platforms')}</Text>
 
                 {data.platforms.length === 0 ? (
                     <View className="rounded-2xl p-8 items-center shadow-sm" style={{ backgroundColor: theme.surface }}>
                         <Ionicons name="link-outline" size={48} color={theme.textTertiary} />
                         <Text className="mt-4 text-base font-semibold" style={{ color: theme.textSecondary }}>
-                            No platforms connected
+                            {t('creatorsId.no_platforms_connected')}
                         </Text>
                     </View>
                 ) : (
@@ -248,7 +250,7 @@ const CreatorProfile = () => {
                                     <Text className="text-xl font-bold" style={{ color: theme.text }}>
                                         {formatNumber(platform.followers)}
                                     </Text>
-                                    <Text className="text-xs" style={{ color: theme.textSecondary }}>Followers</Text>
+                                    <Text className="text-xs" style={{ color: theme.textSecondary }}>{t('creatorsId.followers')}</Text>
                                 </View>
 
                                 {platform.views > 0 && (
@@ -256,7 +258,7 @@ const CreatorProfile = () => {
                                         <Text className="text-xl font-bold" style={{ color: theme.text }}>
                                             {formatNumber(platform.views)}
                                         </Text>
-                                        <Text className="text-xs" style={{ color: theme.textSecondary }}>Views</Text>
+                                        <Text className="text-xs" style={{ color: theme.textSecondary }}>{t('creatorsId.views')}</Text>
                                     </View>
                                 )}
 
@@ -264,14 +266,14 @@ const CreatorProfile = () => {
                                     <Text className="text-xl font-bold" style={{ color: theme.text }}>
                                         {formatNumber(platform.likes)}
                                     </Text>
-                                    <Text className="text-xs" style={{ color: theme.textSecondary }}>Likes</Text>
+                                    <Text className="text-xs" style={{ color: theme.textSecondary }}>{t('creatorsId.likes')}</Text>
                                 </View>
 
                                 <View className="w-1/2 py-2">
                                     <Text className="text-xl font-bold" style={{ color: theme.text }}>
                                         {formatNumber(platform.comments)}
                                     </Text>
-                                    <Text className="text-xs" style={{ color: theme.textSecondary }}>Comments</Text>
+                                    <Text className="text-xs" style={{ color: theme.textSecondary }}>{t('creatorsId.comments')}</Text>
                                 </View>
                             </View>
                         </TouchableOpacity>

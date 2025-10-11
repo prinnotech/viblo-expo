@@ -6,10 +6,12 @@ import { useWallet } from '@/hooks/useWallet';
 import { useRouter } from 'expo-router';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const WalletScreen = () => {
     const { profile } = useAuth()
     const { theme } = useTheme();
+    const { t } = useLanguage();
     const { totalEarnings, hasPayoutMethod, loading, error } = useWallet(profile?.id);
     const router = useRouter();
 
@@ -45,7 +47,7 @@ const WalletScreen = () => {
     if (error) {
         return (
             <SafeAreaView className="flex-1 justify-center items-center p-4" style={{ backgroundColor: theme.background }}>
-                <Text style={{ color: theme.error, textAlign: 'center' }}>Failed to load wallet data. Please try again.</Text>
+                <Text style={{ color: theme.error, textAlign: 'center' }}>{t('walletIndex.failed_load_wallet')}</Text>
             </SafeAreaView>
         )
     }
@@ -55,7 +57,7 @@ const WalletScreen = () => {
             <ScrollView contentContainerStyle={{ padding: 24 }}>
                 <View className="mb-8">
                     <Text className="text-center text-sm font-medium" style={{ color: theme.textSecondary }}>
-                        Available Balance
+                        {t('walletIndex.available_balance')}
                     </Text>
                     <Text className="text-center text-5xl font-bold mt-2" style={{ color: theme.text }}>
                         {formatCurrency(totalEarnings)}
@@ -66,7 +68,7 @@ const WalletScreen = () => {
                 <View className="rounded-xl p-6 border shadow-sm" style={{ backgroundColor: theme.surface, borderColor: theme.borderLight }}>
                     <View className="flex-row justify-between items-center">
                         <View>
-                            <Text className="text-sm font-medium" style={{ color: theme.textSecondary }}>Next Payout</Text>
+                            <Text className="text-sm font-medium" style={{ color: theme.textSecondary }}>{t('walletIndex.next_payout')}</Text>
                             <Text className="text-lg font-semibold mt-1" style={{ color: theme.text }}>
                                 {getNextPayoutDate()}
                             </Text>
@@ -80,9 +82,9 @@ const WalletScreen = () => {
 
                     <View className="flex-row justify-between items-center">
                         <View>
-                            <Text className="text-sm font-medium" style={{ color: theme.textSecondary }}>Payout Method</Text>
+                            <Text className="text-sm font-medium" style={{ color: theme.textSecondary }}>{t('walletIndex.payout_method')}</Text>
                             <Text className="text-lg font-semibold mt-1" style={{ color: hasPayoutMethod ? theme.success : theme.warning }}>
-                                {hasPayoutMethod ? 'Connected' : 'Not Connected'}
+                                {hasPayoutMethod ? t('walletIndex.connected') : t('walletIndex.not_connected')}
                             </Text>
                         </View>
                         <View className="p-3 rounded-full" style={{ backgroundColor: hasPayoutMethod ? theme.successLight : theme.warningLight }}>
@@ -99,16 +101,16 @@ const WalletScreen = () => {
                     onPress={() => router.push('/wallet/connect')}
                 >
                     <Text className="text-center font-bold text-base" style={{ color: theme.surface }}>
-                        Connect New Payout Method
+                        {t('walletIndex.connect_new_payout_method')}
                     </Text>
                 </TouchableOpacity>
 
                 {/* Payout History (Placeholder) */}
                 <View className="mt-10">
-                    <Text className="text-lg font-bold" style={{ color: theme.text }}>Payout History</Text>
+                    <Text className="text-lg font-bold" style={{ color: theme.text }}>{t('walletIndex.payout_history')}</Text>
                     <View className="rounded-xl p-6 mt-4 border shadow-sm items-center" style={{ backgroundColor: theme.surface, borderColor: theme.borderLight }}>
                         <Feather name="clock" size={32} color={theme.textTertiary} />
-                        <Text className="mt-2" style={{ color: theme.textSecondary }}>Your payout history will appear here.</Text>
+                        <Text className="mt-2" style={{ color: theme.textSecondary }}>{t('walletIndex.payout_history_placeholder')}</Text>
                     </View>
                 </View>
 

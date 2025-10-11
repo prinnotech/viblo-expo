@@ -18,6 +18,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { CampaignStatus } from '@/lib/enum_types';
 import { Campaign as BaseCampaign } from '@/lib/db_interface';
 import { useTheme } from '@/contexts/ThemeContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface Campaign extends BaseCampaign {
     brand_id: string;
@@ -61,6 +62,7 @@ const EditCampaignPage = () => {
     const { id } = useLocalSearchParams();
     const { profile } = useAuth();
     const { theme } = useTheme();
+    const { t } = useLanguage();
     const campaignId = Array.isArray(id) ? id[0] : id;
 
     const [loading, setLoading] = useState(true);
@@ -100,7 +102,7 @@ const EditCampaignPage = () => {
 
             if (campaignError) {
                 console.error('Error fetching campaign:', campaignError);
-                Alert.alert('Error', 'Failed to load campaign');
+                Alert.alert(t('campaignIdEdit.error'), t('campaignIdEdit.failed_load'));
                 router.back();
                 return;
             }
@@ -156,27 +158,27 @@ const EditCampaignPage = () => {
 
         // Validation
         if (!title.trim()) {
-            Alert.alert('Validation Error', 'Please enter a campaign title');
+            Alert.alert(t('campaignIdEdit.validation_error'), t('campaignIdEdit.enter_title'));
             return;
         }
 
         if (!totalBudget || parseFloat(totalBudget) <= 0) {
-            Alert.alert('Validation Error', 'Please enter a valid total budget');
+            Alert.alert(t('campaignIdEdit.validation_error'), t('campaignIdEdit.enter_valid_budget'));
             return;
         }
 
         if (!ratePerView || parseFloat(ratePerView) <= 0) {
-            Alert.alert('Validation Error', 'Please enter a valid rate per view');
+            Alert.alert(t('campaignIdEdit.validation_error'), t('campaignIdEdit.enter_valid_rate'));
             return;
         }
 
         if (selectedNiches.length === 0) {
-            Alert.alert('Validation Error', 'Please select at least one niche');
+            Alert.alert(t('campaignIdEdit.validation_error'), t('campaignIdEdit.select_niche'));
             return;
         }
 
         if (selectedPlatforms.length === 0) {
-            Alert.alert('Validation Error', 'Please select at least one platform');
+            Alert.alert(t('campaignIdEdit.validation_error'), t('campaignIdEdit.select_platform'));
             return;
         }
 
@@ -196,12 +198,12 @@ const EditCampaignPage = () => {
         // If trying to activate and hasn't been paid, redirect to payment
         if (wasActivating && !hasPaidPayment) {
             Alert.alert(
-                'Payment Required',
-                'To activate this campaign, you need to complete payment first.',
+                t('campaignIdEdit.payment_required'),
+                t('campaignIdEdit.payment_required_message'),
                 [
-                    { text: 'Cancel', style: 'cancel' },
+                    { text: t('campaignIdEdit.cancel'), style: 'cancel' },
                     {
-                        text: 'Pay Now',
+                        text: t('campaignIdEdit.pay_now'),
                         onPress: () => {
                             // Save other changes first (without status change)
                             saveCampaignWithoutStatusChange().then(() => {
@@ -240,9 +242,9 @@ const EditCampaignPage = () => {
 
         if (error) {
             console.error('Error updating campaign:', error);
-            Alert.alert('Error', 'Failed to update campaign');
+            Alert.alert(t('campaignIdEdit.error'), t('campaignIdEdit.failed_update'));
         } else {
-            Alert.alert('Success', 'Campaign updated successfully', [
+            Alert.alert(t('campaignIdEdit.success'), t('campaignIdEdit.campaign_updated'), [
                 { text: 'OK', onPress: () => router.back() }
             ]);
         }
@@ -278,19 +280,19 @@ const EditCampaignPage = () => {
 
         if (hasActiveSubmissions) {
             Alert.alert(
-                'Cannot Delete',
-                'This campaign has active submissions and cannot be deleted. Please wait until all submissions are completed or cancelled.'
+                t('campaignIdEdit.cannot_delete'),
+                t('campaignIdEdit.cannot_delete_message')
             );
             return;
         }
 
         Alert.alert(
-            'Delete Campaign',
-            'Are you sure you want to delete this campaign? This action cannot be undone.',
+            t('campaignIdEdit.delete_confirmation'),
+            t('campaignIdEdit.delete_confirmation_message'),
             [
-                { text: 'Cancel', style: 'cancel' },
+                { text: t('campaignIdEdit.cancel'), style: 'cancel' },
                 {
-                    text: 'Delete',
+                    text: t('campaignIdEdit.delete'),
                     style: 'destructive',
                     onPress: async () => {
                         const { error } = await supabase
@@ -299,9 +301,9 @@ const EditCampaignPage = () => {
                             .eq('id', campaign.id);
 
                         if (error) {
-                            Alert.alert('Error', 'Failed to delete campaign');
+                            Alert.alert(t('campaignIdEdit.error'), t('campaignIdEdit.failed_delete'));
                         } else {
-                            Alert.alert('Success', 'Campaign deleted successfully', [
+                            Alert.alert(t('campaignIdEdit.success'), t('campaignIdEdit.campaign_deleted'), [
                                 { text: 'OK', onPress: () => router.replace('/(tabs)/campaigns') }
                             ]);
                         }
@@ -346,7 +348,7 @@ const EditCampaignPage = () => {
     if (!campaign) {
         return (
             <View className="flex-1 items-center justify-center p-4" style={{ backgroundColor: theme.background }}>
-                <Text className="text-center" style={{ color: theme.error }}>Campaign not found</Text>
+                <Text className="text-center" style={{ color: theme.error }}>{t('campaignIdEdit.campaign_not_found')}</Text>
             </View>
         );
     }
@@ -356,15 +358,15 @@ const EditCampaignPage = () => {
             <ScrollView className="flex-1" contentContainerStyle={{ padding: 16, paddingBottom: 100 }}>
                 {/* Header */}
                 <View className="mb-6">
-                    <Text className="text-2xl font-bold" style={{ color: theme.text }}>Edit Campaign</Text>
+                    <Text className="text-2xl font-bold" style={{ color: theme.text }}>{t('campaignIdEdit.edit_campaign')}</Text>
                     {submissionStats && submissionStats.total > 0 && (
                         <View className="mt-2 p-3 rounded-lg" style={{ backgroundColor: theme.primaryLight }}>
                             <Text className="text-sm font-medium" style={{ color: theme.primaryDark }}>
-                                📊 {submissionStats.total} total submission(s)
+                                📊 {submissionStats.total} {t('campaignIdEdit.total_submissions')}
                             </Text>
                             {hasActiveSubmissions && (
                                 <Text className="text-xs mt-1" style={{ color: theme.primary }}>
-                                    ⚠️ Some fields are locked due to active submissions
+                                    {t('campaignIdEdit.fields_locked')}
                                 </Text>
                             )}
                         </View>
@@ -374,27 +376,27 @@ const EditCampaignPage = () => {
                 {/* Title */}
                 <View className="mb-4">
                     <Text className="text-sm font-semibold mb-2" style={{ color: theme.textSecondary }}>
-                        Campaign Title <Text style={{ color: theme.error }}>*</Text>
+                        {t('campaignIdEdit.campaign_title')} <Text style={{ color: theme.error }}>*</Text>
                     </Text>
                     <TextInput
                         className="border rounded-lg px-4 py-3 text-base"
                         style={{ backgroundColor: theme.surface, borderColor: theme.border, color: theme.text }}
                         value={title}
                         onChangeText={setTitle}
-                        placeholder="Enter campaign title"
+                        placeholder={t('campaignIdEdit.enter_campaign_title')}
                         placeholderTextColor={theme.textTertiary}
                     />
                 </View>
 
                 {/* Description */}
                 <View className="mb-4">
-                    <Text className="text-sm font-semibold mb-2" style={{ color: theme.textSecondary }}>Description</Text>
+                    <Text className="text-sm font-semibold mb-2" style={{ color: theme.textSecondary }}>{t('campaignIdEdit.description')}</Text>
                     <TextInput
                         className="border rounded-lg px-4 py-3 text-base"
                         style={{ backgroundColor: theme.surface, borderColor: theme.border, color: theme.text, height: 100, textAlignVertical: 'top' }}
                         value={description}
                         onChangeText={setDescription}
-                        placeholder="Describe your campaign"
+                        placeholder={t('campaignIdEdit.describe_campaign')}
                         placeholderTextColor={theme.textTertiary}
                         multiline
                         numberOfLines={4}
@@ -404,14 +406,14 @@ const EditCampaignPage = () => {
                 {/* Content Requirements */}
                 <View className="mb-4">
                     <Text className="text-sm font-semibold mb-2" style={{ color: theme.textSecondary }}>
-                        Content Requirements
+                        {t('campaignIdEdit.content_requirements')}
                     </Text>
                     <TextInput
                         className="border rounded-lg px-4 py-3 text-base"
                         style={{ backgroundColor: theme.surface, borderColor: theme.border, color: theme.text, height: 100, textAlignVertical: 'top' }}
                         value={contentRequirements}
                         onChangeText={setContentRequirements}
-                        placeholder="What should influencers include in their content?"
+                        placeholder={t('campaignIdEdit.content_requirements_placeholder')}
                         placeholderTextColor={theme.textTertiary}
                         multiline
                         numberOfLines={4}
@@ -421,7 +423,7 @@ const EditCampaignPage = () => {
                 {/* Status */}
                 <View className="mb-4">
                     <Text className="text-sm font-semibold mb-2" style={{ color: theme.textSecondary }}>
-                        Campaign Status <Text style={{ color: theme.error }}>*</Text>
+                        {t('campaignIdEdit.campaign_status')} <Text style={{ color: theme.error }}>*</Text>
                     </Text>
                     <View className="flex-row flex-wrap gap-2">
                         {['draft', 'active', 'paused', 'completed'].map((s) => (
@@ -438,7 +440,7 @@ const EditCampaignPage = () => {
                                     className="text-sm font-medium capitalize"
                                     style={{ color: status === s ? theme.surface : theme.text }}
                                 >
-                                    {s}
+                                    {t(`campaignIdEdit.${s}`)}
                                 </Text>
                             </TouchableOpacity>
                         ))}
@@ -449,12 +451,12 @@ const EditCampaignPage = () => {
                 <View className="mb-4">
                     <View className="flex-row items-center justify-between mb-2">
                         <Text className="text-sm font-semibold" style={{ color: theme.textSecondary }}>
-                            Total Budget <Text style={{ color: theme.error }}>*</Text>
+                            {t('campaignIdEdit.total_budget')} <Text style={{ color: theme.error }}>*</Text>
                         </Text>
                         {!canEditFinancials && (
                             <View className="flex-row items-center">
                                 <AntDesign name="lock" size={12} color={theme.error} />
-                                <Text className="text-xs ml-1" style={{ color: theme.error }}>Locked</Text>
+                                <Text className="text-xs ml-1" style={{ color: theme.error }}>{t('campaignIdEdit.locked')}</Text>
                             </View>
                         )}
                     </View>
@@ -474,7 +476,7 @@ const EditCampaignPage = () => {
                     />
                     {campaign.total_paid > 0 && (
                         <Text className="text-xs mt-1" style={{ color: theme.textSecondary }}>
-                            ${campaign.total_paid.toFixed(2)} already paid to influencers
+                            ${campaign.total_paid.toFixed(2)} {t('campaignIdEdit.already_paid')}
                         </Text>
                     )}
                 </View>
@@ -482,12 +484,12 @@ const EditCampaignPage = () => {
                 <View className="mb-4">
                     <View className="flex-row items-center justify-between mb-2">
                         <Text className="text-sm font-semibold" style={{ color: theme.textSecondary }}>
-                            Rate Per View <Text style={{ color: theme.error }}>*</Text>
+                            {t('campaignIdEdit.rate_per_view')} <Text style={{ color: theme.error }}>*</Text>
                         </Text>
                         {!canEditFinancials && (
                             <View className="flex-row items-center">
                                 <AntDesign name="lock" size={12} color={theme.error} />
-                                <Text className="text-xs ml-1" style={{ color: theme.error }}>Locked</Text>
+                                <Text className="text-xs ml-1" style={{ color: theme.error }}>{t('campaignIdEdit.locked')}</Text>
                             </View>
                         )}
                     </View>
@@ -510,7 +512,7 @@ const EditCampaignPage = () => {
                 {/* Target Niches */}
                 <View className="mb-4">
                     <Text className="text-sm font-semibold mb-2" style={{ color: theme.textSecondary }}>
-                        Target Niches <Text style={{ color: theme.error }}>*</Text>
+                        {t('campaignIdEdit.target_niches')} <Text style={{ color: theme.error }}>*</Text>
                     </Text>
                     <View className="flex-row flex-wrap gap-2">
                         {AVAILABLE_NICHES.map((niche) => (
@@ -537,7 +539,7 @@ const EditCampaignPage = () => {
                 {/* Target Platforms */}
                 <View className="mb-4">
                     <Text className="text-sm font-semibold mb-2" style={{ color: theme.textSecondary }}>
-                        Target Platforms <Text style={{ color: theme.error }}>*</Text>
+                        {t('campaignIdEdit.target_platforms')} <Text style={{ color: theme.error }}>*</Text>
                     </Text>
                     <View className="flex-row flex-wrap gap-2">
                         {AVAILABLE_PLATFORMS.map((platform) => (
@@ -564,7 +566,7 @@ const EditCampaignPage = () => {
                 {/* Target Locations */}
                 <View className="mb-4">
                     <Text className="text-sm font-semibold mb-2" style={{ color: theme.textSecondary }}>
-                        Target Locations (Optional)
+                        {t('campaignIdEdit.target_locations')}
                     </Text>
                     <View className="flex-row flex-wrap gap-2">
                         {AVAILABLE_LOCATIONS.map((location) => (
@@ -591,28 +593,28 @@ const EditCampaignPage = () => {
                 {/* Target Audience Age */}
                 <View className="mb-4">
                     <Text className="text-sm font-semibold mb-2" style={{ color: theme.textSecondary }}>
-                        Target Audience Age (Optional)
+                        {t('campaignIdEdit.target_audience_age')}
                     </Text>
                     <TextInput
                         className="border rounded-lg px-4 py-3 text-base"
                         style={{ backgroundColor: theme.surface, borderColor: theme.border, color: theme.text }}
                         value={targetAudienceAge}
                         onChangeText={setTargetAudienceAge}
-                        placeholder="e.g., 18-35"
+                        placeholder={t('campaignIdEdit.age_placeholder')}
                         placeholderTextColor={theme.textTertiary}
                     />
                 </View>
 
                 {/* Dates */}
                 <View className="mb-4">
-                    <Text className="text-sm font-semibold mb-2" style={{ color: theme.textSecondary }}>Start Date</Text>
+                    <Text className="text-sm font-semibold mb-2" style={{ color: theme.textSecondary }}>{t('campaignIdEdit.start_date')}</Text>
                     <TouchableOpacity
                         onPress={() => setShowStartPicker(true)}
                         className="border rounded-lg px-4 py-3"
                         style={{ backgroundColor: theme.surface, borderColor: theme.border }}
                     >
                         <Text className="text-base" style={{ color: startDate ? theme.text : theme.textTertiary }}>
-                            {startDate ? startDate.toLocaleDateString() : 'Select start date'}
+                            {startDate ? startDate.toLocaleDateString() : t('campaignIdEdit.select_start_date')}
                         </Text>
                     </TouchableOpacity>
                     {showStartPicker && (
@@ -642,7 +644,7 @@ const EditCampaignPage = () => {
                         className="text-center font-semibold"
                         style={{ color: hasActiveSubmissions ? theme.textTertiary : theme.error }}
                     >
-                        {hasActiveSubmissions ? 'Cannot Delete (Active Submissions)' : 'Delete Campaign'}
+                        {hasActiveSubmissions ? t('campaignIdEdit.cannot_delete_active') : t('campaignIdEdit.delete_campaign')}
                     </Text>
                 </TouchableOpacity>
             </ScrollView>
@@ -658,7 +660,7 @@ const EditCampaignPage = () => {
                     {saving ? (
                         <ActivityIndicator color={theme.surface} />
                     ) : (
-                        <Text className="text-lg font-bold" style={{ color: theme.surface }}>Save Changes</Text>
+                        <Text className="text-lg font-bold" style={{ color: theme.surface }}>{t('campaignIdEdit.save_changes')}</Text>
                     )}
                 </TouchableOpacity>
             </View>
@@ -667,4 +669,3 @@ const EditCampaignPage = () => {
 };
 
 export default EditCampaignPage;
-

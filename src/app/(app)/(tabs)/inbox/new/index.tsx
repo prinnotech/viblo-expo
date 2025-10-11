@@ -15,10 +15,12 @@ import { supabase } from '@/lib/supabase';
 import { Profile } from '@/lib/db_interface';
 import { debounce } from 'lodash';
 import { useTheme } from '@/contexts/ThemeContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 // A component for each search result item
 const BrandListItem = ({ item, onPress }: { item: Profile, onPress: (profile: Profile) => void }) => {
     const { theme } = useTheme();
+    const { t } = useLanguage();
     return (
         <TouchableOpacity
             onPress={() => onPress(item)}
@@ -32,7 +34,7 @@ const BrandListItem = ({ item, onPress }: { item: Profile, onPress: (profile: Pr
             />
             <View>
                 <Text className="text-base font-semibold" style={{ color: theme.text }}>{item.username}</Text>
-                <Text className="text-sm" style={{ color: theme.textSecondary }}>{item.company_name || 'Brand'}</Text>
+                <Text className="text-sm" style={{ color: theme.textSecondary }}>{item.company_name || t('inboxNew.brand')}</Text>
             </View>
         </TouchableOpacity>
     );
@@ -45,6 +47,7 @@ const NewConversationScreen = () => {
     const [isCreating, setIsCreating] = useState(false);
     const router = useRouter();
     const { theme } = useTheme();
+    const { t } = useLanguage();
 
     const searchBrands = async (query: string) => {
         if (query.length < 2) {
@@ -103,7 +106,7 @@ const NewConversationScreen = () => {
                     <TextInput
                         value={searchTerm}
                         onChangeText={handleSearchChange}
-                        placeholder="Search for a brand..."
+                        placeholder={t('inboxNew.search_placeholder')}
                         placeholderTextColor={theme.textTertiary}
                         className="flex-1 h-12 ml-2 text-base"
                         style={{ color: theme.text }}
@@ -121,7 +124,7 @@ const NewConversationScreen = () => {
                 ListEmptyComponent={() => (
                     !loading && searchTerm.length > 1 ? (
                         <View className="items-center justify-center mt-20">
-                            <Text style={{ color: theme.textTertiary }}>No brands found.</Text>
+                            <Text style={{ color: theme.textTertiary }}>{t('inboxNew.no_brands_found')}</Text>
                         </View>
                     ) : null
                 )}

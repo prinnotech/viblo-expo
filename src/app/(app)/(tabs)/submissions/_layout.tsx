@@ -1,9 +1,11 @@
 import { Stack } from "expo-router";
 import React from "react";
 import { useTheme } from "@/contexts/ThemeContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 function Layout() {
     const { theme } = useTheme();
+    const { t } = useLanguage();
 
     return (
         <Stack
@@ -23,7 +25,7 @@ function Layout() {
                 options={{
                     presentation: 'modal',
                     headerShown: true,
-                    title: 'Loading Campaign...',
+                    title: t('submissionsLayout.loading_campaign'),
                 }}
             />
         </Stack>

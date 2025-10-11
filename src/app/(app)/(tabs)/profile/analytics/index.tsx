@@ -6,11 +6,13 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { SocialIcon } from '@/components/getSocialIcons';
 import { useTheme } from '@/contexts/ThemeContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const AnalyticsPage = () => {
     const { profile } = useAuth();
     const { analytics, loading, refreshing, error, refresh } = useProfileAnalytics(profile?.id);
     const { theme } = useTheme();
+    const { t } = useLanguage();
 
     const formatNumber = (num: number): string => {
         if (num >= 1000000) {
@@ -46,7 +48,7 @@ const AnalyticsPage = () => {
         return (
             <View className="flex-1 justify-center items-center" style={{ backgroundColor: theme.background }}>
                 <ActivityIndicator size="large" color={theme.primary} />
-                <Text className="mt-4 text-base" style={{ color: theme.textSecondary }}>Loading your analytics...</Text>
+                <Text className="mt-4 text-base" style={{ color: theme.textSecondary }}>{t('profileAnalytics.loading_analytics')}</Text>
             </View>
         );
     }
@@ -57,7 +59,7 @@ const AnalyticsPage = () => {
                 <Ionicons name="alert-circle-outline" size={64} color={theme.error} />
                 <Text className="mt-4 text-base text-center" style={{ color: theme.error }}>{error}</Text>
                 <Text className="mt-3 text-base font-semibold" style={{ color: theme.primary }} onPress={refresh}>
-                    Tap to retry
+                    {t('profileAnalytics.tap_to_retry')}
                 </Text>
             </View>
         );
@@ -67,7 +69,7 @@ const AnalyticsPage = () => {
         return (
             <View className="flex-1 justify-center items-center" style={{ backgroundColor: theme.background }}>
                 <Ionicons name="analytics-outline" size={64} color={theme.textTertiary} />
-                <Text className="mt-4 text-base" style={{ color: theme.textTertiary }}>No analytics data available</Text>
+                <Text className="mt-4 text-base" style={{ color: theme.textTertiary }}>{t('profileAnalytics.no_analytics_data')}</Text>
             </View>
         );
     }
@@ -84,7 +86,7 @@ const AnalyticsPage = () => {
             {/* Header */}
             <View className="mb-6">
                 <Text className="text-sm" style={{ color: theme.textSecondary }}>
-                    Last updated: {analytics.lastUpdated.toLocaleTimeString()}
+                    {t('profileAnalytics.last_updated')} {analytics.lastUpdated.toLocaleTimeString()}
                 </Text>
             </View>
 
@@ -97,14 +99,14 @@ const AnalyticsPage = () => {
             >
                 <View className="flex-row items-center mb-3">
                     <Ionicons name="wallet-outline" size={32} color="#fff" />
-                    <Text className="text-base text-white ml-3 font-semibold">Total Earnings</Text>
+                    <Text className="text-base text-white ml-3 font-semibold">{t('profileAnalytics.total_earnings')}</Text>
                 </View>
                 <Text className="text-5xl font-bold text-white mb-2">
                     {formatCurrency(analytics.totalEarnings)}
                 </Text>
                 <View className="flex-row items-center bg-white/20 px-3 py-1.5 rounded-xl self-start">
                     <Ionicons name="trending-up" size={16} color="#10b981" />
-                    <Text className="text-white ml-1.5 text-xs font-semibold">All time</Text>
+                    <Text className="text-white ml-1.5 text-xs font-semibold">{t('profileAnalytics.all_time')}</Text>
                 </View>
             </LinearGradient>
 
@@ -121,7 +123,7 @@ const AnalyticsPage = () => {
                     <Text className="text-3xl font-bold mb-1" style={{ color: theme.text }}>
                         {formatNumber(analytics.totalFollowers)}
                     </Text>
-                    <Text className="text-sm" style={{ color: theme.textSecondary }}>Followers</Text>
+                    <Text className="text-sm" style={{ color: theme.textSecondary }}>{t('profileAnalytics.followers')}</Text>
                 </View>
 
                 {/* Views */}
@@ -135,7 +137,7 @@ const AnalyticsPage = () => {
                     <Text className="text-3xl font-bold mb-1" style={{ color: theme.text }}>
                         {formatNumber(analytics.totalViews)}
                     </Text>
-                    <Text className="text-sm" style={{ color: theme.textSecondary }}>Views</Text>
+                    <Text className="text-sm" style={{ color: theme.textSecondary }}>{t('profileAnalytics.views')}</Text>
                 </View>
 
                 {/* Likes */}
@@ -149,7 +151,7 @@ const AnalyticsPage = () => {
                     <Text className="text-3xl font-bold mb-1" style={{ color: theme.text }}>
                         {formatNumber(analytics.totalLikes)}
                     </Text>
-                    <Text className="text-sm" style={{ color: theme.textSecondary }}>Likes</Text>
+                    <Text className="text-sm" style={{ color: theme.textSecondary }}>{t('profileAnalytics.likes')}</Text>
                 </View>
 
                 {/* Comments */}
@@ -163,22 +165,22 @@ const AnalyticsPage = () => {
                     <Text className="text-3xl font-bold mb-1" style={{ color: theme.text }}>
                         {formatNumber(analytics.totalComments)}
                     </Text>
-                    <Text className="text-sm" style={{ color: theme.textSecondary }}>Comments</Text>
+                    <Text className="text-sm" style={{ color: theme.textSecondary }}>{t('profileAnalytics.comments')}</Text>
                 </View>
             </View>
 
             {/* Platform Breakdown */}
             <View className="mt-2">
-                <Text className="text-2xl font-bold mb-4" style={{ color: theme.text }}>Platform Breakdown</Text>
+                <Text className="text-2xl font-bold mb-4" style={{ color: theme.text }}>{t('profileAnalytics.platform_breakdown')}</Text>
 
                 {analytics.platforms.length === 0 ? (
                     <View className="rounded-2xl p-10 items-center" style={{ backgroundColor: theme.surface }}>
                         <Ionicons name="link-outline" size={48} color={theme.textTertiary} />
                         <Text className="mt-4 text-lg font-semibold" style={{ color: theme.text }}>
-                            No platforms connected
+                            {t('profileAnalytics.no_platforms_connected')}
                         </Text>
                         <Text className="mt-2 text-sm text-center" style={{ color: theme.textTertiary }}>
-                            Connect your social accounts to see analytics
+                            {t('profileAnalytics.connect_social_accounts')}
                         </Text>
                     </View>
                 ) : (
@@ -206,7 +208,7 @@ const AnalyticsPage = () => {
                                     <Text className="text-2xl font-bold mb-1" style={{ color: theme.text }}>
                                         {formatNumber(platform.followers)}
                                     </Text>
-                                    <Text className="text-xs" style={{ color: theme.textSecondary }}>Followers</Text>
+                                    <Text className="text-xs" style={{ color: theme.textSecondary }}>{t('profileAnalytics.followers')}</Text>
                                 </View>
 
                                 {platform.views > 0 && (
@@ -214,7 +216,7 @@ const AnalyticsPage = () => {
                                         <Text className="text-2xl font-bold mb-1" style={{ color: theme.text }}>
                                             {formatNumber(platform.views)}
                                         </Text>
-                                        <Text className="text-xs" style={{ color: theme.textSecondary }}>Views</Text>
+                                        <Text className="text-xs" style={{ color: theme.textSecondary }}>{t('profileAnalytics.views')}</Text>
                                     </View>
                                 )}
 
@@ -222,14 +224,14 @@ const AnalyticsPage = () => {
                                     <Text className="text-2xl font-bold mb-1" style={{ color: theme.text }}>
                                         {formatNumber(platform.likes)}
                                     </Text>
-                                    <Text className="text-xs" style={{ color: theme.textSecondary }}>Likes</Text>
+                                    <Text className="text-xs" style={{ color: theme.textSecondary }}>{t('profileAnalytics.likes')}</Text>
                                 </View>
 
                                 <View className="w-1/2 py-3">
                                     <Text className="text-2xl font-bold mb-1" style={{ color: theme.text }}>
                                         {formatNumber(platform.comments)}
                                     </Text>
-                                    <Text className="text-xs" style={{ color: theme.textSecondary }}>Comments</Text>
+                                    <Text className="text-xs" style={{ color: theme.textSecondary }}>{t('profileAnalytics.comments')}</Text>
                                 </View>
                             </View>
                         </View>

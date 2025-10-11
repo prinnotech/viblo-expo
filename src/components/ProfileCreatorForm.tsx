@@ -19,11 +19,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { registerForPushNotifications } from '@/hooks/usePushNotifications';
 import { Profile } from '@/lib/db_interface';
 import { useTheme } from '@/contexts/ThemeContext';
-
-const AVAILABLE_NICHES = [
-    'Technology', 'Gaming', 'Sports', 'Lifestyle', 'Fashion',
-    'Beauty', 'Food', 'Travel', 'Fitness', 'Music', 'Education'
-];
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const FormInput = ({ label, value, onChangeText, placeholder, multiline = false }: {
     label: string;
@@ -59,6 +55,21 @@ const ProfileCreatorForm = ({ profile }: { profile: Profile }) => {
     const router = useRouter();
     const { session } = useAuth();
     const { theme } = useTheme();
+    const { t } = useLanguage();
+
+    const AVAILABLE_NICHES = [
+        t('profileCreatorForm.technology'),
+        t('profileCreatorForm.gaming'),
+        t('profileCreatorForm.sports'),
+        t('profileCreatorForm.lifestyle'),
+        t('profileCreatorForm.fashion'),
+        t('profileCreatorForm.beauty'),
+        t('profileCreatorForm.food'),
+        t('profileCreatorForm.travel'),
+        t('profileCreatorForm.fitness'),
+        t('profileCreatorForm.music'),
+        t('profileCreatorForm.education')
+    ];
 
     const [firstName, setFirstName] = useState('');
     const [lastName, setLastName] = useState('');
@@ -86,7 +97,7 @@ const ProfileCreatorForm = ({ profile }: { profile: Profile }) => {
     const pickImage = async () => {
         const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
         if (status !== 'granted') {
-            Alert.alert('Permission needed', 'We need access to your photos to upload an avatar.');
+            Alert.alert(t('profileCreatorForm.permission_needed'), t('profileCreatorForm.permission_needed_description'));
             return;
         }
 
@@ -153,11 +164,11 @@ const ProfileCreatorForm = ({ profile }: { profile: Profile }) => {
 
             if (updateError) throw updateError;
 
-            Alert.alert("Success", "Your profile has been updated.");
+            Alert.alert(t('profileCreatorForm.success'), t('profileCreatorForm.profile_updated'));
             router.back();
         } catch (error: any) {
             console.error('Error:', error);
-            Alert.alert("Error", error.message || "Failed to update profile.");
+            Alert.alert(t('profileCreatorForm.error'), error.message || t('profileCreatorForm.failed_update_profile'));
         } finally {
             setUpdating(false);
         }
@@ -175,13 +186,13 @@ const ProfileCreatorForm = ({ profile }: { profile: Profile }) => {
                     .eq('id', session?.user?.id);
 
                 if (error) {
-                    Alert.alert('Error', 'Failed to enable notifications');
+                    Alert.alert(t('profileCreatorForm.error'), t('profileCreatorForm.failed_enable_notifications'));
                     setNotificationsEnabled(false);
                 } else {
-                    Alert.alert('Success', 'Notifications enabled!');
+                    Alert.alert(t('profileCreatorForm.success'), t('profileCreatorForm.notifications_enabled'));
                 }
             } else {
-                Alert.alert('Permission Denied', 'Please enable notifications in your device settings');
+                Alert.alert(t('profileCreatorForm.permission_denied'), t('profileCreatorForm.enable_notifications_settings'));
                 setNotificationsEnabled(false);
             }
         } else {
@@ -189,7 +200,7 @@ const ProfileCreatorForm = ({ profile }: { profile: Profile }) => {
                 .from('profiles')
                 .update({ push_token: null })
                 .eq('id', session?.user?.id);
-            Alert.alert('Success', 'Notifications disabled');
+            Alert.alert(t('profileCreatorForm.success'), t('profileCreatorForm.notifications_disabled'));
         }
     };
 
@@ -203,20 +214,46 @@ const ProfileCreatorForm = ({ profile }: { profile: Profile }) => {
                         className="w-28 h-28 rounded-full"
                     />
                     <TouchableOpacity onPress={pickImage} className="mt-4">
-                        <Text className="font-semibold" style={{ color: theme.primary }}>Change Photo</Text>
+                        <Text className="font-semibold" style={{ color: theme.primary }}>{t('profileCreatorForm.change_photo')}</Text>
                     </TouchableOpacity>
                 </View>
 
                 {/* Form Inputs */}
-                <FormInput label="First Name" value={firstName} onChangeText={setFirstName} placeholder="Your first name" />
-                <FormInput label="Last Name" value={lastName} onChangeText={setLastName} placeholder="Your last name" />
-                <FormInput label="Username" value={username} onChangeText={setUsername} placeholder="Your public username" />
-                <FormInput label="Bio" value={bio} onChangeText={setBio} placeholder="Tell us about yourself" multiline />
-                <FormInput label="Website" value={website} onChangeText={setWebsite} placeholder="https://yourwebsite.com" />
+                <FormInput
+                    label={t('profileCreatorForm.first_name')}
+                    value={firstName}
+                    onChangeText={setFirstName}
+                    placeholder={t('profileCreatorForm.first_name_placeholder')}
+                />
+                <FormInput
+                    label={t('profileCreatorForm.last_name')}
+                    value={lastName}
+                    onChangeText={setLastName}
+                    placeholder={t('profileCreatorForm.last_name_placeholder')}
+                />
+                <FormInput
+                    label={t('profileCreatorForm.username')}
+                    value={username}
+                    onChangeText={setUsername}
+                    placeholder={t('profileCreatorForm.username_placeholder')}
+                />
+                <FormInput
+                    label={t('profileCreatorForm.bio')}
+                    value={bio}
+                    onChangeText={setBio}
+                    placeholder={t('profileCreatorForm.bio_placeholder')}
+                    multiline
+                />
+                <FormInput
+                    label={t('profileCreatorForm.website')}
+                    value={website}
+                    onChangeText={setWebsite}
+                    placeholder={t('profileCreatorForm.website_placeholder')}
+                />
 
                 {/* Niches Selection */}
                 <View className="mb-4">
-                    <Text className="text-sm font-semibold mb-2" style={{ color: theme.textSecondary }}>Content Niches</Text>
+                    <Text className="text-sm font-semibold mb-2" style={{ color: theme.textSecondary }}>{t('profileCreatorForm.content_niches')}</Text>
                     <View className="flex-row flex-wrap gap-2">
                         {AVAILABLE_NICHES.map((niche) => {
                             const isSelected = selectedNiches.includes(niche);
@@ -246,9 +283,9 @@ const ProfileCreatorForm = ({ profile }: { profile: Profile }) => {
                 <View className="mb-6 rounded-lg px-4 py-4" style={{ backgroundColor: theme.surface, borderColor: theme.borderLight, borderWidth: 1 }}>
                     <View className="flex-row justify-between items-center">
                         <View className="flex-1 mr-4">
-                            <Text className="text-base font-semibold" style={{ color: theme.text }}>Push Notifications</Text>
+                            <Text className="text-base font-semibold" style={{ color: theme.text }}>{t('profileCreatorForm.push_notifications')}</Text>
                             <Text className="text-sm mt-1" style={{ color: theme.textSecondary }}>
-                                Receive updates about campaigns, messages, and activity
+                                {t('profileCreatorForm.push_notifications_description')}
                             </Text>
                         </View>
                         <Switch
@@ -272,7 +309,7 @@ const ProfileCreatorForm = ({ profile }: { profile: Profile }) => {
                     ) : (
                         <>
                             <Feather name="save" size={18} color="#FFFFFF" />
-                            <Text className="text-base font-semibold ml-2" style={{ color: '#FFFFFF' }}>Save Changes</Text>
+                            <Text className="text-base font-semibold ml-2" style={{ color: '#FFFFFF' }}>{t('profileCreatorForm.save_changes')}</Text>
                         </>
                     )}
                 </TouchableOpacity>

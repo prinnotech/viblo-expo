@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabase'
 import { Link } from 'expo-router'
 import PasswordInput from '@/components/PasswordInput'
 import { useTheme } from '@/contexts/ThemeContext'
+import { useLanguage } from '@/contexts/LanguageContext'
 
 const imageFavicon = require('@/../assets/favicon.png')
 
@@ -20,6 +21,7 @@ AppState.addEventListener('change', (state) => {
 
 const SignUp = () => {
     const { theme } = useTheme();
+    const { t } = useLanguage();
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const [loading, setLoading] = useState(false)
@@ -34,7 +36,7 @@ const SignUp = () => {
             password: password,
         })
         if (error) Alert.alert(error.message)
-        if (!session) Alert.alert('Please check your inbox for email verification!')
+        if (!session) Alert.alert(t('signup.verification_alert'))
         setLoading(false)
     }
 
@@ -55,7 +57,7 @@ const SignUp = () => {
                         />
                     </View>
 
-                    <Text className="text-3xl font-bold text-center mb-6" style={{ color: theme.text }}>Welcome!</Text>
+                    <Text className="text-3xl font-bold text-center mb-6" style={{ color: theme.text }}>{t('signup.welcome')}</Text>
 
                     {/* Email Input */}
                     <TextInput
@@ -68,7 +70,7 @@ const SignUp = () => {
                         }}
                         onChangeText={(text) => setEmail(text)}
                         value={email}
-                        placeholder="email@address.com"
+                        placeholder={t('signup.email_placeholder')}
                         placeholderTextColor={theme.textTertiary}
                         autoCapitalize={'none'}
                         keyboardType="email-address"
@@ -78,7 +80,7 @@ const SignUp = () => {
                     <PasswordInput
                         onChangeText={(text) => setPassword(text)}
                         value={password}
-                        placeholder="Password"
+                        placeholder={t('signup.password_placeholder')}
                         placeholderTextColor={theme.textTertiary}
                     />
 
@@ -93,16 +95,16 @@ const SignUp = () => {
                         {loading ? (
                             <ActivityIndicator color="#FFFFFF" />
                         ) : (
-                            <Text className="text-lg font-semibold" style={{ color: '#FFFFFF' }}>Sign Up</Text>
+                            <Text className="text-lg font-semibold" style={{ color: '#FFFFFF' }}>{t('signup.sign_up_button')}</Text>
                         )}
                     </TouchableOpacity>
 
                     {/* Sign In Link */}
                     <Text className="text-center mt-6" style={{ color: theme.textTertiary }}>
-                        Already have an account?{' '}
+                        {t('signup.already_have_account')}
                         <Link href="/sign-in">
                             <Text className="font-semibold" style={{ color: theme.primary }}>
-                                Sign In
+                                {t('signup.sign_in_link')}
                             </Text>
                         </Link>
                     </Text>

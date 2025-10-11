@@ -15,6 +15,7 @@ import { useUserProfile } from '@/hooks/useUserProfile';
 import { Feather } from '@expo/vector-icons';
 import { supabase } from '@/lib/supabase';
 import { useTheme } from '@/contexts/ThemeContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const MenuItem = ({ icon, text, onPress }: { icon: any; text: string; onPress: () => void; }) => {
     const { theme } = useTheme();
@@ -37,6 +38,7 @@ const ProfileScreen = () => {
     const router = useRouter();
     const [refreshing, setRefreshing] = useState(false);
     const { theme } = useTheme();
+    const { t } = useLanguage();
 
     const isBrand = profile?.user_type === 'brand';
     const isInfluencer = profile?.user_type === 'influencer';
@@ -48,10 +50,10 @@ const ProfileScreen = () => {
     }, [refetch]);
 
     async function signOut() {
-        Alert.alert("Sign Out", "Are you sure you want to sign out?", [
-            { text: "Cancel", style: "cancel" },
+        Alert.alert(t('profileIndex.sign_out'), t('profileIndex.sign_out_confirm'), [
+            { text: t('profileIndex.cancel'), style: "cancel" },
             {
-                text: "Sign Out",
+                text: t('profileIndex.sign_out'),
                 style: "destructive",
                 onPress: async () => {
                     await supabase.auth.signOut();
@@ -103,7 +105,7 @@ const ProfileScreen = () => {
                 <View className="mt-6 px-6 gap-2">
                     <MenuItem
                         icon="user"
-                        text="Edit Profile"
+                        text={t('profileIndex.edit_profile')}
                         onPress={() => router.push('/profile/edit')}
                     />
 
@@ -112,12 +114,12 @@ const ProfileScreen = () => {
                         <>
                             <MenuItem
                                 icon="share-2"
-                                text="Connected Accounts"
+                                text={t('profileIndex.connected_accounts')}
                                 onPress={() => router.push('/profile/connections')}
                             />
                             <MenuItem
                                 icon="bar-chart-2"
-                                text="Analytics"
+                                text={t('profileIndex.analytics')}
                                 onPress={() => router.push('/profile/analytics')}
                             />
                         </>
@@ -126,17 +128,17 @@ const ProfileScreen = () => {
                     {/* Both */}
                     <MenuItem
                         icon="eye"
-                        text="View Public Profile"
+                        text={t('profileIndex.view_public_profile')}
                         onPress={() => router.push(isBrand ? `/brand/${profile?.id}` : `/creators/${profile?.id}`)}
                     />
                     <MenuItem
                         icon="credit-card"
-                        text="Payments"
+                        text={t('profileIndex.payments')}
                         onPress={() => router.push('/profile/payments')}
                     />
                     <MenuItem
                         icon="settings"
-                        text="Settings"
+                        text={t('profileIndex.settings')}
                         onPress={() => router.push('/profile/settings')}
                     />
                 </View>
@@ -149,7 +151,7 @@ const ProfileScreen = () => {
                         style={{ backgroundColor: theme.surface, borderColor: theme.errorLight }}
                     >
                         <Feather name="log-out" size={18} color={theme.error} />
-                        <Text className="text-base font-semibold ml-2" style={{ color: theme.error }}>Sign Out</Text>
+                        <Text className="text-base font-semibold ml-2" style={{ color: theme.error }}>{t('profileIndex.sign_out')}</Text>
                     </TouchableOpacity>
                 </View>
             </ScrollView>

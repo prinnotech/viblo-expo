@@ -6,6 +6,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import CampaignAnalyticsCard from '@/components/CampaignAnalyticsCard';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { useTheme } from '@/contexts/ThemeContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface CampaignWithStats {
     id: string;
@@ -21,6 +22,7 @@ interface CampaignWithStats {
 const AnalyticsPage = () => {
     const { profile } = useAuth();
     const { theme } = useTheme();
+    const { t } = useLanguage();
     const [campaigns, setCampaigns] = useState<CampaignWithStats[]>([]);
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
@@ -92,7 +94,7 @@ const AnalyticsPage = () => {
         return (
             <View className="flex-1 items-center justify-center" style={{ backgroundColor: theme.background }}>
                 <ActivityIndicator size="large" color={theme.primary} />
-                <Text className="mt-4" style={{ color: theme.textTertiary }}>Loading analytics...</Text>
+                <Text className="mt-4" style={{ color: theme.textTertiary }}>{t('analyticsIndex.loading_analytics')}</Text>
             </View>
         );
     }
@@ -101,9 +103,9 @@ const AnalyticsPage = () => {
         <SafeAreaView className="flex-1" style={{ backgroundColor: theme.background }}>
             {/* Header */}
             <View className="p-4 border-b" style={{ backgroundColor: theme.surface, borderColor: theme.border }}>
-                <Text className="text-2xl font-bold" style={{ color: theme.text }}>Campaign Analytics</Text>
+                <Text className="text-2xl font-bold" style={{ color: theme.text }}>{t('analyticsIndex.campaign_analytics')}</Text>
                 <Text className="text-sm mt-1" style={{ color: theme.textTertiary }}>
-                    Track performance across all your campaigns
+                    {t('analyticsIndex.track_performance')}
                 </Text>
             </View>
 
@@ -136,10 +138,10 @@ const AnalyticsPage = () => {
                     <View className="flex-1 justify-center items-center p-8 mt-20">
                         <AntDesign name="bar-chart" size={64} color={theme.textTertiary} />
                         <Text className="text-center mt-6 text-xl font-semibold" style={{ color: theme.textSecondary }}>
-                            No campaigns yet
+                            {t('analyticsIndex.no_campaigns_yet')}
                         </Text>
                         <Text className="text-center mt-2 text-base" style={{ color: theme.textTertiary }}>
-                            Create your first campaign to see analytics here
+                            {t('analyticsIndex.create_first_campaign')}
                         </Text>
                     </View>
                 }

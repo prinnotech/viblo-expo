@@ -7,6 +7,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from "react";
 import { StripeProvider } from '@stripe/stripe-react-native';
 import { ThemeProvider } from '@/contexts/ThemeContext';
+import { LanguageProvider } from '@/contexts/LanguageContext';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -18,15 +19,17 @@ export default function Layout() {
     }, []);
 
     return (
-        <AuthProvider>
-            <ThemeProvider>
-                <StripeProvider
-                    publishableKey="pk_test_51SEzaBJ6uKV4HQBES2UANsuTfRy87LuusjmIfjNu1QD4aldmYaqxQwAwp4EUKnQnByt4vBo0MjP4dXSesvK1UtWW0069cfpEO4"
-                    merchantIdentifier="io.viblo.app"
-                >
-                    <Slot />
-                </StripeProvider>
-            </ThemeProvider>
-        </AuthProvider>
+        <LanguageProvider>
+            <AuthProvider>
+                <ThemeProvider>
+                    <StripeProvider
+                        publishableKey="pk_test_51SEzaBJ6uKV4HQBES2UANsuTfRy87LuusjmIfjNu1QD4aldmYaqxQwAwp4EUKnQnByt4vBo0MjP4dXSesvK1UtWW0069cfpEO4"
+                        merchantIdentifier="io.viblo.app"
+                    >
+                        <Slot />
+                    </StripeProvider>
+                </ThemeProvider>
+            </AuthProvider>
+        </LanguageProvider>
     );
 }

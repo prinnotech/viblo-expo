@@ -1,9 +1,11 @@
 import { Stack } from "expo-router";
 import React from "react";
 import { useTheme } from "@/contexts/ThemeContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 function Layout() {
     const { theme } = useTheme();
+    const { t } = useLanguage();
 
     return (
         <Stack
@@ -27,7 +29,7 @@ function Layout() {
                 options={{
                     presentation: 'modal',
                     headerShown: true,
-                    title: 'Edit Profile',
+                    title: t('profileLayout.edit_profile'),
                 }}
             />
 
@@ -36,7 +38,7 @@ function Layout() {
                 options={{
                     presentation: 'modal',
                     headerShown: true,
-                    title: 'Connected Accounts',
+                    title: t('profileLayout.connected_accounts'),
                 }}
             />
 
@@ -45,7 +47,7 @@ function Layout() {
                 options={{
                     presentation: 'modal',
                     headerShown: true,
-                    title: 'Your Stats',
+                    title: t('profileLayout.your_stats'),
                 }}
             />
 
@@ -54,7 +56,7 @@ function Layout() {
                 options={{
                     presentation: 'modal',
                     headerShown: true,
-                    title: 'Payments',
+                    title: t('profileLayout.payments'),
                 }}
             />
 
@@ -63,7 +65,7 @@ function Layout() {
                 options={{
                     presentation: 'modal',
                     headerShown: true,
-                    title: 'Settings',
+                    title: t('profileLayout.settings'),
                 }}
             />
         </Stack>

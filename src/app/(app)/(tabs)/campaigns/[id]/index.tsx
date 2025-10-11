@@ -15,10 +15,12 @@ import { supabase } from '@/lib/supabase';
 import { SocialIcon } from '@/components/getSocialIcons';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 // --- Helper Components ---
 const BrandHeader = ({ profile }) => {
     const { theme } = useTheme();
+    const { t } = useLanguage();
     return (
         <View className="flex-row items-center mb-4">
             <Image
@@ -29,13 +31,13 @@ const BrandHeader = ({ profile }) => {
             <View>
                 <View className="flex-row items-center">
                     <Link href={`/brand/${profile?.id}`} asChild>
-                        <Text className="text-xl font-bold" style={{ color: theme.text }}>{profile.company_name || 'Brand Name'}</Text>
+                        <Text className="text-xl font-bold" style={{ color: theme.text }}>{profile.company_name || t('campaignId.brand_name')}</Text>
                     </Link>
                     {profile.is_verified && (
                         <Feather name="check-circle" size={18} color={theme.primary} style={{ marginLeft: 8 }} />
                     )}
                 </View>
-                <Text className="text-sm" style={{ color: theme.textSecondary }}>{profile.industry || 'Industry'}</Text>
+                <Text className="text-sm" style={{ color: theme.textSecondary }}>{profile.industry || t('campaignId.industry')}</Text>
             </View>
         </View>
     );
@@ -81,6 +83,7 @@ const InfoSection = ({ title, children }) => {
 
 const BudgetProgressBar = ({ total, paid }: { total: number; paid: number }) => {
     const { theme } = useTheme();
+    const { t } = useLanguage();
     const paidAmount = paid || 0;
     const totalAmount = total || 0;
     const percentage = totalAmount > 0 ? (paidAmount / totalAmount) * 100 : 0;
@@ -91,7 +94,7 @@ const BudgetProgressBar = ({ total, paid }: { total: number; paid: number }) => 
     return (
         <View className="mb-6">
             <View className="flex-row justify-between items-center mb-1">
-                <Text className="text-xs font-medium" style={{ color: theme.textSecondary }}>Budget Used: ${paidAmount.toFixed(2)}</Text>
+                <Text className="text-xs font-medium" style={{ color: theme.textSecondary }}>{t('campaignId.budget_used')} ${paidAmount.toFixed(2)}</Text>
                 <Text className="text-xs font-bold" style={{ color: theme.textSecondary }}>{Math.round(percentage)}%</Text>
             </View>
             <View className="w-full rounded-full h-2.5" style={{ backgroundColor: theme.surfaceSecondary }}>
@@ -111,6 +114,7 @@ const CampaignDetailsPage = () => {
     const { id } = useLocalSearchParams();
     const navigation = useNavigation();
     const { theme } = useTheme();
+    const { t } = useLanguage();
 
     const { profile, isLoading: isAuthLoading } = useAuth();
     const isBrand = profile?.user_type === 'brand';
@@ -205,7 +209,7 @@ const CampaignDetailsPage = () => {
         return (
             <View className="flex-1 items-center justify-center p-4" style={{ backgroundColor: theme.background }}>
                 <Text className="text-center" style={{ color: theme.error }}>
-                    {error || "Campaign not found."}
+                    {error || t('campaignId.campaign_not_found')}
                 </Text>
             </View>
         );
@@ -214,16 +218,16 @@ const CampaignDetailsPage = () => {
     const getButtonText = () => {
         switch (submissionStatus) {
             case 'pending_review':
-                return 'Application Submitted';
+                return t('campaignId.application_submitted');
             case 'completed':
-                return 'Campaign Completed';
+                return t('campaignId.campaign_completed');
             case 'approved':
             case 'posted_live':
-                return 'View Submission';
+                return t('campaignId.view_submission');
             case 'needs_revision':
-                return 'Revise Submission';
+                return t('campaignId.revise_submission');
             default:
-                return 'Apply Now';
+                return t('campaignId.apply_now');
         }
     };
 
@@ -250,30 +254,30 @@ const CampaignDetailsPage = () => {
                     paid={parseFloat(campaign.total_paid)}
                 />
                 <View className="flex-row space-x-3 mb-6">
-                    <CampaignStat icon="dollar-sign" label="Total Budget" value={`$${campaign.total_budget}`} />
-                    <CampaignStat icon="eye" label="Rate Per View" value={`$${campaign.rate_per_view}`} />
+                    <CampaignStat icon="dollar-sign" label={t('campaignId.total_budget')} value={`$${campaign.total_budget}`} />
+                    <CampaignStat icon="eye" label={t('campaignId.rate_per_view')} value={`$${campaign.rate_per_view}`} />
                 </View>
-                <InfoSection title="Description">
+                <InfoSection title={t('campaignId.description')}>
                     <Text className="text-base leading-relaxed" style={{ color: theme.textSecondary }}>{campaign.description}</Text>
                 </InfoSection>
                 {campaign.content_requirements && (
-                    <InfoSection title="Content Requirements">
+                    <InfoSection title={t('campaignId.content_requirements')}>
                         <Text className="text-base leading-relaxed" style={{ color: theme.textSecondary }}>{campaign.content_requirements}</Text>
                     </InfoSection>
                 )}
-                <InfoSection title="Platforms">
+                <InfoSection title={t('campaignId.platforms')}>
                     <View className="flex-row flex-wrap">
-                        {campaign.target_platforms?.map(p => <TagPlatforms key={p} platform={p} />) || <Tag text="Not specified" />}
+                        {campaign.target_platforms?.map(p => <TagPlatforms key={p} platform={p} />) || <Tag text={t('campaignId.not_specified')} />}
                     </View>
                 </InfoSection>
-                <InfoSection title="Target Niches">
+                <InfoSection title={t('campaignId.target_niches')}>
                     <View className="flex-row flex-wrap">
-                        {campaign.target_niches?.map(n => <Tag key={n} text={n} />) || <Tag text="Not specified" />}
+                        {campaign.target_niches?.map(n => <Tag key={n} text={n} />) || <Tag text={t('campaignId.not_specified')} />}
                     </View>
                 </InfoSection>
-                <InfoSection title="Target Location">
+                <InfoSection title={t('campaignId.target_location')}>
                     <View className="flex-row flex-wrap">
-                        {campaign.target_audience_locations?.map(l => <Tag key={l} text={l} />) || <Tag text="Not specified" />}
+                        {campaign.target_audience_locations?.map(l => <Tag key={l} text={l} />) || <Tag text={t('campaignId.not_specified')} />}
                     </View>
                 </InfoSection>
             </ScrollView>
@@ -286,7 +290,7 @@ const CampaignDetailsPage = () => {
                         style={{ backgroundColor: theme.primary }}
                         onPress={() => router.push(`/campaigns/${campaignId}/edit`)}
                     >
-                        <Text className="text-lg font-bold" style={{ color: theme.surface }}>Edit</Text>
+                        <Text className="text-lg font-bold" style={{ color: theme.surface }}>{t('campaignId.edit')}</Text>
                     </Pressable>
                 ) : isInfluencer ? (
                     <Pressable

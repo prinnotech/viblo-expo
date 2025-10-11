@@ -6,10 +6,12 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useConversations } from '@/hooks/useConversations';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useTheme } from '@/contexts/ThemeContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const Layout = () => {
     const { profile, isLoading } = useAuth();
     const { theme } = useTheme();
+    const { t } = useLanguage();
     const isBrand = profile?.user_type === 'brand';
     const isInfluencer = profile?.user_type === 'influencer';
 
@@ -42,7 +44,7 @@ const Layout = () => {
             <Tabs.Screen
                 name="index"
                 options={{
-                    title: isBrand ? 'Dashboard' : 'Discover',
+                    title: isBrand ? t('tabsLayout.dashboard') : t('tabsLayout.discover'),
                     headerShown: false,
                     tabBarIcon: ({ color, size }) => (
                         <AntDesign name={isBrand ? 'dashboard' : 'search'} size={size} color={color} />
@@ -54,7 +56,7 @@ const Layout = () => {
             <Tabs.Screen
                 name="submissions"
                 options={{
-                    title: 'My Submissions',
+                    title: t('tabsLayout.my_submissions'),
                     headerShown: false,
                     tabBarIcon: ({ color, size }) => <AntDesign name="solution" size={size} color={color} />,
                     // This is the key: hide the tab if the user is not an influencer
@@ -64,7 +66,7 @@ const Layout = () => {
             <Tabs.Screen
                 name="wallet"
                 options={{
-                    title: 'Wallet',
+                    title: t('tabsLayout.wallet'),
                     headerShown: false,
                     tabBarIcon: ({ color, size }) => <AntDesign name="wallet" size={size} color={color} />,
                     // This is the key: hide the tab if the user is not an influencer
@@ -76,7 +78,7 @@ const Layout = () => {
             <Tabs.Screen
                 name="campaigns"
                 options={{
-                    title: 'Campaigns',
+                    title: t('tabsLayout.campaigns'),
                     headerShown: false,
                     tabBarIcon: ({ color, size }) => <AntDesign name="flag" size={size} color={color} />,
                     // This is the key: hide the tab if the user is not a brand
@@ -86,7 +88,7 @@ const Layout = () => {
             <Tabs.Screen
                 name="analytics"
                 options={{
-                    title: 'Analytics',
+                    title: t('tabsLayout.analytics'),
                     headerShown: false,
                     tabBarIcon: ({ color, size }) => <Ionicons name="analytics" size={size} color={color} />,
                     // This is the key: hide the tab if the user is not a brand
@@ -98,7 +100,7 @@ const Layout = () => {
             <Tabs.Screen
                 name="inbox"
                 options={{
-                    title: 'Inbox',
+                    title: t('tabsLayout.inbox'),
                     headerShown: false,
                     tabBarIcon: ({ color, size }) => (
                         <View>
@@ -120,7 +122,7 @@ const Layout = () => {
             <Tabs.Screen
                 name="profile"
                 options={{
-                    title: 'Profile',
+                    title: t('tabsLayout.profile'),
                     headerShown: false,
                     tabBarIcon: ({ color, size }) => <AntDesign name="user" size={size} color={color} />,
                 }}

@@ -1,9 +1,11 @@
 import { Stack } from "expo-router";
 import React from "react";
 import { useTheme } from "@/contexts/ThemeContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 function Layout() {
     const { theme } = useTheme();
+    const { t } = useLanguage();
 
     return (
         <Stack
@@ -34,7 +36,7 @@ function Layout() {
                     headerShown: true,
 
                     // Set a default title that shows while data is loading
-                    title: 'Loading messages...',
+                    title: t('inboxLayout.loading_messages'),
                 }}
             />
             <Stack.Screen
@@ -47,7 +49,7 @@ function Layout() {
                     headerShown: true,
 
                     // Set a default title that shows while data is loading
-                    title: 'Create new message',
+                    title: t('inboxLayout.create_new_message'),
                 }}
             />
         </Stack>

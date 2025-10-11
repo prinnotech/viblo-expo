@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabase'
 import { Link } from 'expo-router'
 import PasswordInput from '@/components/PasswordInput'
 import { useTheme } from '@/contexts/ThemeContext'
+import { useLanguage } from '@/contexts/LanguageContext'
 
 const imageFavicon = require('@/../assets/favicon.png')
 
@@ -20,6 +21,7 @@ AppState.addEventListener('change', (state) => {
 
 const SignIn = () => {
     const { theme } = useTheme();
+    const { t } = useLanguage();
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const [loading, setLoading] = useState(false)
@@ -51,7 +53,7 @@ const SignIn = () => {
                         />
                     </View>
 
-                    <Text className="text-3xl font-bold text-center mb-6" style={{ color: theme.text }}>Welcome Back</Text>
+                    <Text className="text-3xl font-bold text-center mb-6" style={{ color: theme.text }}>{t('signin.welcome_back')}</Text>
 
                     {/* Email Input */}
                     <TextInput
@@ -64,7 +66,7 @@ const SignIn = () => {
                         }}
                         onChangeText={(text) => setEmail(text)}
                         value={email}
-                        placeholder="email@address.com"
+                        placeholder={t('signin.email_placeholder')}
                         placeholderTextColor={theme.textTertiary}
                         autoCapitalize={'none'}
                         keyboardType="email-address"
@@ -74,7 +76,7 @@ const SignIn = () => {
                     <PasswordInput
                         onChangeText={(text) => setPassword(text)}
                         value={password}
-                        placeholder="Password"
+                        placeholder={t('signin.password_placeholder')}
                         placeholderTextColor={theme.textTertiary}
                     />
 
@@ -88,16 +90,16 @@ const SignIn = () => {
                         {loading ? (
                             <ActivityIndicator color="#FFFFFF" />
                         ) : (
-                            <Text className="text-lg font-semibold" style={{ color: '#FFFFFF' }}>Sign In</Text>
+                            <Text className="text-lg font-semibold" style={{ color: '#FFFFFF' }}>{t('signin.sign_in_button')}</Text>
                         )}
                     </TouchableOpacity>
 
                     {/* Sign Up Link */}
                     <Text className="text-center mt-6" style={{ color: theme.textTertiary }}>
-                        Don't have an account?{' '}
+                        {t('signin.no_account_prompt')}
                         <Link href="/sign-up">
                             <Text className="font-semibold" style={{ color: theme.primary }}>
-                                Sign Up
+                                {t('signin.sign_up_link')}
                             </Text>
                         </Link>
                     </Text>

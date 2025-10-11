@@ -4,6 +4,7 @@ import React from 'react';
 import { useRouter } from 'expo-router';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { useTheme } from '@/contexts/ThemeContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface CampaignAnalyticsCardProps {
     campaignId: string;
@@ -28,6 +29,7 @@ const CampaignAnalyticsCard = ({
 }: CampaignAnalyticsCardProps) => {
     const router = useRouter();
     const { theme, themeMode, isDark, setThemeMode } = useTheme();
+    const { t } = useLanguage();
 
     const formatNumber = (num: number) => {
         if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
@@ -77,7 +79,7 @@ const CampaignAnalyticsCard = ({
                     </View>
                     <View className="px-3 py-1 rounded-full" style={{ backgroundColor: statusStyles.backgroundColor }}>
                         <Text className="text-xs font-semibold uppercase" style={{ color: statusStyles.color }}>
-                            {status}
+                            {t(`campaignAnalyticsCard.${status}`)}
                         </Text>
                     </View>
                 </View>
@@ -86,7 +88,7 @@ const CampaignAnalyticsCard = ({
                 <View className="mt-3">
                     <View className="flex-row justify-between items-center mb-1">
                         <Text className="text-xs" style={{ color: theme.textTertiary }}>
-                            {formatCurrency(totalSpent)} of {formatCurrency(totalBudget)}
+                            {formatCurrency(totalSpent)} {t('campaignAnalyticsCard.of')} {formatCurrency(totalBudget)}
                         </Text>
                         <Text className="text-xs font-bold" style={{ color: theme.textSecondary }}>
                             {Math.round(budgetPercentage)}%
@@ -117,7 +119,7 @@ const CampaignAnalyticsCard = ({
                         <Text className="text-lg font-bold mt-1" style={{ color: theme.text }}>
                             {formatNumber(totalViews)}
                         </Text>
-                        <Text className="text-xs" style={{ color: theme.textTertiary }}>Views</Text>
+                        <Text className="text-xs" style={{ color: theme.textTertiary }}>{t('campaignAnalyticsCard.views')}</Text>
                     </View>
 
                     <View className="flex-1 items-center" style={{ borderLeftColor: theme.border, borderRightColor: theme.border, borderLeftWidth: 1, borderRightWidth: 1 }}>
@@ -125,7 +127,7 @@ const CampaignAnalyticsCard = ({
                         <Text className="text-lg font-bold mt-1" style={{ color: theme.text }}>
                             {activeCreators}
                         </Text>
-                        <Text className="text-xs" style={{ color: theme.textTertiary }}>Creators</Text>
+                        <Text className="text-xs" style={{ color: theme.textTertiary }}>{t('campaignAnalyticsCard.creators')}</Text>
                     </View>
 
                     <View className="flex-1 items-center">
@@ -133,14 +135,14 @@ const CampaignAnalyticsCard = ({
                         <Text className="text-lg font-bold mt-1" style={{ color: theme.text }}>
                             {totalSubmissions}
                         </Text>
-                        <Text className="text-xs" style={{ color: theme.textTertiary }}>Posts</Text>
+                        <Text className="text-xs" style={{ color: theme.textTertiary }}>{t('campaignAnalyticsCard.posts')}</Text>
                     </View>
                 </View>
             </View>
 
             {/* Footer */}
             <View className="px-4 py-3 flex-row justify-between items-center" style={{ backgroundColor: theme.background, borderTopColor: theme.border, borderTopWidth: 1 }}>
-                <Text className="text-sm" style={{ color: theme.textSecondary }}>View Analytics</Text>
+                <Text className="text-sm" style={{ color: theme.textSecondary }}>{t('campaignAnalyticsCard.view_analytics')}</Text>
                 <AntDesign name="arrow-right" size={16} color={theme.textSecondary} />
             </View>
         </TouchableOpacity>

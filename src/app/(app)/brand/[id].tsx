@@ -6,6 +6,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { supabase } from '@/lib/supabase';
 import CampaignCard, { Campaign } from '@/components/CampaignCard';
 import { useTheme } from '@/contexts/ThemeContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 
 interface BrandData {
@@ -30,6 +31,7 @@ const BrandPublicPage = () => {
     const { id } = useLocalSearchParams<{ id: string }>();
     const router = useRouter();
     const { theme } = useTheme();
+    const { t } = useLanguage();
 
     const [brand, setBrand] = useState<BrandData | null>(null);
     const [stats, setStats] = useState<BrandStats | null>(null);
@@ -129,7 +131,7 @@ const BrandPublicPage = () => {
         return (
             <View className="flex-1 justify-center items-center" style={{ backgroundColor: theme.background }}>
                 <ActivityIndicator size="large" color={theme.primary} />
-                <Text className="mt-4 text-base" style={{ color: theme.textSecondary }}>Loading brand profile...</Text>
+                <Text className="mt-4 text-base" style={{ color: theme.textSecondary }}>{t('brandId.loading_brand_profile')}</Text>
             </View>
         );
     }
@@ -139,14 +141,14 @@ const BrandPublicPage = () => {
             <View className="flex-1 justify-center items-center px-5" style={{ backgroundColor: theme.background }}>
                 <Ionicons name="alert-circle-outline" size={64} color={theme.error} />
                 <Text className="mt-4 text-base text-center" style={{ color: theme.error }}>
-                    {error || 'Brand profile not found'}
+                    {error || t('brandId.brand_profile_not_found')}
                 </Text>
                 <TouchableOpacity
                     onPress={() => router.back()}
                     className="mt-6 px-6 py-3 rounded-xl"
                     style={{ backgroundColor: theme.primary }}
                 >
-                    <Text className="font-semibold" style={{ color: theme.surface }}>Go Back</Text>
+                    <Text className="font-semibold" style={{ color: theme.surface }}>{t('brandId.go_back')}</Text>
                 </TouchableOpacity>
             </View>
         );
@@ -216,7 +218,7 @@ const BrandPublicPage = () => {
             <View className="p-5">
                 {/* Stats Overview */}
                 <View className="rounded-2xl p-5 mb-4 shadow-sm" style={{ backgroundColor: theme.surface }}>
-                    <Text className="text-lg font-bold mb-4" style={{ color: theme.text }}>Brand Stats</Text>
+                    <Text className="text-lg font-bold mb-4" style={{ color: theme.text }}>{t('brandId.brand_stats')}</Text>
                     <View className="flex-row flex-wrap justify-between">
                         <View className="w-[48%] mb-4">
                             <View className="flex-row items-center mb-2">
@@ -230,7 +232,7 @@ const BrandPublicPage = () => {
                                     <Text className="text-2xl font-bold" style={{ color: theme.text }}>
                                         {stats?.totalCampaigns || 0}
                                     </Text>
-                                    <Text className="text-xs" style={{ color: theme.textSecondary }}>Total Campaigns</Text>
+                                    <Text className="text-xs" style={{ color: theme.textSecondary }}>{t('brandId.total_campaigns')}</Text>
                                 </View>
                             </View>
                         </View>
@@ -247,7 +249,7 @@ const BrandPublicPage = () => {
                                     <Text className="text-2xl font-bold" style={{ color: theme.text }}>
                                         {stats?.activeCampaigns || 0}
                                     </Text>
-                                    <Text className="text-xs" style={{ color: theme.textSecondary }}>Active Now</Text>
+                                    <Text className="text-xs" style={{ color: theme.textSecondary }}>{t('brandId.active_now')}</Text>
                                 </View>
                             </View>
                         </View>
@@ -264,7 +266,7 @@ const BrandPublicPage = () => {
                                     <Text className="text-2xl font-bold" style={{ color: theme.text }}>
                                         {stats?.creatorsWorkedWith || 0}
                                     </Text>
-                                    <Text className="text-xs" style={{ color: theme.textSecondary }}>Creators</Text>
+                                    <Text className="text-xs" style={{ color: theme.textSecondary }}>{t('brandId.creators')}</Text>
                                 </View>
                             </View>
                         </View>
@@ -281,7 +283,7 @@ const BrandPublicPage = () => {
                                     <Text className="text-2xl font-bold" style={{ color: theme.text }}>
                                         {formatCurrency(stats?.totalSpent || 0)}
                                     </Text>
-                                    <Text className="text-xs" style={{ color: theme.textSecondary }}>Total Spent</Text>
+                                    <Text className="text-xs" style={{ color: theme.textSecondary }}>{t('brandId.total_spent')}</Text>
                                 </View>
                             </View>
                         </View>
@@ -290,16 +292,16 @@ const BrandPublicPage = () => {
 
                 <View className="mb-4">
                     <Text className="text-lg font-bold mb-3" style={{ color: theme.text }}>
-                        Active Campaigns
+                        {t('brandId.active_campaigns')}
                     </Text>
                     {campaigns.length === 0 ? (
                         <View className="rounded-2xl p-4 items-center shadow-sm" style={{ backgroundColor: theme.surface }}>
                             <Ionicons name="megaphone-outline" size={48} color={theme.textTertiary} />
                             <Text className="mt-4 text-base font-semibold" style={{ color: theme.textSecondary }}>
-                                No active campaigns
+                                {t('brandId.no_active_campaigns')}
                             </Text>
                             <Text className="text-sm mt-1" style={{ color: theme.textTertiary }}>
-                                This brand doesn't have any active campaigns at the moment
+                                {t('brandId.no_active_campaigns_description')}
                             </Text>
                         </View>
                     ) : (

@@ -1,9 +1,11 @@
 import { Stack } from 'expo-router';
 import React from 'react';
 import { useTheme } from '@/contexts/ThemeContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 export default function AnalyticsLayout() {
     const { theme } = useTheme();
+    const { t } = useLanguage();
 
     return (
         <Stack
@@ -32,7 +34,7 @@ export default function AnalyticsLayout() {
                     headerShown: true,
 
                     // Set a default title that shows while data is loading
-                    title: 'Loading Campaign...',
+                    title: t('analyticsLayout.loading_campaign'),
                 }}
             />
         </Stack>

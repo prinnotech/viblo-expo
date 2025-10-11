@@ -11,6 +11,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import { Campaign } from '@/lib/db_interface';
 import { useTheme } from '@/contexts/ThemeContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 // Add these interfaces at the top of your file
 interface VideoItem {
@@ -31,6 +32,7 @@ const ApplyPage = () => {
     const { id } = useLocalSearchParams();
     const navigation = useNavigation();
     const { theme } = useTheme();
+    const { t } = useLanguage();
 
     const { profile, isLoading: isAuthLoading } = useAuth();
     const campaignId = Array.isArray(id) ? id[0] : id;
@@ -76,7 +78,7 @@ const ApplyPage = () => {
             }
 
             setCampaign(campaignData);
-            navigation.setOptions({ title: `Apply to ${campaignData.title}` });
+            navigation.setOptions({ title: `${t('campaignIdApply.apply_to')} ${campaignData.title}` });
 
             // Check for existing submission
             const { data: submissionData, error: submissionError } = await supabase
@@ -123,7 +125,7 @@ const ApplyPage = () => {
                 setVideos(data);
             } catch (err) {
                 console.error('Error fetching videos:', err);
-                Alert.alert('Error', `Failed to load ${selectedPlatform} videos. Please try again.`);
+                Alert.alert(t('campaignIdApply.error'), `Failed to load ${selectedPlatform} videos. Please try again.`);
                 setVideos([]);
             } finally {
                 setLoadingVideos(false);
@@ -144,7 +146,7 @@ const ApplyPage = () => {
     const pickVideo = async () => {
         const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
         if (status !== 'granted') {
-            Alert.alert('Permission needed', 'We need access to your videos to submit an application.');
+            Alert.alert(t('campaignIdApply.permission_needed'), t('campaignIdApply.video_permission_message'));
             return;
         }
 
@@ -157,7 +159,7 @@ const ApplyPage = () => {
         if (!result.canceled && result.assets[0]) {
             const asset = result.assets[0];
             if (asset.fileSize && asset.fileSize > 500 * 1024 * 1024) {
-                Alert.alert('File too large', 'Please select a video smaller than 500MB.');
+                Alert.alert(t('campaignIdApply.file_too_large'), t('campaignIdApply.file_size_message'));
                 return;
             }
             setSelectedVideo(asset);
@@ -166,13 +168,13 @@ const ApplyPage = () => {
 
     const handleSubmit = async () => {
         if (!selectedVideo || !profile || !campaignId) {
-            Alert.alert("Error", "Missing video, profile, or campaign information.");
+            Alert.alert(t('campaignIdApply.error'), t('campaignIdApply.missing_info'));
             return;
         }
         setIsSubmitting(true);
         try {
             const videoUrl = await uploadVideoToStorage(selectedVideo);
-            if (!videoUrl) throw new Error("Video upload failed and did not return a URL.");
+            if (!videoUrl) throw new Error(t('campaignIdApply.video_upload_failed'));
 
             const { error: submissionError } = await supabase
                 .from('content_submissions')
@@ -185,14 +187,14 @@ const ApplyPage = () => {
 
             if (submissionError) throw submissionError;
 
-            Alert.alert("Success!", "Your application has been submitted successfully.", [
+            Alert.alert(t('campaignIdApply.success'), t('campaignIdApply.application_submitted'), [
                 { text: "OK", onPress: () => router.back() }
             ]);
 
         } catch (err) {
             const error = err as Error;
             console.error("Submission failed:", error.message);
-            Alert.alert("Submission Failed", "There was an error submitting your application. Please try again.");
+            Alert.alert(t('campaignIdApply.submission_failed'), t('campaignIdApply.submission_error'));
         } finally {
             setIsSubmitting(false);
         }
@@ -200,13 +202,13 @@ const ApplyPage = () => {
 
     const handleResubmit = async () => {
         if (!selectedVideo || !profile || !campaignId || !submission) {
-            Alert.alert("Error", "Missing required information.");
+            Alert.alert(t('campaignIdApply.error'), t('campaignIdApply.missing_required'));
             return;
         }
         setIsSubmitting(true);
         try {
             const videoUrl = await uploadVideoToStorage(selectedVideo);
-            if (!videoUrl) throw new Error("Video upload failed.");
+            if (!videoUrl) throw new Error(t('campaignIdApply.video_upload_failed'));
 
             const { error: updateError } = await supabase
                 .from('content_submissions')
@@ -218,14 +220,14 @@ const ApplyPage = () => {
 
             if (updateError) throw updateError;
 
-            Alert.alert("Success!", "Your revised video has been submitted.", [
+            Alert.alert(t('campaignIdApply.success'), t('campaignIdApply.revised_submitted'), [
                 { text: "OK", onPress: () => router.back() }
             ]);
 
         } catch (err) {
             const error = err as Error;
             console.error("Resubmission failed:", error.message);
-            Alert.alert("Resubmission Failed", "There was an error. Please try again.");
+            Alert.alert(t('campaignIdApply.resubmission_failed'), t('campaignIdApply.resubmission_error'));
         } finally {
             setIsSubmitting(false);
         }
@@ -233,7 +235,7 @@ const ApplyPage = () => {
 
     const handleUpdatePostUrl = async () => {
         if (!selectedVideoApproved || !submission) {
-            Alert.alert("Error", "Please select a video.");
+            Alert.alert(t('campaignIdApply.error'), t('campaignIdApply.select_video_error'));
             return;
         }
         setIsUpdatingUrl(true);
@@ -251,7 +253,7 @@ const ApplyPage = () => {
 
             if (updateError) throw updateError;
 
-            Alert.alert("Success!", "Your post has been submitted and is now live!");
+            Alert.alert(t('campaignIdApply.success'), t('campaignIdApply.post_submitted'));
 
             // Refresh submission data
             const { data } = await supabase
@@ -264,7 +266,7 @@ const ApplyPage = () => {
         } catch (err) {
             const error = err as Error;
             console.error("Video selection failed:", error.message);
-            Alert.alert("Update Failed", "There was an error. Please try again.");
+            Alert.alert(t('campaignIdApply.update_failed'), t('campaignIdApply.update_error'));
         } finally {
             setIsUpdatingUrl(false);
         }
@@ -306,7 +308,7 @@ const ApplyPage = () => {
         const now = new Date();
         const diff = deadline.getTime() - now.getTime();
         const hours = Math.floor(diff / (1000 * 60 * 60));
-        return hours > 0 ? `${hours} hours remaining` : 'Deadline passed';
+        return hours > 0 ? t('campaignIdApply.hours_remaining').replace('{{hours}}', hours.toString()) : t('campaignIdApply.deadline_passed');
     };
 
     if (loading || isAuthLoading) {
@@ -314,11 +316,11 @@ const ApplyPage = () => {
     }
 
     if (error || !campaign) {
-        return <View className="flex-1 justify-center items-center p-4"><Text style={{ color: theme.error }}>{error || "Campaign not found."}</Text></View>;
+        return <View className="flex-1 justify-center items-center p-4"><Text style={{ color: theme.error }}>{error || t('campaignIdApply.campaign_not_found')}</Text></View>;
     }
 
     if (profile?.user_type === 'brand') {
-        return <View className="flex-1 justify-center items-center p-4"><Text className="text-lg" style={{ color: theme.text }}>Brands cannot apply to campaigns.</Text></View>
+        return <View className="flex-1 justify-center items-center p-4"><Text className="text-lg" style={{ color: theme.text }}>{t('campaignIdApply.brands_cannot_apply')}</Text></View>
     }
 
     // Render based on submission status
@@ -327,7 +329,7 @@ const ApplyPage = () => {
             // No submission yet - show initial application form
             return (
                 <>
-                    <Text className="text-2xl font-bold mb-1" style={{ color: theme.text }}>Submitting for:</Text>
+                    <Text className="text-2xl font-bold mb-1" style={{ color: theme.text }}>{t('campaignIdApply.submitting_for')}</Text>
                     <Text className="text-3xl font-extrabold mb-6" style={{ color: theme.primary }}>{campaign.title}</Text>
 
                     <View className="items-center justify-center w-full h-64 border-2 border-dashed rounded-lg" style={{ backgroundColor: theme.surfaceSecondary, borderColor: theme.border }}>
@@ -348,21 +350,21 @@ const ApplyPage = () => {
                         ) : (
                             <Pressable onPress={pickVideo} className="items-center">
                                 <Feather name="upload-cloud" size={48} color={theme.textTertiary} />
-                                <Text className="mt-2 text-lg font-semibold" style={{ color: theme.textSecondary }}>Upload Your Video</Text>
-                                <Text className="text-sm" style={{ color: theme.textTertiary }}>Max file size: 500MB</Text>
+                                <Text className="mt-2 text-lg font-semibold" style={{ color: theme.textSecondary }}>{t('campaignIdApply.upload_your_video')}</Text>
+                                <Text className="text-sm" style={{ color: theme.textTertiary }}>{t('campaignIdApply.max_file_size')}</Text>
                             </Pressable>
                         )}
                     </View>
 
                     {selectedVideo && (
                         <Pressable onPress={pickVideo} className="mt-2">
-                            <Text className="text-center font-semibold" style={{ color: theme.primary }}>Change video</Text>
+                            <Text className="text-center font-semibold" style={{ color: theme.primary }}>{t('campaignIdApply.change_video')}</Text>
                         </Pressable>
                     )}
 
                     <View className="p-4 rounded-lg mt-4" style={{ backgroundColor: theme.surface }}>
-                        <Text className="font-semibold mb-2" style={{ color: theme.text }}>Content Requirements:</Text>
-                        <Text style={{ color: theme.textSecondary }}>{campaign.content_requirements || 'No specific requirements'}</Text>
+                        <Text className="font-semibold mb-2" style={{ color: theme.text }}>{t('campaignIdApply.content_requirements')}</Text>
+                        <Text style={{ color: theme.textSecondary }}>{campaign.content_requirements || t('campaignIdApply.no_requirements')}</Text>
                     </View>
                 </>
             );
@@ -374,8 +376,8 @@ const ApplyPage = () => {
                 return (
                     <View className="flex-1 items-center justify-center p-6">
                         <Feather name="clock" size={64} color={theme.warning} />
-                        <Text className="text-2xl font-bold mt-4 text-center" style={{ color: theme.text }}>Under Review</Text>
-                        <Text className="text-center mt-2" style={{ color: theme.textSecondary }}>Your submission is being reviewed by the brand. We'll notify you once they make a decision.</Text>
+                        <Text className="text-2xl font-bold mt-4 text-center" style={{ color: theme.text }}>{t('campaignIdApply.under_review')}</Text>
+                        <Text className="text-center mt-2" style={{ color: theme.textSecondary }}>{t('campaignIdApply.under_review_message')}</Text>
                     </View>
                 );
 
@@ -385,29 +387,29 @@ const ApplyPage = () => {
                         <View className="border rounded-lg p-4 mb-4" style={{ backgroundColor: theme.warningLight, borderColor: theme.warning }}>
                             <View className="flex-row items-center mb-2">
                                 <Feather name="alert-circle" size={24} color={theme.warning} />
-                                <Text className="text-lg font-bold ml-2" style={{ color: theme.text }}>Revision Requested</Text>
+                                <Text className="text-lg font-bold ml-2" style={{ color: theme.text }}>{t('campaignIdApply.revision_requested')}</Text>
                             </View>
                             {submission.rating !== null && (
                                 <View className="flex-row items-center mb-2">
-                                    <Text className="font-semibold" style={{ color: theme.text }}>Rating: </Text>
+                                    <Text className="font-semibold" style={{ color: theme.text }}>{t('campaignIdApply.rating')} </Text>
                                     <Text className="font-bold" style={{ color: theme.warning }}>{submission.rating}/10</Text>
                                 </View>
                             )}
                             {submission.message && (
                                 <View className="mb-2">
-                                    <Text className="font-semibold" style={{ color: theme.text }}>Feedback:</Text>
+                                    <Text className="font-semibold" style={{ color: theme.text }}>{t('campaignIdApply.feedback')}</Text>
                                     <Text className="mt-1" style={{ color: theme.textSecondary }}>{submission.message}</Text>
                                 </View>
                             )}
                             {submission.justify && (
                                 <View>
-                                    <Text className="font-semibold" style={{ color: theme.text }}>Details:</Text>
+                                    <Text className="font-semibold" style={{ color: theme.text }}>{t('campaignIdApply.details')}</Text>
                                     <Text className="mt-1" style={{ color: theme.textSecondary }}>{submission.justify}</Text>
                                 </View>
                             )}
                         </View>
 
-                        <Text className="text-xl font-bold mb-4" style={{ color: theme.text }}>Submit Revised Video</Text>
+                        <Text className="text-xl font-bold mb-4" style={{ color: theme.text }}>{t('campaignIdApply.submit_revised_video')}</Text>
 
                         <View className="items-center justify-center w-full h-64 border-2 border-dashed rounded-lg" style={{ backgroundColor: theme.surfaceSecondary, borderColor: theme.border }}>
                             {selectedVideo ? (
@@ -427,14 +429,14 @@ const ApplyPage = () => {
                             ) : (
                                 <Pressable onPress={pickVideo} className="items-center">
                                     <Feather name="upload-cloud" size={48} color={theme.textTertiary} />
-                                    <Text className="mt-2 text-lg font-semibold" style={{ color: theme.textSecondary }}>Upload Revised Video</Text>
+                                    <Text className="mt-2 text-lg font-semibold" style={{ color: theme.textSecondary }}>{t('campaignIdApply.upload_revised_video')}</Text>
                                 </Pressable>
                             )}
                         </View>
 
                         {selectedVideo && (
                             <Pressable onPress={pickVideo} className="mt-2">
-                                <Text className="text-center font-semibold" style={{ color: theme.primary }}>Change video</Text>
+                                <Text className="text-center font-semibold" style={{ color: theme.primary }}>{t('campaignIdApply.change_video')}</Text>
                             </Pressable>
                         )}
                     </>
@@ -446,11 +448,11 @@ const ApplyPage = () => {
                         <View className="border rounded-lg p-4 mb-4" style={{ backgroundColor: theme.successLight, borderColor: theme.success }}>
                             <View className="flex-row items-center mb-2">
                                 <Feather name="check-circle" size={24} color={theme.success} />
-                                <Text className="text-lg font-bold ml-2" style={{ color: theme.success }}>Approved!</Text>
+                                <Text className="text-lg font-bold ml-2" style={{ color: theme.success }}>{t('campaignIdApply.approved')}</Text>
                             </View>
                             {submission.rating !== null && (
                                 <View className="flex-row items-center mb-2">
-                                    <Text className="font-semibold" style={{ color: theme.text }}>Rating: </Text>
+                                    <Text className="font-semibold" style={{ color: theme.text }}>{t('campaignIdApply.rating')} </Text>
                                     <Text className="font-bold" style={{ color: theme.success }}>{submission.rating}/10</Text>
                                 </View>
                             )}
@@ -460,10 +462,9 @@ const ApplyPage = () => {
                         </View>
 
                         <View className="border rounded-lg p-4 mb-4" style={{ backgroundColor: theme.primaryLight, borderColor: theme.primary }}>
-                            <Text className="font-bold mb-2" style={{ color: theme.primaryDark }}>⏰ Action Required</Text>
+                            <Text className="font-bold mb-2" style={{ color: theme.primaryDark }}>{t('campaignIdApply.action_required')}</Text>
                             <Text className="mb-1" style={{ color: theme.textSecondary }}>
-                                Post your video on {campaign.target_platforms?.join(', ') || 'the platform'} within 24 hours,
-                                then select it from your videos below.
+                                {t('campaignIdApply.action_required_message').replace('{{platforms}}', campaign.target_platforms?.join(', ') || 'the platform')}
                             </Text>
                             {submission.approved_at && (
                                 <Text className="text-sm font-semibold" style={{ color: theme.error }}>{getTimeRemaining(submission.approved_at)}</Text>
@@ -473,7 +474,7 @@ const ApplyPage = () => {
                         {/* Platform Tabs */}
                         {campaign.target_platforms && campaign.target_platforms.length > 0 && (
                             <View className="mb-4">
-                                <Text className="text-lg font-semibold mb-2" style={{ color: theme.text }}>Select Platform:</Text>
+                                <Text className="text-lg font-semibold mb-2" style={{ color: theme.text }}>{t('campaignIdApply.select_platform')}</Text>
                                 <View className="flex-row">
                                     {campaign.target_platforms.map((platform) => (
                                         <Pressable
@@ -498,18 +499,17 @@ const ApplyPage = () => {
                         )}
 
                         {/* Video List */}
-                        <Text className="text-lg font-semibold mb-2" style={{ color: theme.text }}>Select Your Posted Video:</Text>
+                        <Text className="text-lg font-semibold mb-2" style={{ color: theme.text }}>{t('campaignIdApply.select_posted_video')}</Text>
 
                         {loadingVideos ? (
                             <View className="items-center justify-center py-8">
                                 <ActivityIndicator size="large" color={theme.primary} />
-                                <Text className="mt-2" style={{ color: theme.textSecondary }}>Loading your {selectedPlatform} videos...</Text>
+                                <Text className="mt-2" style={{ color: theme.textSecondary }}>{t('campaignIdApply.loading_videos').replace('{{platform}}', selectedPlatform)}</Text>
                             </View>
                         ) : videos.length === 0 ? (
                             <View className="border rounded-lg p-4 mb-4" style={{ backgroundColor: theme.warningLight, borderColor: theme.warning }}>
                                 <Text style={{ color: theme.textSecondary }}>
-                                    No videos found. Make sure you've posted the video on {selectedPlatform} and
-                                    connected your {selectedPlatform} account.
+                                    {t('campaignIdApply.no_videos_found').replace(/{{platform}}/g, selectedPlatform)}
                                 </Text>
                             </View>
                         ) : (
@@ -571,26 +571,27 @@ const ApplyPage = () => {
                             <View className="flex-row items-center mb-2">
                                 <Feather name="check-circle" size={24} color={theme.success} />
                                 <Text className="text-lg font-bold ml-2" style={{ color: theme.success }}>
-                                    {submission.status === 'posted_live' ? 'Posted Live!' : 'Completed!'}
+                                    {submission.status === 'posted_live' ? t('campaignIdApply.posted_live') : t('campaignIdApply.completed')}
                                 </Text>
                             </View>
                             {submission.rating !== null && (
                                 <View className="flex-row items-center">
-                                    <Text className="font-semibold" style={{ color: theme.text }}>Rating: </Text>
+                                    <Text className="font-semibold" style={{ color: theme.text }}>{t('campaignIdApply.rating')} </Text>
                                     <Text className="font-bold" style={{ color: theme.success }}>{submission.rating}/10</Text>
                                 </View>
                             )}
                         </View>
 
-                        <Text className="text-2xl font-bold mb-4" style={{ color: theme.text }}>Performance Stats</Text>
+                        <Text className="text-2xl font-bold mb-4" style={{ color: theme.text }}>{t('campaignIdApply.performance_stats')}</Text>
 
                         <View className="rounded-lg p-4 mb-3 border" style={{ backgroundColor: theme.surface, borderColor: theme.border }}>
                             <View className="flex-row items-center justify-between">
                                 <View className="flex-row items-center">
                                     <Feather name="eye" size={20} color={theme.textSecondary} />
-                                    <Text className="ml-2" style={{ color: theme.textSecondary }}>Views</Text>
+                                    <Text className="ml-2" style={{ color: theme.textSecondary }}>{t('campaignIdApply.views')}</Text>
                                 </View>
-                                <Text className="text-xl font-bold" style={{ color: theme.text }}>{submission.view_count?.toLocaleString() || '0'}</Text>
+                                <Text className="text-xl font-bold"
+                                    style={{ color: theme.text }}>{submission.view_count?.toLocaleString() || '0'}</Text>
                             </View>
                         </View>
 
@@ -598,7 +599,7 @@ const ApplyPage = () => {
                             <View className="flex-row items-center justify-between">
                                 <View className="flex-row items-center">
                                     <Feather name="heart" size={20} color={theme.textSecondary} />
-                                    <Text className="ml-2" style={{ color: theme.textSecondary }}>Likes</Text>
+                                    <Text className="ml-2" style={{ color: theme.textSecondary }}>{t('campaignIdApply.likes')}</Text>
                                 </View>
                                 <Text className="text-xl font-bold" style={{ color: theme.text }}>{submission.like_count?.toLocaleString() || '0'}</Text>
                             </View>
@@ -608,7 +609,7 @@ const ApplyPage = () => {
                             <View className="flex-row items-center justify-between">
                                 <View className="flex-row items-center">
                                     <Feather name="message-circle" size={20} color={theme.textSecondary} />
-                                    <Text className="ml-2" style={{ color: theme.textSecondary }}>Comments</Text>
+                                    <Text className="ml-2" style={{ color: theme.textSecondary }}>{t('campaignIdApply.comments')}</Text>
                                 </View>
                                 <Text className="text-xl font-bold" style={{ color: theme.text }}>{submission.comment_count?.toLocaleString() || '0'}</Text>
                             </View>
@@ -618,7 +619,7 @@ const ApplyPage = () => {
                             <View className="flex-row items-center justify-between">
                                 <View className="flex-row items-center">
                                     <Feather name="dollar-sign" size={20} color={theme.success} />
-                                    <Text className="ml-2" style={{ color: theme.textSecondary }}>Earned</Text>
+                                    <Text className="ml-2" style={{ color: theme.textSecondary }}>{t('campaignIdApply.earned')}</Text>
                                 </View>
                                 <Text className="text-2xl font-bold" style={{ color: theme.success }}>${submission.earned_amount?.toFixed(2) || '0.00'}</Text>
                             </View>
@@ -626,11 +627,11 @@ const ApplyPage = () => {
 
                         {submission.public_post_url && (
                             <Pressable
-                                onPress={() => Alert.alert('Open Post', 'Open in browser: ' + submission.public_post_url)}
+                                onPress={() => Alert.alert(t('campaignIdApply.open_post'), t('campaignIdApply.open_in_browser').replace('{{url}}', submission.public_post_url))}
                                 className="mt-4 py-3 rounded-lg"
                                 style={{ backgroundColor: theme.primary }}
                             >
-                                <Text className="text-center font-semibold" style={{ color: theme.surface }}>View Public Post</Text>
+                                <Text className="text-center font-semibold" style={{ color: theme.surface }}>{t('campaignIdApply.view_public_post')}</Text>
                             </Pressable>
                         )}
                     </>
@@ -654,7 +655,7 @@ const ApplyPage = () => {
                     {isSubmitting ? (
                         <ActivityIndicator color={theme.surface} />
                     ) : (
-                        <Text className="text-lg font-bold" style={{ color: theme.surface }}>Submit Application</Text>
+                        <Text className="text-lg font-bold" style={{ color: theme.surface }}>{t('campaignIdApply.submit_application')}</Text>
                     )}
                 </Pressable>
             );
@@ -671,7 +672,7 @@ const ApplyPage = () => {
                     {isSubmitting ? (
                         <ActivityIndicator color={theme.surface} />
                     ) : (
-                        <Text className="text-lg font-bold" style={{ color: theme.surface }}>Resubmit Video</Text>
+                        <Text className="text-lg font-bold" style={{ color: theme.surface }}>{t('campaignIdApply.resubmit_video')}</Text>
                     )}
                 </Pressable>
             );
@@ -691,7 +692,7 @@ const ApplyPage = () => {
                         <ActivityIndicator color={theme.surface} />
                     ) : (
                         <Text className="text-lg font-bold" style={{ color: theme.surface }}>
-                            {selectedVideoApproved ? 'Submit Selected Video' : 'Select a Video'}
+                            {selectedVideoApproved ? t('campaignIdApply.submit_selected_video') : t('campaignIdApply.select_a_video')}
                         </Text>
                     )}
                 </Pressable>

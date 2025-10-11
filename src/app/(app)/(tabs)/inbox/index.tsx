@@ -14,19 +14,20 @@ import { useConversations, ConversationWithDetails } from '@/hooks/useConversati
 import { Feather, Ionicons } from '@expo/vector-icons';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 // A utility function to format the date/time of the last message
-const formatTimestamp = (timestamp: string | null): string => {
+const formatTimestamp = (timestamp: string | null, t: any): string => {
     if (!timestamp) return '';
     const date = new Date(timestamp);
     const now = new Date();
     const diffSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
 
-    if (diffSeconds < 60) return `${diffSeconds}s ago`;
+    if (diffSeconds < 60) return t('inboxIndex.seconds_ago').replace('{{seconds}}', diffSeconds.toString());
     const diffMinutes = Math.floor(diffSeconds / 60);
-    if (diffMinutes < 60) return `${diffMinutes}m ago`;
+    if (diffMinutes < 60) return t('inboxIndex.minutes_ago').replace('{{minutes}}', diffMinutes.toString());
     const diffHours = Math.floor(diffMinutes / 60);
-    if (diffHours < 24) return `${diffHours}h ago`;
+    if (diffHours < 24) return t('inboxIndex.hours_ago').replace('{{hours}}', diffHours.toString());
 
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 };
@@ -35,6 +36,7 @@ const formatTimestamp = (timestamp: string | null): string => {
 const ConversationRow = ({ conversation, currentUserId }: { conversation: ConversationWithDetails, currentUserId?: string }) => {
     const router = useRouter();
     const { theme } = useTheme();
+    const { t } = useLanguage();
     const { other_participant, last_message, id } = conversation;
 
     const getInitials = (name: string) => (name ? name.charAt(0).toUpperCase() : '?');
@@ -68,11 +70,11 @@ const ConversationRow = ({ conversation, currentUserId }: { conversation: Conver
                         {other_participant.username}
                     </Text>
                     <Text className="text-xs" style={{ color: theme.textTertiary }}>
-                        {formatTimestamp(last_message?.created_at || null)}
+                        {formatTimestamp(last_message?.created_at || null, t)}
                     </Text>
                 </View>
                 <Text className={`text-sm mt-1 ${isUnread ? 'font-semibold' : ''}`} style={{ color: isUnread ? theme.text : theme.textTertiary }} numberOfLines={1}>
-                    {last_message?.content || 'No messages yet'}
+                    {last_message?.content || t('inboxIndex.no_messages_yet')}
                 </Text>
             </View>
             {isUnread && <View className="w-2.5 h-2.5 rounded-full ml-2" style={{ backgroundColor: theme.primary }} />}
@@ -86,6 +88,7 @@ const InboxScreen = () => {
     const [activeFilter, setActiveFilter] = useState<'all' | 'unread' | 'favorites'>('all');
     const { session } = useAuth();
     const { theme } = useTheme();
+    const { t } = useLanguage();
     const currentUserId = session?.user.id;
     const router = useRouter();
 
@@ -113,9 +116,9 @@ const InboxScreen = () => {
         return (
             <SafeAreaView className="flex-1 justify-center items-center p-8" style={{ backgroundColor: theme.background }}>
                 <Feather name="alert-triangle" size={48} color={theme.error} />
-                <Text className="text-lg font-semibold mt-4" style={{ color: theme.text }}>Something went wrong</Text>
+                <Text className="text-lg font-semibold mt-4" style={{ color: theme.text }}>{t('inboxIndex.something_went_wrong')}</Text>
                 <TouchableOpacity onPress={refetch} className="mt-6 px-6 py-2 rounded-lg" style={{ backgroundColor: theme.primary }}>
-                    <Text className="font-semibold" style={{ color: theme.surface }}>Retry</Text>
+                    <Text className="font-semibold" style={{ color: theme.surface }}>{t('inboxIndex.retry')}</Text>
                 </TouchableOpacity>
             </SafeAreaView>
         )
@@ -124,7 +127,7 @@ const InboxScreen = () => {
     return (
         <SafeAreaView className="flex-1" style={{ backgroundColor: theme.surface }}>
             <View className="flex-row justify-between items-center px-4 pt-4 pb-2">
-                <Text className="text-3xl font-bold" style={{ color: theme.text }}>Messages</Text>
+                <Text className="text-3xl font-bold" style={{ color: theme.text }}>{t('inboxIndex.messages')}</Text>
                 <TouchableOpacity className="p-2" onPress={() => router.push('/inbox/new')}>
                     <Ionicons name="add-circle-outline" size={28} color={theme.text} />
                 </TouchableOpacity>
@@ -133,7 +136,7 @@ const InboxScreen = () => {
             <View className="flex-row items-center px-4 py-2 gap-3">
                 <View className="flex-1 flex-row items-center rounded-lg px-3" style={{ backgroundColor: theme.surfaceSecondary }}>
                     <Feather name="search" size={20} color={theme.textTertiary} />
-                    <TextInput placeholder="Search" className="flex-1 h-10 ml-2 text-base" style={{ color: theme.text }} placeholderTextColor={theme.textTertiary} />
+                    <TextInput placeholder={t('inboxIndex.search')} className="flex-1 h-10 ml-2 text-base" style={{ color: theme.text }} placeholderTextColor={theme.textTertiary} />
                 </View>
             </View>
 
@@ -143,30 +146,30 @@ const InboxScreen = () => {
                     className="px-4 py-1.5 rounded-full"
                     style={{ backgroundColor: activeFilter === 'all' ? theme.primary : theme.surfaceSecondary }}
                 >
-                    <Text className="font-semibold" style={{ color: activeFilter === 'all' ? theme.surface : theme.textSecondary }}>All</Text>
+                    <Text className="font-semibold" style={{ color: activeFilter === 'all' ? theme.surface : theme.textSecondary }}>{t('inboxIndex.all')}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                     onPress={() => setActiveFilter('unread')}
                     className="px-4 py-1.5 rounded-full"
                     style={{ backgroundColor: activeFilter === 'unread' ? theme.primary : theme.surfaceSecondary }}
                 >
-                    <Text className="font-semibold" style={{ color: activeFilter === 'unread' ? theme.surface : theme.textSecondary }}>Unread</Text>
+                    <Text className="font-semibold" style={{ color: activeFilter === 'unread' ? theme.surface : theme.textSecondary }}>{t('inboxIndex.unread')}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                     onPress={() => setActiveFilter('favorites')}
                     className="px-4 py-1.5 rounded-full"
                     style={{ backgroundColor: activeFilter === 'favorites' ? theme.primary : theme.surfaceSecondary }}
                 >
-                    <Text className="font-semibold" style={{ color: activeFilter === 'favorites' ? theme.surface : theme.textSecondary }}>Favorites</Text>
+                    <Text className="font-semibold" style={{ color: activeFilter === 'favorites' ? theme.surface : theme.textSecondary }}>{t('inboxIndex.favorites')}</Text>
                 </TouchableOpacity>
             </View>
 
             {filteredConversations.length === 0 ? (
                 <View className="flex-1 justify-center items-center p-8" style={{ backgroundColor: theme.background }}>
                     <Feather name="message-square" size={64} color={theme.border} />
-                    <Text className="text-lg font-semibold mt-4" style={{ color: theme.text }}>No Conversations Found</Text>
+                    <Text className="text-lg font-semibold mt-4" style={{ color: theme.text }}>{t('inboxIndex.no_conversations_found')}</Text>
                     <Text className="mt-2 text-center" style={{ color: theme.textTertiary }}>
-                        Your conversations in the "{activeFilter}" filter will appear here.
+                        {t('inboxIndex.conversations_appear_here').replace('{{filter}}', activeFilter)}
                     </Text>
                 </View>
             ) : (

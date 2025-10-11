@@ -7,6 +7,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'expo-router';
 import { PayoutMethod } from '@/lib/db_interface';
 import { useTheme } from '@/contexts/ThemeContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const revolut_img = require('@/../assets/bank_icons/revolut.png')
 const wise_img = require('@/../assets/bank_icons/wise.png')
@@ -18,6 +19,7 @@ const ConnectPage = () => {
     const { profile } = useAuth();
     const router = useRouter();
     const { theme } = useTheme();
+    const { t } = useLanguage();
     const [methods, setMethods] = useState<PayoutMethod[]>([]);
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
@@ -70,13 +72,13 @@ const ConnectPage = () => {
     const getMethodTitle = (type: string) => {
         switch (type) {
             case 'paypal':
-                return 'PayPal';
+                return t('walletConnect.paypal');
             case 'wise':
-                return 'Wise';
+                return t('walletConnect.wise');
             case 'bank_transfer':
-                return 'Bank Transfer';
+                return t('walletConnect.bank_transfer');
             case 'revolut':
-                return 'Revolut';
+                return t('walletConnect.revolut');
             default:
                 return type;
         }
@@ -86,17 +88,17 @@ const ConnectPage = () => {
         const details = method.details as any;
         switch (method.method_type) {
             case 'paypal':
-                return details?.email || 'PayPal Account';
+                return details?.email || t('walletConnect.paypal_account');
             case 'wise':
-                return details?.email || 'Wise Account';
+                return details?.email || t('walletConnect.wise_account');
             case 'bank_transfer':
                 return details?.account_number
                     ? `•••• ${details.account_number.slice(-4)}`
-                    : 'Bank Account';
+                    : t('walletConnect.bank_account');
             case 'revolut':
-                return details?.email || 'Revolut Account';
+                return details?.email || t('walletConnect.revolut_account');
             default:
-                return 'Payment Method';
+                return t('walletConnect.payment_method');
         }
     };
 
@@ -120,9 +122,9 @@ const ConnectPage = () => {
             >
                 {/* Header */}
                 <View className="px-6 py-6 border-b" style={{ backgroundColor: theme.surface, borderColor: theme.border }}>
-                    <Text className="text-2xl font-bold" style={{ color: theme.text }}>Payout Methods</Text>
+                    <Text className="text-2xl font-bold" style={{ color: theme.text }}>{t('walletConnect.payout_methods')}</Text>
                     <Text className="text-sm mt-1" style={{ color: theme.textSecondary }}>
-                        Manage how you receive payments
+                        {t('walletConnect.manage_payments')}
                     </Text>
                 </View>
 
@@ -156,7 +158,7 @@ const ConnectPage = () => {
                                                     {method.is_primary && (
                                                         <View className="ml-2 px-2 py-1 rounded-full" style={{ backgroundColor: theme.primaryLight }}>
                                                             <Text className="text-xs font-semibold" style={{ color: theme.primary }}>
-                                                                Primary
+                                                                {t('walletConnect.primary')}
                                                             </Text>
                                                         </View>
                                                     )}
@@ -178,10 +180,10 @@ const ConnectPage = () => {
                                 <Feather name="credit-card" size={32} color={theme.textTertiary} />
                             </View>
                             <Text className="font-semibold text-center mb-1" style={{ color: theme.text }}>
-                                No Payout Methods
+                                {t('walletConnect.no_payout_methods')}
                             </Text>
                             <Text className="text-sm text-center" style={{ color: theme.textSecondary }}>
-                                Add a payout method to receive your earnings
+                                {t('walletConnect.add_payout_method_description')}
                             </Text>
                         </View>
                     )}
@@ -195,7 +197,7 @@ const ConnectPage = () => {
                     >
                         <Feather name="plus-circle" size={20} color={theme.surface} />
                         <Text className="font-semibold text-base ml-2" style={{ color: theme.surface }}>
-                            Add New Method
+                            {t('walletConnect.add_new_method')}
                         </Text>
                     </TouchableOpacity>
 
@@ -205,10 +207,10 @@ const ConnectPage = () => {
                             <Feather name="info" size={18} color={theme.primaryDark} />
                             <View className="flex-1 ml-3">
                                 <Text className="text-sm font-medium mb-1" style={{ color: theme.primaryDark }}>
-                                    About Payouts
+                                    {t('walletConnect.about_payouts')}
                                 </Text>
                                 <Text className="text-xs leading-5" style={{ color: theme.primaryDark }}>
-                                    Payments are processed every Friday. Make sure your payment details are up to date to avoid delays.
+                                    {t('walletConnect.payout_info')}
                                 </Text>
                             </View>
                         </View>

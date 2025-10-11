@@ -7,11 +7,13 @@ import CampaignCard, { Campaign } from '@/components/CampaignCard';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { useRouter } from 'expo-router';
 import { useTheme } from '@/contexts/ThemeContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const Campaigns = () => {
     const router = useRouter();
     const { profile } = useAuth();
     const { theme } = useTheme();
+    const { t } = useLanguage();
     const {
         campaigns,
         loading,
@@ -41,9 +43,9 @@ const Campaigns = () => {
             {/* Header */}
             <View className="p-4 flex-row justify-between items-center" style={{ backgroundColor: theme.surface, borderBottomColor: theme.border, borderBottomWidth: 1 }}>
                 <View>
-                    <Text className="text-2xl font-bold" style={{ color: theme.text }}>My Campaigns</Text>
+                    <Text className="text-2xl font-bold" style={{ color: theme.text }}>{t('campaignsIndex.my_campaigns')}</Text>
                     <Text className="text-sm" style={{ color: theme.textTertiary }}>
-                        Manage and track your campaigns
+                        {t('campaignsIndex.manage_track_campaigns')}
                     </Text>
                 </View>
                 <TouchableOpacity
@@ -52,7 +54,7 @@ const Campaigns = () => {
                     style={{ backgroundColor: theme.primary }}
                 >
                     <AntDesign name="plus" size={16} color={theme.surface} />
-                    <Text className="font-semibold" style={{ color: theme.surface }}>New</Text>
+                    <Text className="font-semibold" style={{ color: theme.surface }}>{t('campaignsIndex.new')}</Text>
                 </TouchableOpacity>
             </View>
 
@@ -60,7 +62,7 @@ const Campaigns = () => {
             {!loading && (
                 <View className="px-4 py-2" style={{ backgroundColor: theme.background }}>
                     <Text className="text-sm" style={{ color: theme.textSecondary }}>
-                        {uniqueCampaigns.length} {uniqueCampaigns.length === 1 ? 'campaign' : 'campaigns'}
+                        {uniqueCampaigns.length} {uniqueCampaigns.length === 1 ? t('campaignsIndex.campaign') : t('campaignsIndex.campaigns')}
                     </Text>
                 </View>
             )}
@@ -69,7 +71,7 @@ const Campaigns = () => {
             {loading ? (
                 <View className="flex-1 justify-center items-center">
                     <ActivityIndicator size="large" color={theme.primary} />
-                    <Text className="mt-4" style={{ color: theme.textTertiary }}>Loading campaigns...</Text>
+                    <Text className="mt-4" style={{ color: theme.textTertiary }}>{t('campaignsIndex.loading_campaigns')}</Text>
                 </View>
             ) : (
                 <FlatList
@@ -83,10 +85,10 @@ const Campaigns = () => {
                         <View className="flex-1 justify-center items-center p-8 mt-20">
                             <AntDesign name="inbox" size={64} color={theme.textTertiary} />
                             <Text className="text-center mt-6 text-xl font-semibold" style={{ color: theme.textSecondary }}>
-                                No campaigns yet
+                                {t('campaignsIndex.no_campaigns_yet')}
                             </Text>
                             <Text className="text-center mt-2 text-base" style={{ color: theme.textTertiary }}>
-                                Create your first campaign to start connecting with influencers
+                                {t('campaignsIndex.create_first_campaign')}
                             </Text>
                             <TouchableOpacity
                                 onPress={handleCreateCampaign}
@@ -95,7 +97,7 @@ const Campaigns = () => {
                             >
                                 <AntDesign name="plus" size={20} color={theme.surface} />
                                 <Text className="font-semibold text-base" style={{ color: theme.surface }}>
-                                    Create Campaign
+                                    {t('campaignsIndex.create_campaign')}
                                 </Text>
                             </TouchableOpacity>
                         </View>
@@ -118,7 +120,7 @@ const Campaigns = () => {
                         ) : !hasMore && uniqueCampaigns.length > 0 ? (
                             <View className="py-4">
                                 <Text className="text-center text-sm" style={{ color: theme.textTertiary }}>
-                                    You've reached the end
+                                    {t('campaignsIndex.reached_end')}
                                 </Text>
                             </View>
                         ) : null

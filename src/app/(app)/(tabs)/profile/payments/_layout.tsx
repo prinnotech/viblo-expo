@@ -1,9 +1,12 @@
 import { Stack } from 'expo-router';
 import React from 'react';
 import { useTheme } from '@/contexts/ThemeContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 export default function PaymentsLayout() {
     const { theme } = useTheme();
+    const { t } = useLanguage();
+
     return (
         <Stack
             screenOptions={{
@@ -27,7 +30,7 @@ export default function PaymentsLayout() {
                 options={{
                     presentation: 'modal',
                     headerShown: true,
-                    title: 'Payment Details',
+                    title: t('profilePaymentsLayout.payment_details'),
                 }}
             />
         </Stack>

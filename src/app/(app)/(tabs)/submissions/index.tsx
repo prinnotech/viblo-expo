@@ -17,21 +17,23 @@ import { SubmissionStatus } from "@/lib/enum_types";
 import Feather from "@expo/vector-icons/Feather";
 import { useSubmissions } from "@/hooks/useSubmissions";
 import { useTheme } from "@/contexts/ThemeContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function Page() {
     const [refreshing, setRefreshing] = useState(false);
     const [statusFilter, setStatusFilter] = useState<SubmissionStatus | "all">('all');
     const [searchQuery, setSearchQuery] = useState('');
     const { theme } = useTheme();
+    const { t } = useLanguage();
     const router = useRouter();
 
     const STATUS_LABELS: Record<SubmissionStatus | 'all', string> = {
-        all: 'All',
-        pending_review: 'Pending Review',
-        needs_revision: 'Needs Revision',
-        approved: 'Approved',
-        posted_live: 'Posted Live',
-        completed: 'Completed',
+        all: t('submissionsIndex.all'),
+        pending_review: t('submissionsIndex.pending_review'),
+        needs_revision: t('submissionsIndex.needs_revision'),
+        approved: t('submissionsIndex.approved'),
+        posted_live: t('submissionsIndex.posted_live'),
+        completed: t('submissionsIndex.completed'),
     };
 
     const { submissions, loading, error, refetch } = useSubmissions(statusFilter)
@@ -84,7 +86,7 @@ export default function Page() {
             <SafeAreaView className="flex-1 justify-center items-center" style={{ backgroundColor: theme.background }}>
                 <View className="flex-1 justify-center items-center">
                     <ActivityIndicator size="large" color={theme.primary} />
-                    <Text className="mt-4" style={{ color: theme.textSecondary }}>Loading submissions...</Text>
+                    <Text className="mt-4" style={{ color: theme.textSecondary }}>{t('submissionsIndex.loading_submissions')}</Text>
                 </View>
             </SafeAreaView>
         );
@@ -93,9 +95,12 @@ export default function Page() {
     return (
         <SafeAreaView className="flex-1" style={{ backgroundColor: theme.background }}>
             <View className="px-6 py-4 border-b" style={{ backgroundColor: theme.surface, borderColor: theme.border }}>
-                <Text className="text-2xl font-bold" style={{ color: theme.text }}>My Submissions</Text>
+                <Text className="text-2xl font-bold" style={{ color: theme.text }}>{t('submissionsIndex.my_submissions')}</Text>
                 <Text className="text-sm mt-1" style={{ color: theme.textSecondary }}>
-                    {submissions.length} total submission{submissions.length !== 1 ? 's' : ''}
+                    {submissions.length !== 1
+                        ? t('submissionsIndex.total_submissions_plural').replace('{{count}}', submissions.length.toString())
+                        : t('submissionsIndex.total_submissions').replace('{{count}}', submissions.length.toString())
+                    }
                 </Text>
             </View>
 
@@ -106,7 +111,7 @@ export default function Page() {
                     <TextInput
                         value={searchQuery}
                         onChangeText={setSearchQuery}
-                        placeholder="Search campaigns..."
+                        placeholder={t('submissionsIndex.search_campaigns')}
                         className="flex-1 ml-2"
                         style={{ color: theme.text }}
                         placeholderTextColor={theme.textTertiary}
@@ -155,14 +160,14 @@ export default function Page() {
                 }
                 ListEmptyComponent={
                     <View className="flex-1 justify-center items-center py-20">
-                        <Text className="text-6xl mb-4">📝</Text>
+                        <Text className="text-6xl mb-4">📋</Text>
                         <Text className="text-lg font-semibold" style={{ color: theme.text }}>
-                            {searchQuery ? 'No results found' : 'No submissions yet'}
+                            {searchQuery ? t('submissionsIndex.no_results_found') : t('submissionsIndex.no_submissions_yet')}
                         </Text>
                         <Text className="mt-2 text-center px-8" style={{ color: theme.textSecondary }}>
                             {searchQuery
-                                ? `No submissions match "${searchQuery}"`
-                                : 'Your content submissions will appear here'
+                                ? t('submissionsIndex.no_submissions_match').replace('{{query}}', searchQuery)
+                                : t('submissionsIndex.submissions_appear_here')
                             }
                         </Text>
                     </View>
@@ -187,7 +192,7 @@ export default function Page() {
                             <View className="flex-col gap-2 items-start mb-3">
                                 <View className="flex-1">
                                     <Text className="text-lg font-semibold" style={{ color: theme.text }} numberOfLines={1}>
-                                        {typeof submission.campaign_id === 'object' && submission.campaign_id?.title || 'Campaign Title'}
+                                        {typeof submission.campaign_id === 'object' && submission.campaign_id?.title || t('submissionsIndex.campaign_title')}
                                     </Text>
                                 </View>
                                 <View className="px-3 py-1 rounded-full border" style={{ backgroundColor: statusStyles.backgroundColor, borderColor: statusStyles.borderColor }}>
@@ -201,25 +206,25 @@ export default function Page() {
                             {submission.status === 'posted_live' && (
                                 <View className="flex-row justify-between mb-3 py-2 border-t" style={{ borderColor: theme.borderLight }}>
                                     <View className="items-center">
-                                        <Text className="text-xs" style={{ color: theme.textSecondary }}>Views</Text>
+                                        <Text className="text-xs" style={{ color: theme.textSecondary }}>{t('submissionsIndex.views')}</Text>
                                         <Text className="text-sm font-semibold mt-1" style={{ color: theme.text }}>
                                             {formatNumber(submission.view_count)}
                                         </Text>
                                     </View>
                                     <View className="items-center">
-                                        <Text className="text-xs" style={{ color: theme.textSecondary }}>Likes</Text>
+                                        <Text className="text-xs" style={{ color: theme.textSecondary }}>{t('submissionsIndex.likes')}</Text>
                                         <Text className="text-sm font-semibold mt-1" style={{ color: theme.text }}>
                                             {formatNumber(submission.like_count)}
                                         </Text>
                                     </View>
                                     <View className="items-center">
-                                        <Text className="text-xs" style={{ color: theme.textSecondary }}>Comments</Text>
+                                        <Text className="text-xs" style={{ color: theme.textSecondary }}>{t('submissionsIndex.comments')}</Text>
                                         <Text className="text-sm font-semibold mt-1" style={{ color: theme.text }}>
                                             {formatNumber(submission.comment_count)}
                                         </Text>
                                     </View>
                                     <View className="items-center">
-                                        <Text className="text-xs" style={{ color: theme.textSecondary }}>Earned</Text>
+                                        <Text className="text-xs" style={{ color: theme.textSecondary }}>{t('submissionsIndex.earned')}</Text>
                                         <Text className="text-sm font-semibold mt-1" style={{ color: theme.success }}>
                                             ${submission.earned_amount.toFixed(0)}
                                         </Text>
@@ -230,11 +235,11 @@ export default function Page() {
                             {/* Date Info */}
                             <View className="flex-row justify-between items-center pt-2 border-t" style={{ borderColor: theme.borderLight }}>
                                 <Text className="text-xs" style={{ color: theme.textTertiary }}>
-                                    Submitted {formatDate(submission.submitted_at)}
+                                    {t('submissionsIndex.submitted').replace('{{date}}', formatDate(submission.submitted_at))}
                                 </Text>
                                 {submission.posted_at && (
                                     <Text className="text-xs" style={{ color: theme.textTertiary }}>
-                                        Posted {formatDate(submission.posted_at)}
+                                        {t('submissionsIndex.posted').replace('{{date}}', formatDate(submission.posted_at))}
                                     </Text>
                                 )}
                             </View>

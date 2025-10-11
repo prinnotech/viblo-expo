@@ -13,11 +13,13 @@ import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
 import { useCampaignAnalytics } from '@/hooks/useCampaignAnalytics';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { useTheme } from '@/contexts/ThemeContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const CampaignAnalytics = () => {
     const router = useRouter();
     const { id } = useLocalSearchParams();
     const { theme } = useTheme();
+    const { t } = useLanguage();
     const campaignId = Array.isArray(id) ? id[0] : id;
 
     const { campaign, stats, influencers, loading, refreshing, error, refresh } = useCampaignAnalytics(campaignId);
@@ -44,14 +46,14 @@ const CampaignAnalytics = () => {
                 return {
                     backgroundColor: theme.primaryLight,
                     textColor: theme.primary,
-                    text: 'Completed'
+                    text: t('analyticsId.completed')
                 };
             case 'posted_live':
             default:
                 return {
                     backgroundColor: theme.successLight,
                     textColor: theme.success,
-                    text: 'Live'
+                    text: t('analyticsId.live')
                 };
         }
     };
@@ -60,7 +62,7 @@ const CampaignAnalytics = () => {
         return (
             <View className="flex-1 items-center justify-center" style={{ backgroundColor: theme.background }}>
                 <ActivityIndicator size="large" color={theme.primary} />
-                <Text className="mt-4" style={{ color: theme.textTertiary }}>Loading analytics...</Text>
+                <Text className="mt-4" style={{ color: theme.textTertiary }}>{t('analyticsId.loading_analytics')}</Text>
             </View>
         );
     }
@@ -70,14 +72,14 @@ const CampaignAnalytics = () => {
             <View className="flex-1 items-center justify-center p-4" style={{ backgroundColor: theme.background }}>
                 <AntDesign name="frown" size={48} color={theme.error} />
                 <Text className="text-center mt-4 text-lg" style={{ color: theme.error }}>
-                    {error || 'Campaign not found'}
+                    {error || t('analyticsId.campaign_not_found')}
                 </Text>
                 <TouchableOpacity
                     onPress={() => router.back()}
                     className="mt-4 px-6 py-3 rounded-full"
                     style={{ backgroundColor: theme.primary }}
                 >
-                    <Text className="font-semibold" style={{ color: theme.surface }}>Go Back</Text>
+                    <Text className="font-semibold" style={{ color: theme.surface }}>{t('analyticsId.go_back')}</Text>
                 </TouchableOpacity>
             </View>
         );
@@ -118,21 +120,21 @@ const CampaignAnalytics = () => {
 
                 {/* Budget Overview */}
                 <View className="m-4 p-4 rounded-xl border" style={{ backgroundColor: theme.surface, borderColor: theme.border }}>
-                    <Text className="text-base font-semibold mb-3" style={{ color: theme.text }}>Budget Overview</Text>
+                    <Text className="text-base font-semibold mb-3" style={{ color: theme.text }}>{t('analyticsId.budget_overview')}</Text>
                     <View className="flex-row justify-between items-center mb-2">
-                        <Text className="text-sm" style={{ color: theme.textSecondary }}>Total Budget</Text>
+                        <Text className="text-sm" style={{ color: theme.textSecondary }}>{t('analyticsId.total_budget')}</Text>
                         <Text className="text-base font-bold" style={{ color: theme.text }}>
                             {formatCurrency(campaign.total_budget)}
                         </Text>
                     </View>
                     <View className="flex-row justify-between items-center mb-2">
-                        <Text className="text-sm" style={{ color: theme.textSecondary }}>Spent</Text>
+                        <Text className="text-sm" style={{ color: theme.textSecondary }}>{t('analyticsId.spent')}</Text>
                         <Text className="text-base font-bold" style={{ color: theme.error }}>
                             {formatCurrency(campaign.total_paid)}
                         </Text>
                     </View>
                     <View className="flex-row justify-between items-center mb-3">
-                        <Text className="text-sm" style={{ color: theme.textSecondary }}>Remaining</Text>
+                        <Text className="text-sm" style={{ color: theme.textSecondary }}>{t('analyticsId.remaining')}</Text>
                         <Text className="text-base font-bold" style={{ color: theme.success }}>
                             {formatCurrency(budgetRemaining)}
                         </Text>
@@ -157,14 +159,14 @@ const CampaignAnalytics = () => {
                             <Text className="text-2xl font-bold mt-2" style={{ color: theme.text }}>
                                 {formatNumber(stats.total_views)}
                             </Text>
-                            <Text className="text-sm" style={{ color: theme.textTertiary }}>Total Views</Text>
+                            <Text className="text-sm" style={{ color: theme.textTertiary }}>{t('analyticsId.total_views')}</Text>
                         </View>
                         <View className="flex-1 p-4 rounded-xl border" style={{ backgroundColor: theme.surface, borderColor: theme.border }}>
                             <AntDesign name="heart" size={24} color={theme.error} />
                             <Text className="text-2xl font-bold mt-2" style={{ color: theme.text }}>
                                 {formatNumber(stats.total_likes)}
                             </Text>
-                            <Text className="text-sm" style={{ color: theme.textTertiary }}>Total Likes</Text>
+                            <Text className="text-sm" style={{ color: theme.textTertiary }}>{t('analyticsId.total_likes')}</Text>
                         </View>
                     </View>
                     <View className="flex-row gap-3">
@@ -173,14 +175,14 @@ const CampaignAnalytics = () => {
                             <Text className="text-2xl font-bold mt-2" style={{ color: theme.text }}>
                                 {formatNumber(stats.total_comments)}
                             </Text>
-                            <Text className="text-sm" style={{ color: theme.textTertiary }}>Comments</Text>
+                            <Text className="text-sm" style={{ color: theme.textTertiary }}>{t('analyticsId.comments')}</Text>
                         </View>
                         <View className="flex-1 p-4 rounded-xl border" style={{ backgroundColor: theme.surface, borderColor: theme.border }}>
                             <AntDesign name="team" size={24} color={'#8B5CF6'} />
                             <Text className="text-2xl font-bold mt-2" style={{ color: theme.text }}>
                                 {stats.active_influencers}
                             </Text>
-                            <Text className="text-sm" style={{ color: theme.textTertiary }}>Active Creators</Text>
+                            <Text className="text-sm" style={{ color: theme.textTertiary }}>{t('analyticsId.active_creators')}</Text>
                         </View>
                     </View>
                 </View>
@@ -188,13 +190,13 @@ const CampaignAnalytics = () => {
                 {/* Influencers List */}
                 <View className="mx-4">
                     <Text className="text-lg font-bold mb-3" style={{ color: theme.text }}>
-                        Creator Performance
+                        {t('analyticsId.creator_performance')}
                     </Text>
                     {influencers.length === 0 ? (
                         <View className="p-8 rounded-xl border items-center" style={{ backgroundColor: theme.surface, borderColor: theme.border }}>
                             <AntDesign name="inbox" size={48} color={theme.textTertiary} />
                             <Text className="mt-4 text-center" style={{ color: theme.textTertiary }}>
-                                No live content yet. Influencers will appear here once their content is posted.
+                                {t('analyticsId.no_live_content')}
                             </Text>
                         </View>
                     ) : (
@@ -236,25 +238,25 @@ const CampaignAnalytics = () => {
                                                 <Text className="text-base font-bold" style={{ color: theme.text }}>
                                                     {formatNumber(influencer.view_count)}
                                                 </Text>
-                                                <Text className="text-xs" style={{ color: theme.textTertiary }}>Views</Text>
+                                                <Text className="text-xs" style={{ color: theme.textTertiary }}>{t('analyticsId.views')}</Text>
                                             </View>
                                             <View className="items-center">
                                                 <Text className="text-base font-bold" style={{ color: theme.text }}>
                                                     {formatNumber(influencer.like_count)}
                                                 </Text>
-                                                <Text className="text-xs" style={{ color: theme.textTertiary }}>Likes</Text>
+                                                <Text className="text-xs" style={{ color: theme.textTertiary }}>{t('analyticsId.likes')}</Text>
                                             </View>
                                             <View className="items-center">
                                                 <Text className="text-base font-bold" style={{ color: theme.text }}>
                                                     {formatNumber(influencer.comment_count)}
                                                 </Text>
-                                                <Text className="text-xs" style={{ color: theme.textTertiary }}>Comments</Text>
+                                                <Text className="text-xs" style={{ color: theme.textTertiary }}>{t('analyticsId.comments')}</Text>
                                             </View>
                                             <View className="items-center">
                                                 <Text className="text-base font-bold" style={{ color: theme.success }}>
                                                     {formatCurrency(influencer.earned_amount)}
                                                 </Text>
-                                                <Text className="text-xs" style={{ color: theme.textTertiary }}>Earned</Text>
+                                                <Text className="text-xs" style={{ color: theme.textTertiary }}>{t('analyticsId.earned')}</Text>
                                             </View>
                                         </View>
                                     </View>

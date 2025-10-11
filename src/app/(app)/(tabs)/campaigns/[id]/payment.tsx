@@ -14,6 +14,7 @@ import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { useTheme } from '@/contexts/ThemeContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL || 'http://192.168.1.214:3001';
 const API_KEY = process.env.EXPO_PUBLIC_API_KEY;
@@ -24,6 +25,7 @@ const PaymentPage = () => {
     const { profile } = useAuth();
     const { initPaymentSheet, presentPaymentSheet } = useStripe();
     const { theme } = useTheme();
+    const { t } = useLanguage();
 
     const [loading, setLoading] = useState(true);
     const [processing, setProcessing] = useState(false);
@@ -59,7 +61,7 @@ const PaymentPage = () => {
             console.log('Campaign query result:', { campaignData, error }); // ADD THIS LINE
 
             if (error || !campaignData) {
-                Alert.alert('Error', 'Campaign not found');
+                Alert.alert(t('campaignIdPayment.error'), t('campaignIdPayment.campaign_not_found'));
                 router.back();
                 return;
             }
@@ -91,7 +93,7 @@ const PaymentPage = () => {
             console.log('Backend response data:', data);
 
             if (!response.ok) {
-                throw new Error(data.error || 'Failed to initialize payment');
+                throw new Error(data.error || t('campaignIdPayment.failed_initialize'));
             }
 
             setPaymentDetails(data);
@@ -123,7 +125,7 @@ const PaymentPage = () => {
             }
         } catch (err: any) {
             console.error('Payment initialization error:', err);
-            Alert.alert('Error', err.message || 'Failed to initialize payment');
+            Alert.alert(t('campaignIdPayment.error'), err.message || t('campaignIdPayment.failed_initialize'));
         }
 
         setLoading(false);
@@ -137,7 +139,7 @@ const PaymentPage = () => {
             const { error } = await presentPaymentSheet();
 
             if (error) {
-                Alert.alert('Payment Cancelled', error.message);
+                Alert.alert(t('campaignIdPayment.payment_cancelled'), error.message);
                 setProcessing(false);
                 return;
             }
@@ -158,17 +160,17 @@ const PaymentPage = () => {
             const confirmData = await confirmResponse.json();
 
             if (!confirmResponse.ok) {
-                throw new Error(confirmData.error || 'Failed to confirm payment');
+                throw new Error(confirmData.error || t('campaignIdPayment.failed_confirm'));
             }
 
             setProcessing(false);
 
             Alert.alert(
-                'Success!',
-                'Your campaign is now active and ready to receive applications from influencers.',
+                t('campaignIdPayment.success'),
+                t('campaignIdPayment.campaign_active_message'),
                 [
                     {
-                        text: 'View Campaign',
+                        text: t('campaignIdPayment.view_campaign'),
                         onPress: () => router.replace(`/(tabs)/campaigns/${campaignId}`),
                     },
                 ]
@@ -176,7 +178,7 @@ const PaymentPage = () => {
         } catch (err: any) {
             console.error('Payment error:', err);
             setProcessing(false);
-            Alert.alert('Error', err.message || 'Payment failed');
+            Alert.alert(t('campaignIdPayment.error'), err.message || t('campaignIdPayment.payment_failed'));
         }
     };
 
@@ -184,7 +186,7 @@ const PaymentPage = () => {
         return (
             <View className="flex-1 items-center justify-center" style={{ backgroundColor: theme.background }}>
                 <ActivityIndicator size="large" color={theme.primary} />
-                <Text className="mt-4" style={{ color: theme.textTertiary }}>Setting up payment...</Text>
+                <Text className="mt-4" style={{ color: theme.textTertiary }}>{t('campaignIdPayment.setting_up_payment')}</Text>
             </View>
         );
     }
@@ -200,9 +202,9 @@ const PaymentPage = () => {
             <ScrollView className="flex-1 p-4">
                 {/* Header */}
                 <View className="mb-6">
-                    <Text className="text-2xl font-bold" style={{ color: theme.text }}>Complete Payment</Text>
+                    <Text className="text-2xl font-bold" style={{ color: theme.text }}>{t('campaignIdPayment.complete_payment')}</Text>
                     <Text className="text-sm mt-1" style={{ color: theme.textTertiary }}>
-                        Activate your campaign and start connecting with influencers
+                        {t('campaignIdPayment.activate_campaign_subtitle')}
                     </Text>
                 </View>
 
@@ -217,7 +219,7 @@ const PaymentPage = () => {
                                 {campaign.title}
                             </Text>
                             <Text className="text-sm" style={{ color: theme.textTertiary }}>
-                                Campaign Budget
+                                {t('campaignIdPayment.campaign_budget')}
                             </Text>
                         </View>
                     </View>
@@ -225,7 +227,7 @@ const PaymentPage = () => {
                     {/* Rate Details */}
                     <View className="p-3 rounded-lg" style={{ backgroundColor: theme.primaryLight }}>
                         <Text className="text-xs" style={{ color: theme.primaryDark }}>
-                            ${(campaign.rate_per_view * 1000).toFixed(2)} per 1,000 views
+                            ${(campaign.rate_per_view * 1000).toFixed(2)} {t('campaignIdPayment.per_1k_views')}
                         </Text>
                     </View>
                 </View>
@@ -235,36 +237,36 @@ const PaymentPage = () => {
                     <View className="flex-row items-center">
                         <AntDesign name="credit-card" size={24} color={theme.textSecondary} />
                         <Text className="text-base font-semibold ml-3" style={{ color: theme.text }}>
-                            Payment Method
+                            {t('campaignIdPayment.payment_method')}
                         </Text>
                     </View>
                     <Text className="text-sm mt-2" style={{ color: theme.textTertiary }}>
-                        Securely processed by Stripe. Your payment method will be saved for future campaigns.
+                        {t('campaignIdPayment.payment_secure_message')}
                     </Text>
                 </View>
 
                 {/* Cost Breakdown */}
                 <View className="rounded-2xl p-4 mb-6 border" style={{ backgroundColor: theme.surface, borderColor: theme.border }}>
                     <Text className="text-base font-semibold mb-4" style={{ color: theme.text }}>
-                        Payment Summary
+                        {t('campaignIdPayment.payment_summary')}
                     </Text>
 
                     <View className="flex-row justify-between items-center mb-3">
-                        <Text className="text-base" style={{ color: theme.textSecondary }}>Campaign Budget</Text>
+                        <Text className="text-base" style={{ color: theme.textSecondary }}>{t('campaignIdPayment.campaign_budget')}</Text>
                         <Text className="text-base font-semibold" style={{ color: theme.text }}>
                             ${subtotal.toFixed(2)}
                         </Text>
                     </View>
 
                     <View className="flex-row justify-between items-center mb-3 pb-3 border-b" style={{ borderColor: theme.border }}>
-                        <Text className="text-base" style={{ color: theme.textSecondary }}>Processing Fee (3%)</Text>
+                        <Text className="text-base" style={{ color: theme.textSecondary }}>{t('campaignIdPayment.processing_fee')}</Text>
                         <Text className="text-base font-semibold" style={{ color: theme.text }}>
                             ${processingFee.toFixed(2)}
                         </Text>
                     </View>
 
                     <View className="flex-row justify-between items-center">
-                        <Text className="text-lg font-bold" style={{ color: theme.text }}>Total Amount</Text>
+                        <Text className="text-lg font-bold" style={{ color: theme.text }}>{t('campaignIdPayment.total_amount')}</Text>
                         <Text className="text-2xl font-bold" style={{ color: theme.primary }}>
                             ${total.toFixed(2)}
                         </Text>
@@ -277,7 +279,7 @@ const PaymentPage = () => {
                         <AntDesign name="info-circle" size={20} color={theme.primary} />
                         <View className="flex-1 ml-3">
                             <Text className="text-sm leading-5" style={{ color: theme.primaryDark }}>
-                                Once payment is complete, your campaign will be activated immediately and visible to influencers on the platform.
+                                {t('campaignIdPayment.campaign_activated_info')}
                             </Text>
                         </View>
                     </View>
@@ -296,13 +298,13 @@ const PaymentPage = () => {
                         <View className="flex-row items-center">
                             <ActivityIndicator color={theme.surface} size="small" />
                             <Text className="text-base font-semibold ml-2" style={{ color: theme.surface }}>
-                                Processing...
+                                {t('campaignIdPayment.processing')}
                             </Text>
                         </View>
                     ) : (
                         <View className="flex-row items-center">
                             <Text className="text-lg font-bold mr-2" style={{ color: theme.surface }}>
-                                Pay ${total.toFixed(2)}
+                                {t('campaignIdPayment.pay').replace('{{amount}}', total.toFixed(2))}
                             </Text>
                             <AntDesign name="arrow-right" size={20} color="white" />
                         </View>

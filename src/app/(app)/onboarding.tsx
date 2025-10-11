@@ -21,6 +21,8 @@ import * as ImagePicker from 'expo-image-picker';
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
 import { registerForPushNotifications } from '@/hooks/usePushNotifications';
 import { useTheme } from '@/contexts/ThemeContext';
+import { useLanguage } from '@/contexts/LanguageContext';
+import LanguageSwitcher from '@/components/LanguageSwitcher';
 
 // Constants
 const INFLUENCER_NICHES = [
@@ -39,6 +41,7 @@ const Onboarding = () => {
     const { user, getProfile } = useAuth();
     const router = useRouter();
     const { theme } = useTheme();
+    const { t } = useLanguage();
 
     // State Management
     const [currentStep, setCurrentStep] = useState(1);
@@ -84,12 +87,12 @@ const Onboarding = () => {
         try {
             const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
             if (status !== 'granted') {
-                Alert.alert('Permission needed', 'We need access to your photos to upload an avatar.');
+                Alert.alert(t('onboarding.permission_needed'), t('onboarding.photo_permission_message'));
                 return;
             }
 
             const result = await ImagePicker.launchImageLibraryAsync({
-                mediaTypes: ImagePicker.MediaTypeOptions.Images,
+                mediaTypes: ['images'],
                 allowsEditing: true,
                 aspect: [1, 1],
                 quality: 0.8,
@@ -99,20 +102,20 @@ const Onboarding = () => {
             if (!result.canceled && result.assets[0]) {
                 const asset = result.assets[0];
                 if (asset.fileSize && asset.fileSize > 50 * 1024 * 1024) {
-                    Alert.alert('File too large', 'Please select an image smaller than 50MB.');
+                    Alert.alert(t('onboarding.file_too_large'), t('onboarding.file_size_message'));
                     return;
                 }
                 await uploadAvatar(asset);
             }
         } catch (error) {
             console.error('Error picking image:', error);
-            Alert.alert('Error', 'Failed to pick image. Please try again.');
+            Alert.alert(t('onboarding.error'), t('onboarding.pick_image_error'));
         }
     };
 
     const uploadAvatar = async (asset: ImagePicker.ImagePickerAsset) => {
         if (!user || !asset.uri) {
-            Alert.alert('Error', 'No image selected or user not logged in.');
+            Alert.alert(t('onboarding.error'), t('onboarding.no_image_selected'));
             return;
         }
         setUploadingAvatar(true);
@@ -136,11 +139,11 @@ const Onboarding = () => {
                 .getPublicUrl(filePath);
 
             updateProfileData('avatar_url', publicUrlData.publicUrl);
-            Alert.alert('Success', 'Avatar uploaded successfully!');
+            Alert.alert(t('onboarding.success'), t('onboarding.avatar_uploaded'));
         } catch (err) {
             const error = err as Error;
             console.error('Error uploading avatar:', error.message);
-            Alert.alert('Error', 'Failed to upload avatar. Please try again.');
+            Alert.alert(t('onboarding.error'), t('onboarding.upload_avatar_error'));
         } finally {
             setUploadingAvatar(false);
         }
@@ -149,12 +152,12 @@ const Onboarding = () => {
     const removeAvatar = async () => {
         if (!profileData.avatar_url) return;
         Alert.alert(
-            'Remove Avatar',
-            'Are you sure you want to remove your avatar?',
+            t('onboarding.remove_avatar'),
+            t('onboarding.remove_avatar_confirm'),
             [
-                { text: 'Cancel', style: 'cancel' },
+                { text: t('onboarding.cancel'), style: 'cancel' },
                 {
-                    text: 'Remove',
+                    text: t('onboarding.remove'),
                     style: 'destructive',
                     onPress: async () => {
                         try {
@@ -199,7 +202,7 @@ const Onboarding = () => {
     // Navigation Functions
     const nextStep = async () => {
         if (!validateStep(currentStep)) {
-            Alert.alert('Error', 'Please fill in all required fields');
+            Alert.alert(t('onboarding.error'), t('onboarding.fill_required_fields'));
             return;
         }
         if (currentStep < totalSteps) {
@@ -226,12 +229,11 @@ const Onboarding = () => {
     // Complete Onboarding
     const completeOnboarding = async () => {
         if (!user) {
-            Alert.alert('Error', 'Authentication error. Please try logging out and in again.');
+            Alert.alert(t('onboarding.error'), t('onboarding.auth_error'));
             return;
         }
         setLoading(true);
         try {
-            const pushToken = await registerForPushNotifications();
             const dataToSave: any = {
                 id: user.id,
                 username: profileData.username.trim(),
@@ -240,7 +242,6 @@ const Onboarding = () => {
                 website_url: profileData.website_url.trim() || null,
                 location: profileData.location.trim() || null,
                 updated_at: new Date().toISOString(),
-                push_token: pushToken || null,
             };
             if (profileData.user_type === 'influencer') {
                 dataToSave.first_name = profileData.first_name.trim();
@@ -253,7 +254,7 @@ const Onboarding = () => {
             const { error } = await supabase.from('profiles').upsert(dataToSave);
             if (error) {
                 console.error('Error saving profile:', error);
-                Alert.alert('Error', `Failed to save profile: ${error.message}`);
+                Alert.alert(t('onboarding.error'), `${t('onboarding.save_profile_error')}: ${error.message}`);
             } else {
                 await getProfile();
                 router.replace('/(tabs)');
@@ -261,16 +262,17 @@ const Onboarding = () => {
         } catch (error) {
             console.error('Error completing onboarding:', error);
             const message = error instanceof Error ? error.message : 'Something went wrong.';
-            Alert.alert('Error', message);
+            Alert.alert(t('onboarding.error'), message);
         } finally {
             setLoading(false);
         }
     };
 
-    // Avatar Component
     const renderAvatarSection = () => (
         <View className="items-center mb-6 my-6">
-            <Text className="font-medium mb-4" style={{ color: theme.textSecondary }}>Profile Picture</Text>
+            <Text className="font-medium mb-4" style={{ color: theme.textSecondary }}>
+                {t('onboarding.profile_picture')}
+            </Text>
             <View className="relative">
                 <TouchableOpacity
                     onPress={pickImage}
@@ -289,7 +291,9 @@ const Onboarding = () => {
                     ) : (
                         <View className="items-center">
                             <Ionicons name="camera" size={24} color={theme.textSecondary} />
-                            <Text className="text-xs mt-1" style={{ color: theme.textTertiary }}>Add Photo</Text>
+                            <Text className="text-xs mt-1" style={{ color: theme.textTertiary }}>
+                                {t('onboarding.add_photo')}
+                            </Text>
                         </View>
                     )}
                 </TouchableOpacity>
@@ -305,7 +309,7 @@ const Onboarding = () => {
                 )}
             </View>
             <Text className="text-xs mt-2 text-center" style={{ color: theme.textTertiary }}>
-                Upload a profile picture (max 50MB)
+                {t('onboarding.upload_avatar_text')}
             </Text>
         </View>
     );
@@ -313,19 +317,24 @@ const Onboarding = () => {
     // Step Components
     const renderUserTypeStep = () => (
         <View className="flex-1 p-6">
+            {/* Language Switcher at the top */}
+            <View className="mb-6">
+                <LanguageSwitcher variant="compact" />
+            </View>
+
             <Text className="text-2xl font-bold mb-2" style={{ color: theme.text }}>
-                What best describes you?
+                {t('onboarding.user_type_title')}
             </Text>
             <Text className="mb-8" style={{ color: theme.textSecondary }}>
-                This helps us customize your experience
+                {t('onboarding.user_type_subtitle')}
             </Text>
-            <View className="space-y-4 ">
+            <View className="space-y-4">
                 <TouchableOpacity
                     onPress={() => updateProfileData('user_type', 'influencer')}
                     className={`p-6 rounded-xl border-2 my-2`}
                     style={{
                         borderColor: profileData.user_type === 'influencer' ? theme.primary : theme.border,
-                        backgroundColor: profileData.user_type === 'influencer' ? theme.surface : theme.surface,
+                        backgroundColor: theme.surface,
                     }}
                 >
                     <View className="flex-row items-center">
@@ -339,10 +348,10 @@ const Onboarding = () => {
                         </View>
                         <View className="flex-1">
                             <Text className={`text-lg font-semibold`} style={{ color: profileData.user_type === 'influencer' ? theme.primary : theme.text }}>
-                                Influencer/Creator
+                                {t('onboarding.influencer_title')}
                             </Text>
                             <Text className="mt-1" style={{ color: theme.textSecondary }}>
-                                Share content and collaborate with brands
+                                {t('onboarding.influencer_subtitle')}
                             </Text>
                         </View>
                         {profileData.user_type === 'influencer' && (
@@ -369,10 +378,10 @@ const Onboarding = () => {
                         </View>
                         <View className="flex-1">
                             <Text className={`text-lg font-semibold`} style={{ color: profileData.user_type === 'brand' ? theme.primary : theme.text }}>
-                                Brand/Business
+                                {t('onboarding.brand_title')}
                             </Text>
                             <Text className="mt-1" style={{ color: theme.textSecondary }}>
-                                Connect with influencers and grow your brand
+                                {t('onboarding.brand_subtitle')}
                             </Text>
                         </View>
                         {profileData.user_type === 'brand' && (
@@ -387,20 +396,22 @@ const Onboarding = () => {
     const renderBasicInfoStep = () => (
         <ScrollView className="flex-1 p-6">
             <Text className="text-2xl font-bold mb-2" style={{ color: theme.text }}>
-                Basic Information
+                {t('onboarding.basic_info_title')}
             </Text>
             <Text className="mb-8" style={{ color: theme.textSecondary }}>
                 {profileData.user_type === 'influencer'
-                    ? 'Tell us your name and choose a username'
-                    : 'Tell us about your business'}
+                    ? t('onboarding.basic_info_subtitle_influencer')
+                    : t('onboarding.basic_info_subtitle_brand')}
             </Text>
             <View className="gap-4">
                 <View>
-                    <Text className="font-medium mb-2" style={{ color: theme.textSecondary }}>Username *</Text>
+                    <Text className="font-medium mb-2" style={{ color: theme.textSecondary }}>
+                        {t('onboarding.username')} *
+                    </Text>
                     <TextInput
                         value={profileData.username}
                         onChangeText={(text) => updateProfileData('username', text)}
-                        placeholder="Choose a unique username"
+                        placeholder={t('onboarding.username_placeholder')}
                         placeholderTextColor={theme.textTertiary}
                         className="w-full px-4 py-3 rounded-lg text-base"
                         style={{ backgroundColor: theme.surface, borderColor: theme.borderLight, borderWidth: 1, color: theme.text }}
@@ -410,22 +421,26 @@ const Onboarding = () => {
                 {profileData.user_type === 'influencer' ? (
                     <>
                         <View>
-                            <Text className="font-medium mb-2" style={{ color: theme.textSecondary }}>First Name *</Text>
+                            <Text className="font-medium mb-2" style={{ color: theme.textSecondary }}>
+                                {t('onboarding.first_name')} *
+                            </Text>
                             <TextInput
                                 value={profileData.first_name}
                                 onChangeText={(text) => updateProfileData('first_name', text)}
-                                placeholder="Your first name"
+                                placeholder={t('onboarding.first_name_placeholder')}
                                 placeholderTextColor={theme.textTertiary}
                                 className="w-full px-4 py-3 rounded-lg text-base"
                                 style={{ backgroundColor: theme.surface, borderColor: theme.borderLight, borderWidth: 1, color: theme.text }}
                             />
                         </View>
                         <View>
-                            <Text className="font-medium mb-2" style={{ color: theme.textSecondary }}>Last Name *</Text>
+                            <Text className="font-medium mb-2" style={{ color: theme.textSecondary }}>
+                                {t('onboarding.last_name')} *
+                            </Text>
                             <TextInput
                                 value={profileData.last_name}
                                 onChangeText={(text) => updateProfileData('last_name', text)}
-                                placeholder="Your last name"
+                                placeholder={t('onboarding.last_name_placeholder')}
                                 placeholderTextColor={theme.textTertiary}
                                 className="w-full px-4 py-3 rounded-lg text-base"
                                 style={{ backgroundColor: theme.surface, borderColor: theme.borderLight, borderWidth: 1, color: theme.text }}
@@ -434,11 +449,13 @@ const Onboarding = () => {
                     </>
                 ) : (
                     <View>
-                        <Text className="font-medium mb-2" style={{ color: theme.textSecondary }}>Company Name *</Text>
+                        <Text className="font-medium mb-2" style={{ color: theme.textSecondary }}>
+                            {t('onboarding.company_name')} *
+                        </Text>
                         <TextInput
                             value={profileData.company_name}
                             onChangeText={(text) => updateProfileData('company_name', text)}
-                            placeholder="Your company name"
+                            placeholder={t('onboarding.company_name_placeholder')}
                             placeholderTextColor={theme.textTertiary}
                             className="w-full px-4 py-3 rounded-lg text-base"
                             style={{ backgroundColor: theme.surface, borderColor: theme.borderLight, borderWidth: 1, color: theme.text }}
@@ -453,18 +470,22 @@ const Onboarding = () => {
     const renderProfileDetailsStep = () => (
         <View className="flex-1 p-6">
             <Text className="text-2xl font-bold mb-2" style={{ color: theme.text }}>
-                Profile Details
+                {t('onboarding.profile_details_title')}
             </Text>
             <Text className="mb-8" style={{ color: theme.textSecondary }}>
-                Add some details to help others discover you
+                {t('onboarding.profile_details_subtitle')}
             </Text>
             <View className="space-y-4 gap-4">
                 <View>
-                    <Text className="font-medium mb-2" style={{ color: theme.textSecondary }}>Bio</Text>
+                    <Text className="font-medium mb-2" style={{ color: theme.textSecondary }}>
+                        {t('onboarding.bio')}
+                    </Text>
                     <TextInput
                         value={profileData.bio}
                         onChangeText={(text) => updateProfileData('bio', text)}
-                        placeholder={`Tell us about ${profileData.user_type === 'influencer' ? 'yourself' : 'your business'}...`}
+                        placeholder={profileData.user_type === 'influencer'
+                            ? t('onboarding.bio_placeholder_influencer')
+                            : t('onboarding.bio_placeholder_brand')}
                         placeholderTextColor={theme.textTertiary}
                         className="w-full px-4 py-3 rounded-lg text-base h-24"
                         style={{ backgroundColor: theme.surface, borderColor: theme.borderLight, borderWidth: 1, color: theme.text }}
@@ -474,11 +495,13 @@ const Onboarding = () => {
                     />
                 </View>
                 <View>
-                    <Text className="font-medium mb-2" style={{ color: theme.textSecondary }}>Website</Text>
+                    <Text className="font-medium mb-2" style={{ color: theme.textSecondary }}>
+                        {t('onboarding.website')}
+                    </Text>
                     <TextInput
                         value={profileData.website_url}
                         onChangeText={(text) => updateProfileData('website_url', text)}
-                        placeholder="https://yourwebsite.com"
+                        placeholder={t('onboarding.website_placeholder')}
                         placeholderTextColor={theme.textTertiary}
                         className="w-full px-4 py-3 rounded-lg text-base"
                         style={{ backgroundColor: theme.surface, borderColor: theme.borderLight, borderWidth: 1, color: theme.text }}
@@ -487,9 +510,11 @@ const Onboarding = () => {
                     />
                 </View>
                 <View style={{ zIndex: 1 }}>
-                    <Text className="font-medium mb-2" style={{ color: theme.textSecondary }}>Location</Text>
+                    <Text className="font-medium mb-2" style={{ color: theme.textSecondary }}>
+                        {t('onboarding.location')}
+                    </Text>
                     <GooglePlacesAutocomplete
-                        placeholder='City, Country'
+                        placeholder={t('onboarding.location_placeholder')}
                         onPress={(data, details = null) => {
                             updateProfileData('location', data.description);
                         }}
@@ -529,17 +554,19 @@ const Onboarding = () => {
     const renderPreferencesStep = () => (
         <ScrollView className="flex-1 p-6">
             <Text className="text-2xl font-bold mb-2" style={{ color: theme.text }}>
-                {profileData.user_type === 'influencer' ? 'Content Preferences' : 'Business Details'}
+                {profileData.user_type === 'influencer'
+                    ? t('onboarding.preferences_title_influencer')
+                    : t('onboarding.preferences_title_brand')}
             </Text>
             <Text className="mb-8" style={{ color: theme.textSecondary }}>
                 {profileData.user_type === 'influencer'
-                    ? 'Select up to 5 niches that match your content'
-                    : 'Choose your industry to connect with relevant influencers'}
+                    ? t('onboarding.preferences_subtitle_influencer')
+                    : t('onboarding.preferences_subtitle_brand')}
             </Text>
             {profileData.user_type === 'influencer' ? (
                 <View>
                     <Text className="font-medium mb-4" style={{ color: theme.textSecondary }}>
-                        Content Niches (Select up to 5)
+                        {t('onboarding.content_niches')}
                     </Text>
                     <View className="flex-row flex-wrap">
                         {INFLUENCER_NICHES.map((niche) => (
@@ -559,12 +586,14 @@ const Onboarding = () => {
                         ))}
                     </View>
                     <Text className="text-sm mt-2" style={{ color: theme.textTertiary }}>
-                        Selected: {profileData.niches.length}/5
+                        {t('onboarding.selected')}: {profileData.niches.length}/5
                     </Text>
                 </View>
             ) : (
                 <View>
-                    <Text className="font-medium mb-4" style={{ color: theme.textSecondary }}>Industry</Text>
+                    <Text className="font-medium mb-4" style={{ color: theme.textSecondary }}>
+                        {t('onboarding.industry')}
+                    </Text>
                     <View className="flex-row flex-wrap">
                         {BRAND_INDUSTRIES.map((industry) => (
                             <TouchableOpacity
@@ -614,7 +643,7 @@ const Onboarding = () => {
                 <View className="px-6 py-4" style={{ backgroundColor: theme.surface }}>
                     <View className="flex-row justify-between items-center mb-2">
                         <Text className="text-sm" style={{ color: theme.textSecondary }}>
-                            Step {currentStep} of {totalSteps}
+                            {t('onboarding.step_of').replace('{{current}}', currentStep.toString()).replace('{{total}}', totalSteps.toString())}
                         </Text>
                         <Text className="text-sm" style={{ color: theme.textSecondary }}>
                             {Math.round((currentStep / totalSteps) * 100)}%
@@ -642,7 +671,7 @@ const Onboarding = () => {
                                 style={{ backgroundColor: theme.surfaceSecondary }}
                             >
                                 <Text className="text-center font-medium" style={{ color: theme.textSecondary }}>
-                                    Back
+                                    {t('onboarding.back')}
                                 </Text>
                             </TouchableOpacity>
                         )}
@@ -653,7 +682,7 @@ const Onboarding = () => {
                                 style={{ backgroundColor: theme.surfaceSecondary }}
                             >
                                 <Text className="text-center font-medium" style={{ color: theme.textSecondary }}>
-                                    Skip
+                                    {t('onboarding.skip')}
                                 </Text>
                             </TouchableOpacity>
                         )}
@@ -667,7 +696,7 @@ const Onboarding = () => {
                                 <ActivityIndicator color="#FFFFFF" />
                             ) : (
                                 <Text className="text-center font-medium" style={{ color: '#FFFFFF' }}>
-                                    {currentStep === totalSteps ? 'Complete' : 'Next'}
+                                    {currentStep === totalSteps ? t('onboarding.complete') : t('onboarding.next')}
                                 </Text>
                             )}
                         </TouchableOpacity>

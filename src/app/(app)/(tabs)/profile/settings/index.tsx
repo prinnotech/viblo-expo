@@ -17,6 +17,8 @@ import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import { registerForPushNotifications } from '@/hooks/usePushNotifications';
 import { useTheme } from '@/contexts/ThemeContext';
+import { useLanguage } from '@/contexts/LanguageContext';
+import LanguageSwitcher from '@/components/LanguageSwitcher';
 
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL || 'http://192.168.1.214:3001';
 const API_KEY = process.env.EXPO_PUBLIC_API_KEY;
@@ -28,7 +30,7 @@ const SettingsPage = () => {
     const [loading, setLoading] = useState(true);
     const [deleting, setDeleting] = useState(false);
     const { theme, themeMode, isDark, setThemeMode } = useTheme();
-
+    const { t, language } = useLanguage();
 
     useEffect(() => {
         if (profile) {
@@ -49,13 +51,13 @@ const SettingsPage = () => {
                     .eq('id', session?.user?.id);
 
                 if (error) {
-                    Alert.alert('Error', 'Failed to enable notifications');
+                    Alert.alert(t('profileSettings.error'), t('profileSettings.failed_enable_notifications'));
                     setNotificationsEnabled(false);
                 } else {
-                    Alert.alert('Success', 'Notifications enabled!');
+                    Alert.alert(t('profileSettings.success'), t('profileSettings.notifications_enabled'));
                 }
             } else {
-                Alert.alert('Permission Denied', 'Please enable notifications in your device settings');
+                Alert.alert(t('profileSettings.permission_denied'), t('profileSettings.enable_notifications_settings'));
                 setNotificationsEnabled(false);
             }
         } else {
@@ -67,7 +69,7 @@ const SettingsPage = () => {
             if (error) {
                 console.error('Error clearing push token:', error);
             } else {
-                Alert.alert('Success', 'Notifications disabled');
+                Alert.alert(t('profileSettings.success'), t('profileSettings.notifications_disabled'));
             }
         }
     };
@@ -77,18 +79,18 @@ const SettingsPage = () => {
         if (canOpen) {
             await Linking.openURL(url);
         } else {
-            Alert.alert('Error', 'Cannot open URL');
+            Alert.alert(t('profileSettings.error'), t('profileSettings.cannot_open_url'));
         }
     };
 
     const handleDeleteAccount = () => {
         Alert.alert(
-            'Delete Account',
-            'Are you sure you want to delete your account? This action cannot be undone. Your account will be deactivated and all your data will be permanently deleted.',
+            t('profileSettings.delete_account_title'),
+            t('profileSettings.delete_account_confirm'),
             [
-                { text: 'Cancel', style: 'cancel' },
+                { text: t('profileSettings.cancel'), style: 'cancel' },
                 {
-                    text: 'Delete',
+                    text: t('profileSettings.delete'),
                     style: 'destructive',
                     onPress: confirmDelete,
                 },
@@ -119,12 +121,12 @@ const SettingsPage = () => {
             // Don't wait for backend - logout immediately
             await supabase.auth.signOut();
             Alert.alert(
-                'Account Deleted',
-                'Your account has been scheduled for deletion. You will be logged out now.'
+                t('profileSettings.account_deleted'),
+                t('profileSettings.account_deleted_message')
             );
         } catch (error: any) {
             console.error('Error deleting account:', error);
-            Alert.alert('Error', 'Failed to delete account. Please try again or contact support.');
+            Alert.alert(t('profileSettings.error'), t('profileSettings.failed_delete_account'));
             setDeleting(false);
         }
     };
@@ -143,13 +145,13 @@ const SettingsPage = () => {
 
                 {/* Notifications Section */}
                 <View className="mt-4 mx-4">
-                    <Text className="text-sm font-semibold  mb-2 px-2" style={{ color: theme.textTertiary }}>NOTIFICATIONS</Text>
+                    <Text className="text-sm font-semibold  mb-2 px-2" style={{ color: theme.textTertiary }}>{t('profileSettings.notifications')}</Text>
                     <View className=" rounded-xl" style={{ backgroundColor: theme.surface, borderColor: theme.border, borderWidth: 1 }}>
                         <View className="flex-row justify-between items-center p-4">
                             <View className="flex-1 mr-4">
-                                <Text className="text-base font-semibold " style={{ color: theme.text }}>Push Notifications</Text>
+                                <Text className="text-base font-semibold " style={{ color: theme.text }}>{t('profileSettings.push_notifications')}</Text>
                                 <Text className="text-sm  mt-1" style={{ color: theme.textTertiary }}>
-                                    Receive updates about campaigns, messages, and activity
+                                    {t('profileSettings.push_notifications_description')}
                                 </Text>
                             </View>
                             <Switch
@@ -164,7 +166,7 @@ const SettingsPage = () => {
 
                 {/* Appearance Section */}
                 <View className="mt-6 mx-4">
-                    <Text className="text-sm font-semibold  mb-2 px-2" style={{ color: theme.textTertiary }}>APPEARANCE</Text>
+                    <Text className="text-sm font-semibold  mb-2 px-2" style={{ color: theme.textTertiary }}>{t('profileSettings.appearance')}</Text>
                     <View className=" rounded-xl" style={{ backgroundColor: theme.surface, borderColor: theme.border, borderWidth: 1 }}>
                         <TouchableOpacity
                             onPress={() => setThemeMode('light')}
@@ -173,7 +175,7 @@ const SettingsPage = () => {
                         >
                             <View className="flex-row items-center flex-1">
                                 <Feather name="sun" size={20} color={theme.textSecondary} />
-                                <Text className="text-base ml-3" style={{ color: theme.text }}>Light Mode</Text>
+                                <Text className="text-base ml-3" style={{ color: theme.text }}>{t('profileSettings.light_mode')}</Text>
                             </View>
                             {themeMode === 'light' && (
                                 <Feather name="check" size={20} color={theme.primary} />
@@ -187,7 +189,7 @@ const SettingsPage = () => {
                         >
                             <View className="flex-row items-center flex-1">
                                 <Feather name="moon" size={20} color={theme.textSecondary} />
-                                <Text className="text-base ml-3" style={{ color: theme.text }}>Dark Mode</Text>
+                                <Text className="text-base ml-3" style={{ color: theme.text }}>{t('profileSettings.dark_mode')}</Text>
                             </View>
                             {themeMode === 'dark' && (
                                 <Feather name="check" size={20} color={theme.primary} />
@@ -201,9 +203,9 @@ const SettingsPage = () => {
                             <View className="flex-row items-center flex-1">
                                 <Feather name="smartphone" size={20} color={theme.textSecondary} />
                                 <View className="ml-3 flex-1">
-                                    <Text className="text-base " style={{ color: theme.text }}>System</Text>
+                                    <Text className="text-base " style={{ color: theme.text }}>{t('profileSettings.system')}</Text>
                                     <Text className="text-sm mt-1" style={{ color: theme.textTertiary }}>
-                                        Follow device settings
+                                        {t('profileSettings.follow_device_settings')}
                                     </Text>
                                 </View>
                             </View>
@@ -214,30 +216,40 @@ const SettingsPage = () => {
                     </View>
                 </View>
 
+                {/* Language Section */}
+                <View className="mt-6 mx-4">
+                    <Text className="text-sm font-semibold mb-2 px-2" style={{ color: theme.textTertiary }}>{t('profileSettings.language')}</Text>
+                    <View className="rounded-xl p-4" style={{ backgroundColor: theme.surface, borderColor: theme.border, borderWidth: 1 }}>
+                        <Text className="text-sm mb-4" style={{ color: theme.textSecondary }}>
+                            {t('profileSettings.select_language')}
+                        </Text>
+                        <LanguageSwitcher variant="default" />
+                    </View>
+                </View>
 
                 {/* Privacy & Legal */}
                 <View className="mt-6 mx-4">
-                    <Text className="text-sm font-semibold mb-2 px-2" style={{ color: theme.textTertiary }}>PRIVACY & LEGAL</Text>
+                    <Text className="text-sm font-semibold mb-2 px-2" style={{ color: theme.textTertiary }}>{t('profileSettings.privacy_legal')}</Text>
                     <View className="rounded-xl" style={{ backgroundColor: theme.surface, borderColor: theme.border, borderWidth: 1 }}>
                         <TouchableOpacity
-                            onPress={() => openURL('https://viblo.io/privacy')}
+                            onPress={() => openURL(`https://viblo.io/${language}/privacy`)}
                             className="flex-row items-center justify-between p-4"
                             style={{ borderBottomColor: theme.border, borderBottomWidth: 1 }}
                         >
                             <View className="flex-row items-center flex-1">
                                 <Feather name="shield" size={20} color={theme.textSecondary} />
-                                <Text className="text-base ml-3" style={{ color: theme.text }}>Privacy Policy</Text>
+                                <Text className="text-base ml-3" style={{ color: theme.text }}>{t('profileSettings.privacy_policy')}</Text>
                             </View>
                             <Feather name="external-link" size={18} color={theme.textTertiary} />
                         </TouchableOpacity>
 
                         <TouchableOpacity
-                            onPress={() => openURL('https://viblo.io/terms')}
+                            onPress={() => openURL(`https://viblo.io/${language}/terms`)}
                             className="flex-row items-center justify-between p-4"
                         >
                             <View className="flex-row items-center flex-1">
                                 <Feather name="file-text" size={20} color={theme.textSecondary} />
-                                <Text className="text-base ml-3" style={{ color: theme.text }}>Terms of Service</Text>
+                                <Text className="text-base ml-3" style={{ color: theme.text }}>{t('profileSettings.terms_of_service')}</Text>
                             </View>
                             <Feather name="external-link" size={18} color={theme.textTertiary} />
                         </TouchableOpacity>
@@ -246,15 +258,15 @@ const SettingsPage = () => {
 
                 {/* Support */}
                 <View className="mt-6 mx-4">
-                    <Text className="text-sm font-semibold mb-2 px-2" style={{ color: theme.textTertiary }}>SUPPORT</Text>
+                    <Text className="text-sm font-semibold mb-2 px-2" style={{ color: theme.textTertiary }}>{t('profileSettings.support')}</Text>
                     <View className="rounded-xl" style={{ backgroundColor: theme.surface, borderColor: theme.border, borderWidth: 1 }}>
                         <TouchableOpacity
-                            onPress={() => openURL('https://viblo.io/en/contact')}
+                            onPress={() => openURL(`https://viblo.io/${language}/contact`)}
                             className="flex-row items-center justify-between p-4"
                         >
                             <View className="flex-row items-center flex-1">
                                 <Feather name="help-circle" size={20} color={theme.textSecondary} />
-                                <Text className="text-base ml-3" style={{ color: theme.text }}>Contact Support</Text>
+                                <Text className="text-base ml-3" style={{ color: theme.text }}>{t('profileSettings.contact_support')}</Text>
                             </View>
                             <Feather name="external-link" size={18} color={theme.textTertiary} />
                         </TouchableOpacity>
@@ -263,22 +275,22 @@ const SettingsPage = () => {
 
                 {/* About */}
                 <View className="mt-6 mx-4">
-                    <Text className="text-sm font-semibold mb-2 px-2" style={{ color: theme.textTertiary }}>ABOUT</Text>
+                    <Text className="text-sm font-semibold mb-2 px-2" style={{ color: theme.textTertiary }}>{t('profileSettings.about')}</Text>
                     <View className="rounded-xl p-4" style={{ backgroundColor: theme.surface, borderColor: theme.border, borderWidth: 1 }}>
                         <View className="flex-row items-center mb-2">
                             <Feather name="info" size={20} color={theme.textSecondary} />
-                            <Text className="text-base font-semibold ml-3" style={{ color: theme.text }}>Viblo</Text>
+                            <Text className="text-base font-semibold ml-3" style={{ color: theme.text }}>{t('profileSettings.viblo')}</Text>
                         </View>
-                        <Text className="text-sm" style={{ color: theme.textTertiary }}>Version 1.0</Text>
+                        <Text className="text-sm" style={{ color: theme.textTertiary }}>{t('profileSettings.version')}</Text>
                         <Text className="text-sm mt-2" style={{ color: theme.textTertiary }}>
-                            Connecting brands with creators for authentic influencer marketing campaigns.
+                            {t('profileSettings.app_description')}
                         </Text>
                     </View>
                 </View>
 
                 {/* Danger Zone */}
                 <View className="mt-6 mx-4 mb-8">
-                    <Text className="text-sm font-semibold mb-2 px-2" style={{ color: theme.textTertiary }}>DANGER ZONE</Text>
+                    <Text className="text-sm font-semibold mb-2 px-2" style={{ color: theme.textTertiary }}>{t('profileSettings.danger_zone')}</Text>
                     <TouchableOpacity
                         onPress={handleDeleteAccount}
                         disabled={deleting}
@@ -288,15 +300,15 @@ const SettingsPage = () => {
                         {deleting ? (
                             <View className="flex-row items-center justify-center">
                                 <ActivityIndicator color={theme.error} />
-                                <Text className="font-semibold ml-2" style={{ color: theme.error }}>Deleting...</Text>
+                                <Text className="font-semibold ml-2" style={{ color: theme.error }}>{t('profileSettings.deleting')}</Text>
                             </View>
                         ) : (
                             <View className="flex-row items-center">
                                 <Feather name="trash-2" size={20} color={theme.error} />
                                 <View className="ml-3 flex-1">
-                                    <Text className="text-base font-semibold" style={{ color: theme.error }}>Delete Account</Text>
+                                    <Text className="text-base font-semibold" style={{ color: theme.error }}>{t('profileSettings.delete_account')}</Text>
                                     <Text className="text-sm mt-1" style={{ color: theme.textTertiary }}>
-                                        Permanently delete your account and all data
+                                        {t('profileSettings.delete_account_description')}
                                     </Text>
                                 </View>
                             </View>

@@ -1,9 +1,11 @@
 import { Stack } from "expo-router";
 import React from "react";
 import { useTheme } from "@/contexts/ThemeContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 function Layout() {
     const { theme } = useTheme();
+    const { t } = useLanguage();
 
     return (
         <Stack
@@ -24,7 +26,7 @@ function Layout() {
                 options={{
                     presentation: 'modal',
                     headerShown: false,
-                    title: 'Loading payments...',
+                    title: t('walletLayout.loading_payments'),
                 }}
             />
 
@@ -33,7 +35,7 @@ function Layout() {
                 options={{
                     presentation: 'modal',
                     headerShown: true,
-                    title: 'New Payment method',
+                    title: t('walletLayout.new_payment_method'),
                 }}
             />
 
@@ -42,7 +44,7 @@ function Layout() {
                 options={{
                     presentation: 'modal',
                     headerShown: true,
-                    title: 'Edit Payment method',
+                    title: t('walletLayout.edit_payment_method'),
                 }}
             />
         </Stack>

@@ -17,6 +17,7 @@ import { useMessages } from '@/hooks/useMessages';
 import { Feather } from '@expo/vector-icons';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const ChatScreen = () => {
     const { id } = useLocalSearchParams();
@@ -29,6 +30,7 @@ const ChatScreen = () => {
     const flatListRef = useRef<FlatList>(null);
     const navigation = useNavigation();
     const { theme } = useTheme();
+    const { t } = useLanguage();
 
     useEffect(() => {
         // Scroll to bottom when new messages arrive
@@ -37,8 +39,8 @@ const ChatScreen = () => {
         }
 
         // Dynamically set the header title
-        navigation.setOptions({ title: otherParticipant?.username || 'Chat' });
-    }, [messages, otherParticipant, navigation]);
+        navigation.setOptions({ title: otherParticipant?.username || t('inboxId.chat') });
+    }, [messages, otherParticipant, navigation, t]);
 
     const handleSend = () => {
         if (newMessage.trim()) {
@@ -58,7 +60,7 @@ const ChatScreen = () => {
     }
 
     if (error) {
-        return <View className="flex-1 justify-center items-center" style={{ backgroundColor: theme.background }}><Text style={{ color: theme.error }}>Failed to load messages.</Text></View>;
+        return <View className="flex-1 justify-center items-center" style={{ backgroundColor: theme.background }}><Text style={{ color: theme.error }}>{t('inboxId.failed_load_messages')}</Text></View>;
     }
 
     return (
@@ -101,7 +103,7 @@ const ChatScreen = () => {
                     <TextInput
                         value={newMessage}
                         onChangeText={setNewMessage}
-                        placeholder="Type a message..."
+                        placeholder={t('inboxId.type_message_placeholder')}
                         placeholderTextColor={theme.textTertiary}
                         className="flex-1 rounded-full h-10 px-4"
                         style={{ backgroundColor: theme.surfaceSecondary, color: theme.text }}
@@ -117,4 +119,3 @@ const ChatScreen = () => {
 };
 
 export default ChatScreen;
-

@@ -18,6 +18,7 @@ import * as WebBrowser from 'expo-web-browser';
 import { SocialIcon } from '@/components/getSocialIcons';
 import { SocialPlatform } from '@/lib/enum_types';
 import { useTheme } from '@/contexts/ThemeContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -34,6 +35,7 @@ interface SocialLink {
 const ConnectionsPage = () => {
     const { profile } = useAuth();
     const { theme } = useTheme();
+    const { t } = useLanguage();
     const [connections, setConnections] = useState<SocialLink[]>([]);
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
@@ -42,21 +44,21 @@ const ConnectionsPage = () => {
     const platforms = [
         {
             id: 'instagram',
-            name: 'Instagram',
+            name: t('profileConnections.instagram'),
             icon: 'instagram' as SocialPlatform,
-            description: 'Connect your Instagram Business account'
+            description: t('profileConnections.connect_instagram')
         },
         {
             id: 'tiktok',
-            name: 'TikTok',
+            name: t('profileConnections.tiktok'),
             icon: 'tiktok' as SocialPlatform,
-            description: 'Connect your TikTok account'
+            description: t('profileConnections.connect_tiktok')
         },
         {
             id: 'youtube',
-            name: 'YouTube',
+            name: t('profileConnections.youtube'),
             icon: 'youtube' as SocialPlatform,
-            description: 'Connect your YouTube channel'
+            description: t('profileConnections.connect_youtube')
         }
     ];
 
@@ -109,7 +111,7 @@ const ConnectionsPage = () => {
                     authUrl = `${backendUrl}/api/youtube/authorize?user_id=${profile?.id}`;
                     break;
                 default:
-                    Alert.alert('Error', 'Platform not supported');
+                    Alert.alert(t('profileConnections.error'), t('profileConnections.platform_not_supported'));
                     setConnecting(null);
                     return;
             }
@@ -130,18 +132,18 @@ const ConnectionsPage = () => {
                     .single();
 
                 if (data && !error) {
-                    Alert.alert('Success', `${platformId} connected successfully!`);
+                    Alert.alert(t('profileConnections.success'), t('profileConnections.connected_successfully').replace('{{platform}}', platformId));
                     fetchConnections();
                 } else {
-                    Alert.alert('Error', 'Connection was not completed. Please try again.');
+                    Alert.alert(t('profileConnections.error'), t('profileConnections.connection_not_completed'));
                 }
             } else if (result.type === 'cancel') {
-                Alert.alert('Cancelled', 'Authorization was cancelled');
+                Alert.alert(t('profileConnections.cancelled'), t('profileConnections.authorization_cancelled'));
             }
 
         } catch (error) {
             console.error('Connection error:', error);
-            Alert.alert('Error', 'Failed to connect. Please try again.');
+            Alert.alert(t('profileConnections.error'), t('profileConnections.failed_connect'));
         } finally {
             setConnecting(null);
         }
@@ -149,12 +151,12 @@ const ConnectionsPage = () => {
 
     const handleDisconnect = async (platformId: string) => {
         Alert.alert(
-            'Disconnect Account',
-            `Are you sure you want to disconnect your ${platformId} account?`,
+            t('profileConnections.disconnect_account'),
+            t('profileConnections.disconnect_confirm').replace('{{platform}}', platformId),
             [
-                { text: 'Cancel', style: 'cancel' },
+                { text: t('profileConnections.cancel'), style: 'cancel' },
                 {
-                    text: 'Disconnect',
+                    text: t('profileConnections.disconnect'),
                     style: 'destructive',
                     onPress: async () => {
                         try {
@@ -189,11 +191,11 @@ const ConnectionsPage = () => {
 
                             if (tokenError) console.error('Token deletion error:', tokenError);
 
-                            Alert.alert('Disconnected', `${platformId} account disconnected. You can now connect a different account.`);
+                            Alert.alert(t('profileConnections.disconnected'), t('profileConnections.disconnected_message').replace('{{platform}}', platformId));
                             fetchConnections();
                         } catch (error) {
                             console.error('Disconnect error:', error);
-                            Alert.alert('Error', 'Failed to disconnect');
+                            Alert.alert(t('profileConnections.error'), t('profileConnections.failed_disconnect'));
                         }
                     }
                 }
@@ -230,9 +232,9 @@ const ConnectionsPage = () => {
         <SafeAreaView className="flex-1" style={{ backgroundColor: theme.background }}>
             {/* Header */}
             <View className="px-6 py-4 border-b" style={{ backgroundColor: theme.surface, borderColor: theme.border }}>
-                <Text className="text-2xl font-bold" style={{ color: theme.text }}>Connections</Text>
+                <Text className="text-2xl font-bold" style={{ color: theme.text }}>{t('profileConnections.connections')}</Text>
                 <Text className="text-sm mt-1" style={{ color: theme.textSecondary }}>
-                    Connect your social media accounts
+                    {t('profileConnections.connect_social_media')}
                 </Text>
             </View>
 
@@ -250,10 +252,10 @@ const ConnectionsPage = () => {
                             <Feather name="info" size={18} color={theme.primaryDark} />
                             <View className="flex-1 ml-3">
                                 <Text className="text-sm font-medium mb-1" style={{ color: theme.primaryDark }}>
-                                    Why Connect?
+                                    {t('profileConnections.why_connect')}
                                 </Text>
                                 <Text className="text-xs leading-5" style={{ color: theme.primaryDark }}>
-                                    Connect your accounts to automatically sync your stats, find matching campaigns, and get paid for your content.
+                                    {t('profileConnections.why_connect_description')}
                                 </Text>
                             </View>
                         </View>
@@ -284,7 +286,7 @@ const ConnectionsPage = () => {
                                     {connected && (
                                         <View className="px-2 py-1 rounded-full" style={{ backgroundColor: theme.successLight }}>
                                             <Text className="text-xs font-semibold" style={{ color: theme.success }}>
-                                                Connected
+                                                {t('profileConnections.connected')}
                                             </Text>
                                         </View>
                                     )}
@@ -295,19 +297,19 @@ const ConnectionsPage = () => {
                                     <View className="rounded-lg p-3 mb-4" style={{ backgroundColor: theme.surfaceSecondary }}>
                                         <View className="flex-row justify-between">
                                             <View className="items-center flex-1">
-                                                <Text className="text-xs mb-1" style={{ color: theme.textTertiary }}>Followers</Text>
+                                                <Text className="text-xs mb-1" style={{ color: theme.textTertiary }}>{t('profileConnections.followers')}</Text>
                                                 <Text className="text-sm font-bold" style={{ color: theme.text }}>
                                                     {formatNumber(connection.follower_count)}
                                                 </Text>
                                             </View>
                                             <View className="items-center flex-1">
-                                                <Text className="text-xs mb-1" style={{ color: theme.textTertiary }}>Views</Text>
+                                                <Text className="text-xs mb-1" style={{ color: theme.textTertiary }}>{t('profileConnections.views')}</Text>
                                                 <Text className="text-sm font-bold" style={{ color: theme.text }}>
                                                     {formatNumber(connection.total_views_count)}
                                                 </Text>
                                             </View>
                                             <View className="items-center flex-1">
-                                                <Text className="text-xs mb-1" style={{ color: theme.textTertiary }}>Likes</Text>
+                                                <Text className="text-xs mb-1" style={{ color: theme.textTertiary }}>{t('profileConnections.likes')}</Text>
                                                 <Text className="text-sm font-bold" style={{ color: theme.text }}>
                                                     {formatNumber(connection.total_likes_count)}
                                                 </Text>
@@ -337,7 +339,7 @@ const ConnectionsPage = () => {
                                         <ActivityIndicator color={connected ? theme.error : theme.surface} />
                                     ) : (
                                         <Text className="text-center font-semibold" style={{ color: connected ? theme.error : theme.surface }}>
-                                            {connected ? 'Disconnect' : `Connect ${platform.name}`}
+                                            {connected ? t('profileConnections.disconnect') : t('profileConnections.connect').replace('{{platform}}', platform.name)}
                                         </Text>
                                     )}
                                 </TouchableOpacity>

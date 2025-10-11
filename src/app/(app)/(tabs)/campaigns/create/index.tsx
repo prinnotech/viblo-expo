@@ -16,6 +16,7 @@ import AntDesign from '@expo/vector-icons/AntDesign';
 import Slider from '@react-native-community/slider';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useTheme } from '@/contexts/ThemeContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 type CampaignStatus = 'draft' | 'active';
 
@@ -36,6 +37,7 @@ const CreateCampaign = () => {
     const router = useRouter();
     const { profile } = useAuth();
     const { theme } = useTheme();
+    const { t } = useLanguage();
     const [saving, setSaving] = useState(false);
 
     // Form fields
@@ -91,28 +93,28 @@ const CreateCampaign = () => {
 
     const handleCreate = async () => {
         if (!profile || profile.user_type !== 'brand') {
-            Alert.alert('Error', 'Only brands can create campaigns');
+            Alert.alert(t('campaignCreate.error'), t('campaignCreate.only_brands_create'));
             return;
         }
 
         // Validation
         if (!title.trim()) {
-            Alert.alert('Validation Error', 'Please enter a campaign title');
+            Alert.alert(t('campaignCreate.validation_error'), t('campaignCreate.enter_title'));
             return;
         }
 
         if (!totalBudget || parseFloat(totalBudget) <= 0) {
-            Alert.alert('Validation Error', 'Please enter a valid total budget');
+            Alert.alert(t('campaignCreate.validation_error'), t('campaignCreate.enter_valid_budget'));
             return;
         }
 
         if (selectedNiches.length === 0) {
-            Alert.alert('Validation Error', 'Please select at least one niche');
+            Alert.alert(t('campaignCreate.validation_error'), t('campaignCreate.select_niche'));
             return;
         }
 
         if (selectedPlatforms.length === 0) {
-            Alert.alert('Validation Error', 'Please select at least one platform');
+            Alert.alert(t('campaignCreate.validation_error'), t('campaignCreate.select_platform'));
             return;
         }
 
@@ -152,7 +154,7 @@ const CreateCampaign = () => {
 
         if (error) {
             console.error('Error creating campaign:', error);
-            Alert.alert('Error', 'Failed to create campaign');
+            Alert.alert(t('campaignCreate.error'), t('campaignCreate.failed_create'));
             return;
         }
 
@@ -161,7 +163,7 @@ const CreateCampaign = () => {
             router.replace(`/(tabs)/campaigns/${data.id}/payment`);
         } else {
             // Just a draft, no payment needed
-            Alert.alert('Success', 'Campaign saved as draft', [
+            Alert.alert(t('campaignCreate.success'), t('campaignCreate.campaign_saved_draft'), [
                 {
                     text: 'OK',
                     onPress: () => router.replace(`/(tabs)/campaigns/${data.id}`)
@@ -195,34 +197,34 @@ const CreateCampaign = () => {
                 {/* Header */}
                 <View className="mb-6">
                     <Text className="text-sm mt-1" style={{ color: theme.textTertiary }}>
-                        Set up your campaign and start connecting with influencers
+                        {t('campaignCreate.setup_campaign')}
                     </Text>
                 </View>
 
                 {/* Title */}
                 <View className="mb-4">
                     <Text className="text-sm font-semibold mb-2" style={{ color: theme.textSecondary }}>
-                        Campaign Title <Text style={{ color: theme.error }}>*</Text>
+                        {t('campaignCreate.campaign_title')} <Text style={{ color: theme.error }}>*</Text>
                     </Text>
                     <TextInput
                         className="border rounded-lg px-4 py-3 text-base"
                         style={{ backgroundColor: theme.surface, borderColor: theme.borderLight, color: theme.text }}
                         value={title}
                         onChangeText={setTitle}
-                        placeholder="Enter campaign title"
+                        placeholder={t('campaignCreate.enter_campaign_title')}
                         placeholderTextColor={theme.textTertiary}
                     />
                 </View>
 
                 {/* Description */}
                 <View className="mb-4">
-                    <Text className="text-sm font-semibold mb-2" style={{ color: theme.textSecondary }}>Description</Text>
+                    <Text className="text-sm font-semibold mb-2" style={{ color: theme.textSecondary }}>{t('campaignCreate.description')}</Text>
                     <TextInput
                         className="border rounded-lg px-4 py-3 text-base"
                         style={{ backgroundColor: theme.surface, borderColor: theme.borderLight, color: theme.text, height: 100, textAlignVertical: 'top' }}
                         value={description}
                         onChangeText={setDescription}
-                        placeholder="Describe your campaign"
+                        placeholder={t('campaignCreate.describe_campaign')}
                         placeholderTextColor={theme.textTertiary}
                         multiline
                         numberOfLines={4}
@@ -232,14 +234,14 @@ const CreateCampaign = () => {
                 {/* Content Requirements */}
                 <View className="mb-4">
                     <Text className="text-sm font-semibold mb-2" style={{ color: theme.textSecondary }}>
-                        Content Requirements
+                        {t('campaignCreate.content_requirements')}
                     </Text>
                     <TextInput
                         className="border rounded-lg px-4 py-3 text-base"
                         style={{ backgroundColor: theme.surface, borderColor: theme.borderLight, color: theme.text, height: 100, textAlignVertical: 'top' }}
                         value={contentRequirements}
                         onChangeText={setContentRequirements}
-                        placeholder="What should influencers include in their content?"
+                        placeholder={t('campaignCreate.content_requirements_placeholder')}
                         placeholderTextColor={theme.textTertiary}
                         multiline
                         numberOfLines={4}
@@ -249,7 +251,7 @@ const CreateCampaign = () => {
                 {/* Status */}
                 <View className="mb-4">
                     <Text className="text-sm font-semibold mb-2" style={{ color: theme.textSecondary }}>
-                        Campaign Status <Text style={{ color: theme.error }}>*</Text>
+                        {t('campaignCreate.campaign_status')} <Text style={{ color: theme.error }}>*</Text>
                     </Text>
                     <View className="flex-row gap-2">
                         <TouchableOpacity
@@ -264,7 +266,7 @@ const CreateCampaign = () => {
                                 className="text-center text-sm font-medium"
                                 style={{ color: status === 'draft' ? theme.surface : theme.text }}
                             >
-                                Draft
+                                {t('campaignCreate.draft')}
                             </Text>
                         </TouchableOpacity>
                         <TouchableOpacity
@@ -279,7 +281,7 @@ const CreateCampaign = () => {
                                 className="text-center text-sm font-medium"
                                 style={{ color: status === 'active' ? theme.surface : theme.text }}
                             >
-                                Active
+                                {t('campaignCreate.active')}
                             </Text>
                         </TouchableOpacity>
                     </View>
@@ -288,13 +290,13 @@ const CreateCampaign = () => {
                 {/* Budget Calculator Section */}
                 <View className="mb-6 p-4 rounded-xl border-2" style={{ backgroundColor: theme.surfaceSecondary, borderColor: theme.primaryLight }}>
                     <Text className="text-lg font-bold mb-4" style={{ color: theme.text }}>
-                        💰 Budget Calculator
+                        {t('campaignCreate.budget_calculator')}
                     </Text>
 
                     {/* Total Budget Input */}
                     <View className="mb-4">
                         <Text className="text-sm font-semibold mb-2" style={{ color: theme.textSecondary }}>
-                            Total Budget <Text style={{ color: theme.error }}>*</Text>
+                            {t('campaignCreate.total_budget')} <Text style={{ color: theme.error }}>*</Text>
                         </Text>
                         <View className="flex-row items-center border-2 rounded-lg px-4 py-3" style={{ backgroundColor: theme.surface, borderColor: theme.primary }}>
                             <Text className="text-2xl font-bold mr-2" style={{ color: theme.textSecondary }}>$</Text>
@@ -315,7 +317,7 @@ const CreateCampaign = () => {
                             {/* Cost per 1k Views Slider */}
                             <View className="mb-4">
                                 <Text className="text-sm font-semibold mb-2" style={{ color: theme.textSecondary }}>
-                                    Cost per 1,000 Views
+                                    {t('campaignCreate.cost_per_1k_views')}
                                 </Text>
                                 <View className="rounded-lg p-4 border-2" style={{ backgroundColor: theme.surface, borderColor: theme.primaryLight }}>
                                     {/* Price Display with +/- Buttons */}
@@ -354,7 +356,7 @@ const CreateCampaign = () => {
                                     </View>
 
                                     <Text className="text-xs text-center mb-3" style={{ color: theme.textTertiary }}>
-                                        per 1,000 views
+                                        {t('campaignCreate.per_1k_views')}
                                     </Text>
 
                                     <Slider
@@ -394,7 +396,7 @@ const CreateCampaign = () => {
                                         </Text>
                                     </View>
                                     <Text className="text-xs text-center mt-2" style={{ color: theme.textTertiary }}>
-                                        Increments: $0.05 below $3, then $0.50
+                                        {t('campaignCreate.increments_info')}
                                     </Text>
                                 </View>
                             </View>
@@ -402,25 +404,25 @@ const CreateCampaign = () => {
                             {/* Results Display */}
                             <View className="rounded-lg p-4 border-2" style={{ backgroundColor: theme.surface, borderColor: theme.successLight }}>
                                 <Text className="text-sm font-semibold mb-3 text-center" style={{ color: theme.textSecondary }}>
-                                    📊 Campaign Reach Estimate
+                                    {t('campaignCreate.campaign_reach_estimate')}
                                 </Text>
 
                                 <View className="flex-row justify-between items-center mb-3 pb-3 border-b" style={{ borderColor: theme.border }}>
-                                    <Text className="text-sm" style={{ color: theme.textSecondary }}>Total Views</Text>
+                                    <Text className="text-sm" style={{ color: theme.textSecondary }}>{t('campaignCreate.total_views')}</Text>
                                     <Text className="text-xl font-bold" style={{ color: theme.success }}>
                                         {formatNumber(budgetCalculations.totalViews)}
                                     </Text>
                                 </View>
 
                                 <View className="flex-row justify-between items-center mb-3 pb-3 border-b" style={{ borderColor: theme.border }}>
-                                    <Text className="text-sm" style={{ color: theme.textSecondary }}>1K View Blocks</Text>
+                                    <Text className="text-sm" style={{ color: theme.textSecondary }}>{t('campaignCreate.1k_view_blocks')}</Text>
                                     <Text className="text-lg font-bold" style={{ color: theme.text }}>
                                         {budgetCalculations.blocks1k.toLocaleString()}
                                     </Text>
                                 </View>
 
                                 <View className="flex-row justify-between items-center">
-                                    <Text className="text-sm" style={{ color: theme.textSecondary }}>Rate per View</Text>
+                                    <Text className="text-sm" style={{ color: theme.textSecondary }}>{t('campaignCreate.rate_per_view')}</Text>
                                     <Text className="text-sm font-semibold" style={{ color: theme.text }}>
                                         ${budgetCalculations.ratePerView.toFixed(6)}
                                     </Text>
@@ -429,7 +431,7 @@ const CreateCampaign = () => {
                                 {/* Info Box */}
                                 <View className="mt-4 p-3 rounded-lg" style={{ backgroundColor: theme.primaryLight }}>
                                     <Text className="text-xs" style={{ color: theme.primary }}>
-                                        💡 Influencers will be paid ${costPer1kViews.toFixed(2)} for every 1,000 views their content generates
+                                        {t('campaignCreate.influencers_paid_info').replace('{{amount}}', costPer1kViews.toFixed(2))}
                                     </Text>
                                 </View>
                             </View>
@@ -440,7 +442,7 @@ const CreateCampaign = () => {
                 {/* Target Niches */}
                 <View className="mb-4">
                     <Text className="text-sm font-semibold mb-2" style={{ color: theme.textSecondary }}>
-                        Target Niches <Text style={{ color: theme.error }}>*</Text>
+                        {t('campaignCreate.target_niches')} <Text style={{ color: theme.error }}>*</Text>
                     </Text>
                     <View className="flex-row flex-wrap gap-2">
                         {AVAILABLE_NICHES.map((niche) => (
@@ -467,7 +469,7 @@ const CreateCampaign = () => {
                 {/* Target Platforms */}
                 <View className="mb-4">
                     <Text className="text-sm font-semibold mb-2" style={{ color: theme.textSecondary }}>
-                        Target Platforms <Text style={{ color: theme.error }}>*</Text>
+                        {t('campaignCreate.target_platforms')} <Text style={{ color: theme.error }}>*</Text>
                     </Text>
                     <View className="flex-row flex-wrap gap-2">
                         {AVAILABLE_PLATFORMS.map((platform) => (
@@ -494,7 +496,7 @@ const CreateCampaign = () => {
                 {/* Target Locations */}
                 <View className="mb-4">
                     <Text className="text-sm font-semibold mb-2" style={{ color: theme.textSecondary }}>
-                        Target Locations (Optional)
+                        {t('campaignCreate.target_locations')}
                     </Text>
                     <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                         <View className="flex-row gap-2">
@@ -523,28 +525,28 @@ const CreateCampaign = () => {
                 {/* Target Audience Age */}
                 <View className="mb-4">
                     <Text className="text-sm font-semibold mb-2" style={{ color: theme.textSecondary }}>
-                        Target Audience Age (Optional)
+                        {t('campaignCreate.target_audience_age')}
                     </Text>
                     <TextInput
                         className="border rounded-lg px-4 py-3 text-base"
                         style={{ backgroundColor: theme.surface, borderColor: theme.borderLight, color: theme.text }}
                         value={targetAudienceAge}
                         onChangeText={setTargetAudienceAge}
-                        placeholder="e.g., 18-35"
+                        placeholder={t('campaignCreate.age_placeholder')}
                         placeholderTextColor={theme.textTertiary}
                     />
                 </View>
 
                 {/* Dates */}
                 <View className="mb-4">
-                    <Text className="text-sm font-semibold mb-2" style={{ color: theme.textSecondary }}>Start Date</Text>
+                    <Text className="text-sm font-semibold mb-2" style={{ color: theme.textSecondary }}>{t('campaignCreate.start_date')}</Text>
                     <TouchableOpacity
                         onPress={() => setShowStartPicker(true)}
                         className="border rounded-lg px-4 py-3"
                         style={{ backgroundColor: theme.surface, borderColor: theme.borderLight }}
                     >
                         <Text className="text-base" style={{ color: startDate ? theme.text : theme.textTertiary }}>
-                            {startDate ? startDate.toLocaleDateString() : 'Select start date'}
+                            {startDate ? startDate.toLocaleDateString() : t('campaignCreate.select_start_date')}
                         </Text>
                     </TouchableOpacity>
                     {showStartPicker && (
@@ -573,7 +575,7 @@ const CreateCampaign = () => {
                     {saving ? (
                         <ActivityIndicator color={theme.surface} />
                     ) : (
-                        <Text className="text-lg font-bold" style={{ color: theme.surface }}>Create Campaign</Text>
+                        <Text className="text-lg font-bold" style={{ color: theme.surface }}>{t('campaignCreate.create_campaign')}</Text>
                     )}
                 </TouchableOpacity>
             </View>

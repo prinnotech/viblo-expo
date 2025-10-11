@@ -6,12 +6,14 @@ import { useAuth } from '@/contexts/AuthContext';
 import { usePayments } from '@/hooks/usePayments';
 import { Feather } from '@expo/vector-icons';
 import { useTheme } from '@/contexts/ThemeContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const PaymentsPage = () => {
     const router = useRouter();
     const { profile } = useAuth();
     const { payments, loading, refreshing, totalSpent, refresh } = usePayments(profile?.id);
     const { theme } = useTheme();
+    const { t } = useLanguage();
 
     const formatCurrency = (amount: number) => {
         return new Intl.NumberFormat('en-US', {
@@ -63,24 +65,24 @@ const PaymentsPage = () => {
             >
                 {/* Summary Card */}
                 <View className="m-4 rounded-2xl p-6 shadow-sm border" style={{ backgroundColor: theme.surface, borderColor: theme.border }}>
-                    <Text className="text-sm mb-2" style={{ color: theme.textSecondary }}>Total Spent</Text>
+                    <Text className="text-sm mb-2" style={{ color: theme.textSecondary }}>{t('profilePaymentsIndex.total_spent')}</Text>
                     <Text className="text-4xl font-bold" style={{ color: theme.text }}>
                         {formatCurrency(totalSpent)}
                     </Text>
                     <Text className="text-sm mt-2" style={{ color: theme.textSecondary }}>
-                        {payments.length} {payments.length === 1 ? 'payment' : 'payments'}
+                        {payments.length} {payments.length === 1 ? t('profilePaymentsIndex.payment') : t('profilePaymentsIndex.payments')}
                     </Text>
                 </View>
 
                 {/* Payments List */}
                 <View className="mx-4 mb-4">
-                    <Text className="text-lg font-bold mb-3" style={{ color: theme.text }}>Payment History</Text>
+                    <Text className="text-lg font-bold mb-3" style={{ color: theme.text }}>{t('profilePaymentsIndex.payment_history')}</Text>
 
                     {payments.length === 0 ? (
                         <View className="rounded-2xl p-8 items-center" style={{ backgroundColor: theme.surface }}>
                             <Feather name="credit-card" size={48} color={theme.border} />
                             <Text className="mt-4 text-center" style={{ color: theme.textSecondary }}>
-                                No payments yet. Your payment history will appear here.
+                                {t('profilePaymentsIndex.no_payments_yet')}
                             </Text>
                         </View>
                     ) : (
@@ -108,13 +110,13 @@ const PaymentsPage = () => {
                                             </Text>
                                             <View className="px-2 py-1 rounded-full mt-1" style={{ backgroundColor: statusStyle.backgroundColor }}>
                                                 <Text className="text-xs font-semibold capitalize" style={{ color: statusStyle.color }}>
-                                                    {payment.status}
+                                                    {t(`profilePaymentsIndex.${payment.status}`)}
                                                 </Text>
                                             </View>
                                         </View>
                                     </View>
                                     <View className="flex-row items-center">
-                                        <Text className="text-sm" style={{ color: theme.primary }}>View Details</Text>
+                                        <Text className="text-sm" style={{ color: theme.primary }}>{t('profilePaymentsIndex.view_details')}</Text>
                                         <Feather name="chevron-right" size={16} color={theme.primary} />
                                     </View>
                                 </TouchableOpacity>
