@@ -152,6 +152,7 @@ const EditCampaignPage = () => {
     );
 
     const canEditFinancials = !hasActiveSubmissions && campaign?.total_paid === 0;
+    const canEditCampaignDetails = !hasActiveSubmissions;
 
     const handleSave = async () => {
         if (!campaign || !profile) return;
@@ -314,6 +315,7 @@ const EditCampaignPage = () => {
     };
 
     const toggleNiche = (niche: string) => {
+        if (!canEditCampaignDetails) return;
         setSelectedNiches(prev =>
             prev.includes(niche)
                 ? prev.filter(n => n !== niche)
@@ -322,6 +324,7 @@ const EditCampaignPage = () => {
     };
 
     const togglePlatform = (platform: string) => {
+        if (!canEditCampaignDetails) return;
         setSelectedPlatforms(prev =>
             prev.includes(platform)
                 ? prev.filter(p => p !== platform)
@@ -330,6 +333,7 @@ const EditCampaignPage = () => {
     };
 
     const toggleLocation = (location: string) => {
+        if (!canEditCampaignDetails) return;
         setSelectedLocations(prev =>
             prev.includes(location)
                 ? prev.filter(l => l !== location)
@@ -405,35 +409,60 @@ const EditCampaignPage = () => {
 
                 {/* Content Requirements */}
                 <View className="mb-4">
-                    <Text className="text-sm font-semibold mb-2" style={{ color: theme.textSecondary }}>
-                        {t('campaignIdEdit.content_requirements')}
-                    </Text>
+                    <View className="flex-row items-center justify-between mb-2">
+                        <Text className="text-sm font-semibold" style={{ color: theme.textSecondary }}>
+                            {t('campaignIdEdit.content_requirements')}
+                        </Text>
+                        {!canEditCampaignDetails && (
+                            <View className="flex-row items-center">
+                                <AntDesign name="lock" size={12} color={theme.error} />
+                                <Text className="text-xs ml-1" style={{ color: theme.error }}>{t('campaignIdEdit.locked')}</Text>
+                            </View>
+                        )}
+                    </View>
                     <TextInput
                         className="border rounded-lg px-4 py-3 text-base"
-                        style={{ backgroundColor: theme.surface, borderColor: theme.border, color: theme.text, height: 100, textAlignVertical: 'top' }}
+                        style={{
+                            backgroundColor: canEditCampaignDetails ? theme.surface : theme.surfaceSecondary,
+                            borderColor: theme.border,
+                            color: canEditCampaignDetails ? theme.text : theme.textTertiary,
+                            height: 100,
+                            textAlignVertical: 'top'
+                        }}
                         value={contentRequirements}
                         onChangeText={setContentRequirements}
                         placeholder={t('campaignIdEdit.content_requirements_placeholder')}
                         placeholderTextColor={theme.textTertiary}
                         multiline
                         numberOfLines={4}
+                        editable={canEditCampaignDetails}
                     />
                 </View>
 
                 {/* Status */}
                 <View className="mb-4">
-                    <Text className="text-sm font-semibold mb-2" style={{ color: theme.textSecondary }}>
-                        {t('campaignIdEdit.campaign_status')} <Text style={{ color: theme.error }}>*</Text>
-                    </Text>
+                    <View className="flex-row items-center justify-between mb-2">
+                        <Text className="text-sm font-semibold" style={{ color: theme.textSecondary }}>
+                            {t('campaignIdEdit.campaign_status')} <Text style={{ color: theme.error }}>*</Text>
+                        </Text>
+                        {!canEditCampaignDetails && (
+                            <View className="flex-row items-center">
+                                <AntDesign name="lock" size={12} color={theme.error} />
+                                <Text className="text-xs ml-1" style={{ color: theme.error }}>{t('campaignIdEdit.locked')}</Text>
+                            </View>
+                        )}
+                    </View>
                     <View className="flex-row flex-wrap gap-2">
                         {['draft', 'active', 'paused', 'completed'].map((s) => (
                             <TouchableOpacity
                                 key={s}
-                                onPress={() => setStatus(s as CampaignStatus)}
+                                onPress={() => canEditCampaignDetails && setStatus(s as CampaignStatus)}
+                                disabled={!canEditCampaignDetails}
                                 className="px-4 py-2 rounded-full border"
                                 style={{
-                                    backgroundColor: status === s ? theme.primary : theme.surface,
-                                    borderColor: status === s ? theme.primary : theme.border
+                                    backgroundColor: status === s ? theme.primary : (canEditCampaignDetails ? theme.surface : theme.surfaceSecondary),
+                                    borderColor: status === s ? theme.primary : theme.border,
+                                    opacity: canEditCampaignDetails ? 1 : 0.6
                                 }}
                             >
                                 <Text
@@ -502,7 +531,7 @@ const EditCampaignPage = () => {
                         }}
                         value={ratePerView}
                         onChangeText={setRatePerView}
-                        placeholder="0.0000"
+                        placeholder="0.50"
                         placeholderTextColor={theme.textTertiary}
                         keyboardType="decimal-pad"
                         editable={canEditFinancials}
@@ -511,18 +540,28 @@ const EditCampaignPage = () => {
 
                 {/* Target Niches */}
                 <View className="mb-4">
-                    <Text className="text-sm font-semibold mb-2" style={{ color: theme.textSecondary }}>
-                        {t('campaignIdEdit.target_niches')} <Text style={{ color: theme.error }}>*</Text>
-                    </Text>
+                    <View className="flex-row items-center justify-between mb-2">
+                        <Text className="text-sm font-semibold" style={{ color: theme.textSecondary }}>
+                            {t('campaignIdEdit.target_niches')} <Text style={{ color: theme.error }}>*</Text>
+                        </Text>
+                        {!canEditCampaignDetails && (
+                            <View className="flex-row items-center">
+                                <AntDesign name="lock" size={12} color={theme.error} />
+                                <Text className="text-xs ml-1" style={{ color: theme.error }}>{t('campaignIdEdit.locked')}</Text>
+                            </View>
+                        )}
+                    </View>
                     <View className="flex-row flex-wrap gap-2">
                         {AVAILABLE_NICHES.map((niche) => (
                             <TouchableOpacity
                                 key={niche}
                                 onPress={() => toggleNiche(niche)}
+                                disabled={!canEditCampaignDetails}
                                 className="px-4 py-2 rounded-full border"
                                 style={{
-                                    backgroundColor: selectedNiches.includes(niche) ? theme.primary : theme.surface,
-                                    borderColor: selectedNiches.includes(niche) ? theme.primary : theme.border
+                                    backgroundColor: selectedNiches.includes(niche) ? theme.primary : (canEditCampaignDetails ? theme.surface : theme.surfaceSecondary),
+                                    borderColor: selectedNiches.includes(niche) ? theme.primary : theme.border,
+                                    opacity: canEditCampaignDetails ? 1 : 0.6
                                 }}
                             >
                                 <Text
@@ -538,18 +577,28 @@ const EditCampaignPage = () => {
 
                 {/* Target Platforms */}
                 <View className="mb-4">
-                    <Text className="text-sm font-semibold mb-2" style={{ color: theme.textSecondary }}>
-                        {t('campaignIdEdit.target_platforms')} <Text style={{ color: theme.error }}>*</Text>
-                    </Text>
+                    <View className="flex-row items-center justify-between mb-2">
+                        <Text className="text-sm font-semibold" style={{ color: theme.textSecondary }}>
+                            {t('campaignIdEdit.target_platforms')} <Text style={{ color: theme.error }}>*</Text>
+                        </Text>
+                        {!canEditCampaignDetails && (
+                            <View className="flex-row items-center">
+                                <AntDesign name="lock" size={12} color={theme.error} />
+                                <Text className="text-xs ml-1" style={{ color: theme.error }}>{t('campaignIdEdit.locked')}</Text>
+                            </View>
+                        )}
+                    </View>
                     <View className="flex-row flex-wrap gap-2">
                         {AVAILABLE_PLATFORMS.map((platform) => (
                             <TouchableOpacity
                                 key={platform}
                                 onPress={() => togglePlatform(platform)}
+                                disabled={!canEditCampaignDetails}
                                 className="px-4 py-2 rounded-full border"
                                 style={{
-                                    backgroundColor: selectedPlatforms.includes(platform) ? theme.primary : theme.surface,
-                                    borderColor: selectedPlatforms.includes(platform) ? theme.primary : theme.border
+                                    backgroundColor: selectedPlatforms.includes(platform) ? theme.primary : (canEditCampaignDetails ? theme.surface : theme.surfaceSecondary),
+                                    borderColor: selectedPlatforms.includes(platform) ? theme.primary : theme.border,
+                                    opacity: canEditCampaignDetails ? 1 : 0.6
                                 }}
                             >
                                 <Text
@@ -565,18 +614,28 @@ const EditCampaignPage = () => {
 
                 {/* Target Locations */}
                 <View className="mb-4">
-                    <Text className="text-sm font-semibold mb-2" style={{ color: theme.textSecondary }}>
-                        {t('campaignIdEdit.target_locations')}
-                    </Text>
+                    <View className="flex-row items-center justify-between mb-2">
+                        <Text className="text-sm font-semibold" style={{ color: theme.textSecondary }}>
+                            {t('campaignIdEdit.target_locations')}
+                        </Text>
+                        {!canEditCampaignDetails && (
+                            <View className="flex-row items-center">
+                                <AntDesign name="lock" size={12} color={theme.error} />
+                                <Text className="text-xs ml-1" style={{ color: theme.error }}>{t('campaignIdEdit.locked')}</Text>
+                            </View>
+                        )}
+                    </View>
                     <View className="flex-row flex-wrap gap-2">
                         {AVAILABLE_LOCATIONS.map((location) => (
                             <TouchableOpacity
                                 key={location}
                                 onPress={() => toggleLocation(location)}
+                                disabled={!canEditCampaignDetails}
                                 className="px-4 py-2 rounded-full border"
                                 style={{
-                                    backgroundColor: selectedLocations.includes(location) ? theme.success : theme.surface,
-                                    borderColor: selectedLocations.includes(location) ? theme.success : theme.border
+                                    backgroundColor: selectedLocations.includes(location) ? theme.success : (canEditCampaignDetails ? theme.surface : theme.surfaceSecondary),
+                                    borderColor: selectedLocations.includes(location) ? theme.success : theme.border,
+                                    opacity: canEditCampaignDetails ? 1 : 0.6
                                 }}
                             >
                                 <Text
@@ -607,17 +666,30 @@ const EditCampaignPage = () => {
 
                 {/* Dates */}
                 <View className="mb-4">
-                    <Text className="text-sm font-semibold mb-2" style={{ color: theme.textSecondary }}>{t('campaignIdEdit.start_date')}</Text>
+                    <View className="flex-row items-center justify-between mb-2">
+                        <Text className="text-sm font-semibold" style={{ color: theme.textSecondary }}>{t('campaignIdEdit.start_date')}</Text>
+                        {!canEditCampaignDetails && (
+                            <View className="flex-row items-center">
+                                <AntDesign name="lock" size={12} color={theme.error} />
+                                <Text className="text-xs ml-1" style={{ color: theme.error }}>{t('campaignIdEdit.locked')}</Text>
+                            </View>
+                        )}
+                    </View>
                     <TouchableOpacity
-                        onPress={() => setShowStartPicker(true)}
+                        onPress={() => canEditCampaignDetails && setShowStartPicker(true)}
+                        disabled={!canEditCampaignDetails}
                         className="border rounded-lg px-4 py-3"
-                        style={{ backgroundColor: theme.surface, borderColor: theme.border }}
+                        style={{
+                            backgroundColor: canEditCampaignDetails ? theme.surface : theme.surfaceSecondary,
+                            borderColor: theme.border,
+                            opacity: canEditCampaignDetails ? 1 : 0.6
+                        }}
                     >
                         <Text className="text-base" style={{ color: startDate ? theme.text : theme.textTertiary }}>
                             {startDate ? startDate.toLocaleDateString() : t('campaignIdEdit.select_start_date')}
                         </Text>
                     </TouchableOpacity>
-                    {showStartPicker && (
+                    {showStartPicker && canEditCampaignDetails && (
                         <DateTimePicker
                             value={startDate || new Date()}
                             mode="date"
@@ -625,8 +697,7 @@ const EditCampaignPage = () => {
                             onChange={(event, selectedDate) => {
                                 setShowStartPicker(false);
                                 if (selectedDate) setStartDate(selectedDate);
-                            }}
-                        />
+                            }} />
                     )}
                 </View>
 

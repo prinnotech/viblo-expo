@@ -7,7 +7,7 @@ import {
     Image,
     TouchableOpacity,
 } from 'react-native';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
 import { useCampaignAnalytics } from '@/hooks/useCampaignAnalytics';
@@ -25,7 +25,12 @@ const CampaignAnalytics = () => {
     const { campaign, stats, influencers, loading, refreshing, error, refresh } = useCampaignAnalytics(campaignId);
 
     const navigation = useNavigation();
-    navigation.setOptions({ title: campaign?.title });
+    useEffect(() => {
+        if (campaign?.title) {
+            navigation.setOptions({ title: campaign.title });
+        }
+    }, [campaign?.title, navigation]);
+
 
     const formatNumber = (num: number) => {
         if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
@@ -113,7 +118,7 @@ const CampaignAnalytics = () => {
                             </Text>
                         </View>
                         <Text className="text-sm" style={{ color: theme.textTertiary }}>
-                            {formatCurrency(campaign.rate_per_view * 1000)}/1K views
+                            {formatCurrency(campaign.rate_per_view)}/1K views
                         </Text>
                     </View>
                 </View>

@@ -94,22 +94,32 @@ export const useCampaignAnalytics = (campaignId: string | null) => {
 
             if (submissionsError) throw submissionsError;
 
+            // Get the rate per view from campaign
+            const ratePerView = campaignData.rate_per_view;
+
             // Process submissions data
-            const influencersData: InfluencerPerformance[] = (submissions || []).map(sub => ({
-                influencer_id: sub.influencer_id,
-                influencer_name: sub.influencer
-                    ? `${sub.influencer.first_name || ''} ${sub.influencer.last_name || ''}`.trim() || sub.influencer.username
-                    : 'Unknown',
-                influencer_username: sub.influencer?.username || 'unknown',
-                influencer_avatar: sub.influencer?.avatar_url || null,
-                submission_status: sub.status,
-                view_count: parseFloat(sub.view_count as any) || 0,
-                like_count: parseFloat(sub.like_count as any) || 0,
-                comment_count: parseFloat(sub.comment_count as any) || 0,
-                earned_amount: parseFloat(sub.earned_amount as any) || 0,
-                posted_at: sub.posted_at,
-                submission_id: sub.id,
-            }));
+            const influencersData: InfluencerPerformance[] = (submissions || []).map(sub => {
+                const viewCount = parseFloat(sub.view_count as any) || 0;
+
+                // Calculate earned amount: (views / 1000) * rate_per_1k_views
+                const earnedAmount = (viewCount / 1000) * ratePerView;
+
+                return {
+                    influencer_id: sub.influencer_id,
+                    influencer_name: sub.influencer
+                        ? `${sub.influencer.first_name || ''} ${sub.influencer.last_name || ''}`.trim() || sub.influencer.username
+                        : 'Unknown',
+                    influencer_username: sub.influencer?.username || 'unknown',
+                    influencer_avatar: sub.influencer?.avatar_url || null,
+                    submission_status: sub.status,
+                    view_count: viewCount,
+                    like_count: parseFloat(sub.like_count as any) || 0,
+                    comment_count: parseFloat(sub.comment_count as any) || 0,
+                    earned_amount: earnedAmount,
+                    posted_at: sub.posted_at,
+                    submission_id: sub.id,
+                };
+            });
 
             // Calculate aggregated stats
             const stats: CampaignStats = {

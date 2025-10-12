@@ -117,6 +117,13 @@
     "analyticsLayout": {
         "loading_campaign": "Loading Campaign..."
     },
+    "analyticsIndex": {
+        "campaign_analytics": "Campaign Analytics",
+        "track_performance": "Track your campaign performance and creator engagement",
+        "loading_analytics": "Loading analytics...",
+        "no_campaigns_yet": "No campaigns yet",
+        "create_first_campaign": "Create your first campaign to start tracking analytics"
+    },
     "analyticsId": {
         "loading_analytics": "Loading analytics...",
         "campaign_not_found": "Campaign not found",
