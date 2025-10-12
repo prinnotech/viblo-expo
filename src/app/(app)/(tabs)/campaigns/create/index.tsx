@@ -68,7 +68,7 @@ const CreateCampaign = () => {
         const maxCostPer1k = budget > 0 ? budget : 100;
 
         // Current rate per view (for database)
-        const ratePerView = costPer1kViews / 1000;
+        const ratePerView = costPer1kViews;
 
         // Total views they can get
         const totalViews = costPer1kViews > 0 ? (budget / costPer1kViews) * 1000 : 0;
