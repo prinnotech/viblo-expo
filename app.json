@@ -8,7 +8,7 @@
             [
                 "expo-router",
                 {
-                    "origin": "https://n"
+                    "origin": "https://viblo.io"
                 }
             ],
             [
@@ -49,9 +49,10 @@
             "package": "io.viblo.app",
             "permissions": [
                 "android.permission.RECORD_AUDIO",
-                "RECEIVE_BOOT_COMPLETED",
-                "VIBRATE",
-                "android.permission.POST_NOTIFICATIONS"
+                "android.permission.POST_NOTIFICATIONS",
+                "android.permission.RECEIVE_BOOT_COMPLETED",
+                "android.permission.VIBRATE",
+                "android.permission.WAKE_LOCK"
             ],
             "adaptiveIcon": {
                 "foregroundImage": "./assets/adaptive-icon.png",

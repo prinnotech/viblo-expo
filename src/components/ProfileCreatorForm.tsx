@@ -16,7 +16,7 @@ import { Feather } from '@expo/vector-icons';
 import { supabase } from '@/lib/supabase';
 import * as ImagePicker from 'expo-image-picker';
 import { useAuth } from '@/contexts/AuthContext';
-import { registerForPushNotifications } from '@/hooks/usePushNotifications';
+import { registerForPushNotifications, checkNotificationPermissions, openAppSettings } from '@/hooks/usePushNotifications';
 import { Profile } from '@/lib/db_interface';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -175,10 +175,45 @@ const ProfileCreatorForm = ({ profile }: { profile: Profile }) => {
     };
 
     const handleNotificationToggle = async (value: boolean) => {
-        setNotificationsEnabled(value);
-
         if (value) {
+            // Check current permission state first
+            const { granted, canAskAgain } = await checkNotificationPermissions();
+
+            if (!granted && !canAskAgain) {
+                // Permission was permanently denied, show dialog to go to settings
+                Alert.alert(
+                    t('profileSettings.permission_denied'),
+                    t('profileSettings.notification_permission_settings'),
+                    [
+                        { text: t('profileSettings.cancel'), style: 'cancel' },
+                        {
+                            text: t('profileSettings.open_settings'),
+                            onPress: () => openAppSettings()
+                        }
+                    ]
+                );
+                return;
+            }
+
             const token = await registerForPushNotifications();
+
+            if (token === 'PERMISSION_DENIED_GO_TO_SETTINGS') {
+                // User denied and can't be asked again
+                Alert.alert(
+                    t('profileSettings.permission_denied'),
+                    t('profileSettings.notification_permission_settings'),
+                    [
+                        { text: t('profileSettings.cancel'), style: 'cancel' },
+                        {
+                            text: t('profileSettings.open_settings'),
+                            onPress: () => openAppSettings()
+                        }
+                    ]
+                );
+                setNotificationsEnabled(false);
+                return;
+            }
+
             if (token) {
                 const { error } = await supabase
                     .from('profiles')
@@ -186,21 +221,28 @@ const ProfileCreatorForm = ({ profile }: { profile: Profile }) => {
                     .eq('id', session?.user?.id);
 
                 if (error) {
-                    Alert.alert(t('profileCreatorForm.error'), t('profileCreatorForm.failed_enable_notifications'));
+                    Alert.alert(t('profileSettings.error'), t('profileSettings.failed_enable_notifications'));
                     setNotificationsEnabled(false);
                 } else {
-                    Alert.alert(t('profileCreatorForm.success'), t('profileCreatorForm.notifications_enabled'));
+                    Alert.alert(t('profileSettings.success'), t('profileSettings.notifications_enabled'));
+                    setNotificationsEnabled(true);
                 }
             } else {
-                Alert.alert(t('profileCreatorForm.permission_denied'), t('profileCreatorForm.enable_notifications_settings'));
+                Alert.alert(t('profileSettings.permission_denied'), t('profileSettings.enable_notifications_settings'));
                 setNotificationsEnabled(false);
             }
         } else {
-            await supabase
+            const { error } = await supabase
                 .from('profiles')
                 .update({ push_token: null })
                 .eq('id', session?.user?.id);
-            Alert.alert(t('profileCreatorForm.success'), t('profileCreatorForm.notifications_disabled'));
+
+            if (error) {
+                console.error('Error clearing push token:', error);
+            } else {
+                Alert.alert(t('profileSettings.success'), t('profileSettings.notifications_disabled'));
+                setNotificationsEnabled(false);
+            }
         }
     };
 

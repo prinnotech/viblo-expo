@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import * as Notifications from 'expo-notifications';
 import * as Device from 'expo-device';
-import { Platform } from 'react-native';
+import { Platform, Alert, Linking } from 'react-native';
 
 // Configure how notifications behave when app is open
 Notifications.setNotificationHandler({
@@ -31,6 +31,7 @@ export async function registerForPushNotifications(): Promise<string | null> {
             const { status: existingStatus } = await Notifications.getPermissionsAsync();
             let finalStatus = existingStatus;
 
+            // If permission was previously denied, we need to handle it differently
             if (existingStatus !== 'granted') {
                 const { status } = await Notifications.requestPermissionsAsync();
                 finalStatus = status;
@@ -38,6 +39,15 @@ export async function registerForPushNotifications(): Promise<string | null> {
 
             if (finalStatus !== 'granted') {
                 console.log('Push notification permission denied');
+
+                // Check if we can ask again or if user needs to go to settings
+                const { canAskAgain } = await Notifications.getPermissionsAsync();
+
+                if (!canAskAgain) {
+                    // Permission was permanently denied, guide user to settings
+                    return 'PERMISSION_DENIED_GO_TO_SETTINGS';
+                }
+
                 return null;
             }
 
@@ -54,5 +64,24 @@ export async function registerForPushNotifications(): Promise<string | null> {
     } catch (error) {
         console.error('Error registering for push notifications:', error);
         return null;
+    }
+}
+
+export async function checkNotificationPermissions(): Promise<{
+    granted: boolean;
+    canAskAgain: boolean;
+}> {
+    const { status, canAskAgain } = await Notifications.getPermissionsAsync();
+    return {
+        granted: status === 'granted',
+        canAskAgain: canAskAgain
+    };
+}
+
+export function openAppSettings() {
+    if (Platform.OS === 'ios') {
+        Linking.openURL('app-settings:');
+    } else {
+        Linking.openSettings();
     }
 }
