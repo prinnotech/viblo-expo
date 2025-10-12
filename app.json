@@ -4,6 +4,11 @@
         "userInterfaceStyle": "automatic",
         "orientation": "default",
         "icon": "./assets/icon.png",
+        "splash": {
+            "image": "./assets/splash.png",
+            "resizeMode": "contain",
+            "backgroundColor": "#4A90E2"
+        },
         "plugins": [
             [
                 "expo-router",
@@ -56,16 +61,33 @@
             ],
             "adaptiveIcon": {
                 "foregroundImage": "./assets/adaptive-icon.png",
-                "backgroundImage": "./assets/adaptive-background.png"
+                "backgroundColor": "#4A90E2"
+            },
+            "splash": {
+                "image": "./assets/splash.png",
+                "resizeMode": "contain",
+                "backgroundColor": "#4A90E2",
+                "mdpi": "./assets/splash.png",
+                "hdpi": "./assets/splash.png",
+                "xhdpi": "./assets/splash.png",
+                "xxhdpi": "./assets/splash.png",
+                "xxxhdpi": "./assets/splash.png"
             }
         },
         "ios": {
             "bundleIdentifier": "io.viblo.app",
+            "icon": "./assets/icon.png",
             "infoPlist": {
                 "ITSAppUsesNonExemptEncryption": false,
                 "UIBackgroundModes": [
                     "remote-notification"
                 ]
+            },
+            "splash": {
+                "image": "./assets/splash.png",
+                "resizeMode": "contain",
+                "backgroundColor": "#4A90E2",
+                "tabletImage": "./assets/splash.png"
             }
         }
     }
