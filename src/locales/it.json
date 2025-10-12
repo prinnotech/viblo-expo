@@ -65,7 +65,9 @@
         "password_placeholder": "Password",
         "sign_in_button": "Accedi",
         "no_account_prompt": "Non hai un account? ",
-        "sign_up_link": "Registrati"
+        "sign_up_link": "Registrati",
+        "forgot_password": "Password dimenticata?",
+        "forgot_password_link": " Reimposta qui"
     },
     "signup": {
         "welcome": "Benvenuto!",
@@ -113,16 +115,6 @@
         "analytics": "Statistiche",
         "inbox": "Posta",
         "profile": "Profilo"
-    },
-    "analyticsLayout": {
-        "loading_campaign": "Caricamento Campagna..."
-    },
-    "analyticsIndex": {
-        "campaign_analytics": "Analisi delle Campagne",
-        "track_performance": "Monitora le prestazioni delle tue campagne e il coinvolgimento dei creator",
-        "loading_analytics": "Caricamento analisi...",
-        "no_campaigns_yet": "Nessuna campagna ancora",
-        "create_first_campaign": "Crea la tua prima campagna per iniziare a monitorare le analisi"
     },
     "analyticsId": {
         "loading_analytics": "Caricamento statistiche...",
@@ -847,5 +839,43 @@
         "permission_denied": "Permesso Negato",
         "enable_notifications_settings": "Abilita le notifiche nelle impostazioni del tuo dispositivo",
         "notifications_disabled": "Notifiche disabilitate"
+    },
+    "forgot_password": {
+        "title": "Password Dimenticata",
+        "subtitle": "Inserisci la tua email e ti invieremo un link per reimpostare la password.",
+        "email_placeholder": "La tua Email",
+        "send_link_button": "Invia Link di Ripristino",
+        "back_to_signin": "Torna all'Accesso",
+        "error_title": "Errore",
+        "success_title": "Controlla la tua email",
+        "success_message": "Un link per il ripristino della password è stato inviato al tuo indirizzo email."
+    },
+    "reset_password": {
+        "title": "Crea Nuova Password",
+        "password_placeholder": "Nuova Password",
+        "confirm_password_placeholder": "Conferma Nuova Password",
+        "update_button": "Aggiorna Password",
+        "error_title": "Errore",
+        "passwords_not_match": "Le password non corrispondono. Riprova.",
+        "password_too_short": "La password deve contenere almeno 6 caratteri.",
+        "success_title": "Successo!",
+        "success_message": "La tua password è stata aggiornata con successo."
+    },
+    "auth_callback": {
+        "verifying": "Verifica della tua email in corso...",
+        "success_signup": "Email verificata con successo!",
+        "success_recovery": "Ora puoi reimpostare la tua password",
+        "error_no_token": "Nessun token di autenticazione trovato",
+        "error_title": "Errore"
+    },
+    "analyticsLayout": {
+        "loading_campaign": "Caricamento Campagna in corso..."
+    },
+    "analyticsIndex": {
+        "campaign_analytics": "Analisi Campagna",
+        "track_performance": "Traccia le prestazioni della tua campagna e il coinvolgimento dei creator",
+        "loading_analytics": "Caricamento analisi in corso...",
+        "no_campaigns_yet": "Ancora nessuna campagna",
+        "create_first_campaign": "Crea la tua prima campagna per iniziare a tracciare le analisi"
     }
 }

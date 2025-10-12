@@ -8,7 +8,8 @@ import {
     Alert,
     ActivityIndicator,
     KeyboardAvoidingView,
-    Platform
+    Platform,
+    Keyboard,
 } from 'react-native'
 import React, { useState } from 'react'
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -47,6 +48,7 @@ const Onboarding = () => {
     const [currentStep, setCurrentStep] = useState(1);
     const [loading, setLoading] = useState(false);
     const [uploadingAvatar, setUploadingAvatar] = useState(false);
+    const [isPlacesListVisible, setPlacesListVisible] = useState(false);
 
     const [profileData, setProfileData] = useState<ProfileData>({
         id: '',
@@ -242,6 +244,7 @@ const Onboarding = () => {
                 website_url: profileData.website_url.trim() || null,
                 location: profileData.location.trim() || null,
                 updated_at: new Date().toISOString(),
+                avatar_url: profileData.avatar_url
             };
             if (profileData.user_type === 'influencer') {
                 dataToSave.first_name = profileData.first_name.trim();
@@ -256,6 +259,7 @@ const Onboarding = () => {
                 console.error('Error saving profile:', error);
                 Alert.alert(t('onboarding.error'), `${t('onboarding.save_profile_error')}: ${error.message}`);
             } else {
+                console.log("data save: ", profileData)
                 await getProfile();
                 router.replace('/(tabs)');
             }
@@ -319,7 +323,7 @@ const Onboarding = () => {
         <View className="flex-1 p-6">
             {/* Language Switcher at the top */}
             <View className="mb-6">
-                <LanguageSwitcher variant="compact" />
+                <LanguageSwitcher variant="default" />
             </View>
 
             <Text className="text-2xl font-bold mb-2" style={{ color: theme.text }}>
@@ -468,7 +472,14 @@ const Onboarding = () => {
     );
 
     const renderProfileDetailsStep = () => (
-        <View className="flex-1 p-6">
+
+        <ScrollView
+            className="flex-1 p-6"
+            keyboardShouldPersistTaps="handled"
+            nestedScrollEnabled={true}
+            scrollEnabled={!isPlacesListVisible}
+        >
+
             <Text className="text-2xl font-bold mb-2" style={{ color: theme.text }}>
                 {t('onboarding.profile_details_title')}
             </Text>
@@ -509,23 +520,17 @@ const Onboarding = () => {
                         keyboardType="url"
                     />
                 </View>
-                <View style={{ zIndex: 1 }}>
+                <View style={{ zIndex: 100 }}>
                     <Text className="font-medium mb-2" style={{ color: theme.textSecondary }}>
                         {t('onboarding.location')}
                     </Text>
                     <GooglePlacesAutocomplete
                         placeholder={t('onboarding.location_placeholder')}
-                        onPress={(data, details = null) => {
-                            updateProfileData('location', data.description);
-                        }}
-                        onFail={(error) => console.error("Google Places API Error:", error)}
                         query={{
                             key: process.env.EXPO_PUBLIC_GOOGLE_PLACES_API_KEY,
                             language: 'en',
                             types: '(cities)',
                         }}
-                        fetchDetails={false}
-                        debounce={300}
                         styles={{
                             textInput: {
                                 height: 48,
@@ -538,18 +543,75 @@ const Onboarding = () => {
                                 color: theme.text
                             },
                             listView: {
+                                position: 'absolute',
+                                top: 56,
+                                left: 0,
+                                right: 0,
                                 borderWidth: 1,
                                 borderColor: theme.borderLight,
                                 backgroundColor: theme.surface,
                                 borderRadius: 8,
-                                marginTop: 8,
+                                zIndex: 101,
+                            },
+                            row: {
+                                backgroundColor: theme.surface,
+                                padding: 12,
+                                height: 48,
+                                flexDirection: 'row',
+                            },
+                            description: {
+                                color: theme.text,
+                                fontSize: 16,
+                            },
+                            separator: {
+                                height: 1,
+                                backgroundColor: theme.borderLight,
                             },
                         }}
+
+                        // MODIFIED: Connects to the state to manage scrolling
+                        onPress={(data, details = null) => {
+                            updateProfileData('location', data.description);
+                            setPlacesListVisible(false);
+                            Keyboard.dismiss();
+                        }}
+                        textInputProps={{
+                            onFocus: () => setPlacesListVisible(true),
+                            onBlur: () => setPlacesListVisible(false),
+                        }}
+
+                        // Your explicitly defined default props
+                        fetchDetails={false}
+                        debounce={300}
+                        minLength={2}
+                        autoFillOnNotFound={false}
+                        currentLocation={false}
+                        currentLocationLabel="Current location"
+                        disableScroll={false}
+                        enableHighAccuracyLocation={true}
+                        enablePoweredByContainer={true}
+                        filterReverseGeocodingByTypes={[]}
+                        GooglePlacesDetailsQuery={{}}
+                        GooglePlacesSearchQuery={{ rankby: 'distance' }}
+                        GoogleReverseGeocodingQuery={{}}
+                        isRowScrollable={true}
+                        keyboardShouldPersistTaps="always"
+                        listUnderlayColor="#c8c7cc"
+                        listViewDisplayed="auto"
+                        keepResultsAfterBlur={false}
+                        nearbyPlacesAPI="GooglePlacesSearch"
+                        onFail={(error) => console.error('onFail Error:', error)}
+                        onNotFound={() => console.log('onNotFound: No results were found.')}
+                        onTimeout={() => console.log('onTimeout: The request timed out.')}
+                        predefinedPlaces={[]}
+                        predefinedPlacesAlwaysVisible={false}
+                        suppressDefaultStyles={false}
+                        timeout={20000}
                     />
                 </View>
             </View>
-        </View>
-    );
+        </ScrollView>
+    )
 
     const renderPreferencesStep = () => (
         <ScrollView className="flex-1 p-6">

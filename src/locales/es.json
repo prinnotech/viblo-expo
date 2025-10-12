@@ -65,7 +65,9 @@
         "password_placeholder": "Contraseña",
         "sign_in_button": "Iniciar Sesión",
         "no_account_prompt": "¿No tienes cuenta? ",
-        "sign_up_link": "Regístrate"
+        "sign_up_link": "Regístrate",
+        "forgot_password": "¿Olvidaste tu contraseña?",
+        "forgot_password_link": " Restablecer aquí"
     },
     "signup": {
         "welcome": "¡Bienvenido!",
@@ -113,16 +115,6 @@
         "analytics": "Analíticas",
         "inbox": "Bandeja",
         "profile": "Perfil"
-    },
-    "analyticsLayout": {
-        "loading_campaign": "Cargando Campaña..."
-    },
-    "analyticsIndex": {
-        "campaign_analytics": "Análisis de Campañas",
-        "track_performance": "Rastrea el rendimiento de tus campañas y la participación de los creadores",
-        "loading_analytics": "Cargando análisis...",
-        "no_campaigns_yet": "Aún no hay campañas",
-        "create_first_campaign": "Crea tu primera campaña para comenzar a rastrear análisis"
     },
     "analyticsId": {
         "loading_analytics": "Cargando analíticas...",
@@ -847,5 +839,43 @@
         "permission_denied": "Permiso Denegado",
         "enable_notifications_settings": "Por favor habilita las notificaciones en la configuración de tu dispositivo",
         "notifications_disabled": "Notificaciones deshabilitadas"
+    },
+    "forgot_password": {
+        "title": "Contraseña Olvidada",
+        "subtitle": "Introduce tu correo electrónico y te enviaremos un enlace para restablecer tu contraseña.",
+        "email_placeholder": "Tu Correo Electrónico",
+        "send_link_button": "Enviar Enlace de Restablecimiento",
+        "back_to_signin": "Volver a Iniciar Sesión",
+        "error_title": "Error",
+        "success_title": "Revisa tu correo electrónico",
+        "success_message": "Se ha enviado un enlace para restablecer la contraseña a tu dirección de correo electrónico."
+    },
+    "reset_password": {
+        "title": "Crear Nueva Contraseña",
+        "password_placeholder": "Nueva Contraseña",
+        "confirm_password_placeholder": "Confirmar Nueva Contraseña",
+        "update_button": "Actualizar Contraseña",
+        "error_title": "Error",
+        "passwords_not_match": "Las contraseñas no coinciden. Por favor, inténtalo de nuevo.",
+        "password_too_short": "La contraseña debe tener al menos 6 caracteres.",
+        "success_title": "¡Éxito!",
+        "success_message": "Tu contraseña se ha actualizado correctamente."
+    },
+    "auth_callback": {
+        "verifying": "Verificando tu correo electrónico...",
+        "success_signup": "¡Correo electrónico verificado correctamente!",
+        "success_recovery": "Ahora puedes restablecer tu contraseña",
+        "error_no_token": "No se encontró ningún token de autenticación",
+        "error_title": "Error"
+    },
+    "analyticsLayout": {
+        "loading_campaign": "Cargando Campaña..."
+    },
+    "analyticsIndex": {
+        "campaign_analytics": "Análisis de Campaña",
+        "track_performance": "Sigue el rendimiento de tu campaña y la interacción de los creadores",
+        "loading_analytics": "Cargando análisis...",
+        "no_campaigns_yet": "Aún no hay campañas",
+        "create_first_campaign": "Crea tu primera campaña para empezar a seguir los análisis"
     }
 }

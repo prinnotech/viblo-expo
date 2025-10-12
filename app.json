@@ -1,5 +1,8 @@
 {
     "expo": {
+        "name": "Viblo",
+        "slug": "viblo",
+        "version": "1.1.0",
         "scheme": "viblo",
         "userInterfaceStyle": "automatic",
         "orientation": "default",
@@ -38,10 +41,17 @@
                     "enableGooglePay": true
                 }
             ],
-            "expo-localization"
+            [
+                "@stripe/stripe-react-native",
+                {
+                    "merchantIdentifier": "merchant.io.viblo",
+                    "enableGooglePay": true
+                }
+            ],
+            "@react-native-google-signin/google-signin",
+            "expo-localization",
+            "expo-web-browser"
         ],
-        "name": "Viblo",
-        "slug": "viblo",
         "extra": {
             "router": {
                 "origin": "https://viblo.io"
@@ -52,6 +62,7 @@
         },
         "android": {
             "package": "io.viblo.app",
+            "versionCode": 1,
             "permissions": [
                 "android.permission.RECORD_AUDIO",
                 "android.permission.POST_NOTIFICATIONS",
@@ -76,6 +87,7 @@
         },
         "ios": {
             "bundleIdentifier": "io.viblo.app",
+            "buildNumber": "1",
             "icon": "./assets/icon.png",
             "infoPlist": {
                 "ITSAppUsesNonExemptEncryption": false,

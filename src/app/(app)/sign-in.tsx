@@ -6,11 +6,22 @@ import { Link } from 'expo-router'
 import PasswordInput from '@/components/PasswordInput'
 import { useTheme } from '@/contexts/ThemeContext'
 import { useLanguage } from '@/contexts/LanguageContext'
+import { Feather } from '@expo/vector-icons'
 
 const imageFavicon = require('@/../assets/favicon.png')
 
-// Tells Supabase Auth to continuously refresh the session automatically if
-// the app is in the foreground.
+// Try to load GoogleSignin dynamically
+let GoogleSignin: any = null;
+let isGoogleSignInAvailable = false;
+try {
+    const googleModule = require('@react-native-google-signin/google-signin');
+    GoogleSignin = googleModule.GoogleSignin;
+    isGoogleSignInAvailable = true;
+    console.log('✅ Google Sign-In available');
+} catch (e) {
+    console.log('⚠️ Google Sign-In not available');
+}
+
 AppState.addEventListener('change', (state) => {
     if (state === 'active') {
         supabase.auth.startAutoRefresh()
@@ -25,6 +36,7 @@ const SignIn = () => {
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const [loading, setLoading] = useState(false)
+    const [googleLoading, setGoogleLoading] = useState(false)
 
     async function signInWithEmail() {
         setLoading(true)
@@ -36,6 +48,37 @@ const SignIn = () => {
         setLoading(false)
     }
 
+    async function signInWithGoogle() {
+        if (!isGoogleSignInAvailable || !GoogleSignin) {
+            Alert.alert('Not Available', 'Google Sign-In requires the latest build. Please use email/password.');
+            return;
+        }
+
+        try {
+            setGoogleLoading(true)
+            await GoogleSignin.hasPlayServices()
+            const userInfo = await GoogleSignin.signIn()
+
+            if (userInfo.data?.idToken) {
+                const { data, error } = await supabase.auth.signInWithIdToken({
+                    provider: 'google',
+                    token: userInfo.data.idToken,
+                })
+
+                if (error) {
+                    Alert.alert('Error', error.message)
+                }
+            } else {
+                Alert.alert('Error', 'No ID token present!')
+            }
+        } catch (error: any) {
+            console.error('Google Sign-In Error:', error)
+            Alert.alert('Error', error.message || 'Failed to sign in with Google')
+        } finally {
+            setGoogleLoading(false)
+        }
+    }
+
     return (
         <SafeAreaView className="flex-1" style={{ backgroundColor: theme.background }}>
             <KeyboardAvoidingView
@@ -43,8 +86,6 @@ const SignIn = () => {
                 className='flex-1 justify-center p-4'
             >
                 <View className="p-8 mx-auto w-full max-w-sm rounded-xl shadow-lg" style={{ backgroundColor: theme.surface }}>
-
-                    {/* Logo */}
                     <View>
                         <Image
                             source={imageFavicon}
@@ -53,9 +94,42 @@ const SignIn = () => {
                         />
                     </View>
 
-                    <Text className="text-3xl font-bold text-center mb-6" style={{ color: theme.text }}>{t('signin.welcome_back')}</Text>
+                    <Text className="text-3xl font-bold text-center mb-6" style={{ color: theme.text }}>
+                        {t('signin.welcome_back')}
+                    </Text>
 
-                    {/* Email Input */}
+                    {/* Only show Google button if module is available */}
+                    {isGoogleSignInAvailable && (
+                        <>
+                            <TouchableOpacity
+                                onPress={signInWithGoogle}
+                                disabled={googleLoading}
+                                className="w-full py-3 mb-4 rounded-lg flex-row justify-center items-center border"
+                                style={{
+                                    backgroundColor: theme.surface,
+                                    borderColor: theme.border
+                                }}
+                            >
+                                {googleLoading ? (
+                                    <ActivityIndicator color={theme.primary} />
+                                ) : (
+                                    <>
+                                        <Feather name="chrome" size={20} color={theme.text} />
+                                        <Text className="ml-2 text-base font-semibold" style={{ color: theme.text }}>
+                                            Continue with Google
+                                        </Text>
+                                    </>
+                                )}
+                            </TouchableOpacity>
+
+                            <View className="flex-row items-center my-4">
+                                <View className="flex-1 h-px" style={{ backgroundColor: theme.border }} />
+                                <Text className="mx-4" style={{ color: theme.textTertiary }}>or</Text>
+                                <View className="flex-1 h-px" style={{ backgroundColor: theme.border }} />
+                            </View>
+                        </>
+                    )}
+
                     <TextInput
                         className="w-full px-4 py-3 mb-4 rounded-lg text-base"
                         style={{
@@ -72,7 +146,6 @@ const SignIn = () => {
                         keyboardType="email-address"
                     />
 
-                    {/* Password Input */}
                     <PasswordInput
                         onChangeText={(text) => setPassword(text)}
                         value={password}
@@ -80,7 +153,6 @@ const SignIn = () => {
                         placeholderTextColor={theme.textTertiary}
                     />
 
-                    {/* Sign In Button */}
                     <TouchableOpacity
                         onPress={signInWithEmail}
                         disabled={loading}
@@ -90,16 +162,26 @@ const SignIn = () => {
                         {loading ? (
                             <ActivityIndicator color="#FFFFFF" />
                         ) : (
-                            <Text className="text-lg font-semibold" style={{ color: '#FFFFFF' }}>{t('signin.sign_in_button')}</Text>
+                            <Text className="text-lg font-semibold" style={{ color: '#FFFFFF' }}>
+                                {t('signin.sign_in_button')}
+                            </Text>
                         )}
                     </TouchableOpacity>
 
-                    {/* Sign Up Link */}
                     <Text className="text-center mt-6" style={{ color: theme.textTertiary }}>
                         {t('signin.no_account_prompt')}
                         <Link href="/sign-up">
                             <Text className="font-semibold" style={{ color: theme.primary }}>
                                 {t('signin.sign_up_link')}
+                            </Text>
+                        </Link>
+                    </Text>
+
+                    <Text className="text-center mt-6" style={{ color: theme.textTertiary }}>
+                        {t('signin.forgot_password')}
+                        <Link href="/forgot-password">
+                            <Text className="font-semibold" style={{ color: theme.primary }}>
+                                {t('signin.forgot_password_link')}
                             </Text>
                         </Link>
                     </Text>

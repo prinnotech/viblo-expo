@@ -65,16 +65,30 @@
         "password_placeholder": "Password",
         "sign_in_button": "Sign In",
         "no_account_prompt": "Don't have an account? ",
-        "sign_up_link": "Sign Up"
+        "sign_up_link": "Sign Up",
+        "forgot_password": "Forgot password?",
+        "forgot_password_link": " Reset Here"
     },
     "signup": {
-        "welcome": "Welcome!",
-        "email_placeholder": "email@address.com",
+        "welcome": "Welcome to Viblo",
+        "email_placeholder": "Email",
         "password_placeholder": "Password",
+        "confirm_password_placeholder": "Confirm Password",
         "sign_up_button": "Sign Up",
         "already_have_account": "Already have an account? ",
         "sign_in_link": "Sign In",
-        "verification_alert": "Please check your inbox for email verification!"
+        "verification_alert": "Please check your email for a verification link",
+        "passwords_not_match": "Passwords do not match",
+        "password_too_short": "Password must be at least 6 characters",
+        "check_email_title": "Check your email",
+        "check_email_message": "We sent you a confirmation link. Please check your email and click the link to verify your account."
+    },
+    "auth_callback": {
+        "verifying": "Verifying your email...",
+        "success_signup": "Email verified successfully!",
+        "success_recovery": "You can now reset your password",
+        "error_no_token": "No authentication token found",
+        "error_title": "Error"
     },
     "tabsIndex": {
         "discover_campaigns": "Discover Campaigns",
@@ -847,5 +861,26 @@
         "permission_denied": "Permission Denied",
         "enable_notifications_settings": "Please enable notifications in your device settings",
         "notifications_disabled": "Notifications disabled"
+    },
+    "forgot_password": {
+        "title": "Forgot Password",
+        "subtitle": "Enter your email and we'll send you a link to reset your password.",
+        "email_placeholder": "Your Email",
+        "send_link_button": "Send Reset Link",
+        "back_to_signin": "Back to Sign In",
+        "error_title": "Error",
+        "success_title": "Check your email",
+        "success_message": "A password reset link has been sent to your email address."
+    },
+    "reset_password": {
+        "title": "Create New Password",
+        "password_placeholder": "New Password",
+        "confirm_password_placeholder": "Confirm New Password",
+        "update_button": "Update Password",
+        "error_title": "Error",
+        "passwords_not_match": "The passwords do not match. Please try again.",
+        "password_too_short": "Password should be at least 6 characters.",
+        "success_title": "Success!",
+        "success_message": "Your password has been updated successfully."
     }
 }
