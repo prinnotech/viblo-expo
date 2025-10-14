@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "893634938841",
+    "project_id": "viblo-f2ff2",
+    "storage_bucket": "viblo-f2ff2.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:893634938841:android:d8fb16a1ed836bf7a7bbc8",
+        "android_client_info": {
+          "package_name": "io.viblo.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC2eELCbxQyPb5Iy9DmeNxMCVwfvu8VD7A"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -6,6 +6,8 @@ import {
     TouchableOpacity,
     ActivityIndicator,
     Alert,
+    Image,
+    Modal,
 } from 'react-native';
 import React, { useState, useMemo } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -17,6 +19,8 @@ import Slider from '@react-native-community/slider';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useLanguage } from '@/contexts/LanguageContext';
+import * as ImagePicker from 'expo-image-picker';
+import { CampaignType } from '@/lib/enum_types';
 
 type CampaignStatus = 'draft' | 'active';
 
@@ -52,9 +56,25 @@ const CreateCampaign = () => {
     const [selectedLocations, setSelectedLocations] = useState<string[]>([]);
     const [startDate, setStartDate] = useState<Date | null>(null);
     const [showStartPicker, setShowStartPicker] = useState(false);
-    const [showEndPicker, setShowEndPicker] = useState(false);
+    const [campaignType, setCampaignType] = useState<CampaignType>('service');
+    const [productUrl, setProductUrl] = useState('');
+    const [discountCode, setDiscountCode] = useState('');
+    const [productImageUri, setProductImageUri] = useState<string | null>(null);
+    const [returnPolicy, setReturnPolicy] = useState('');
+    const [uploadingImage, setUploadingImage] = useState(false);
     // Budget calculator states
     const [costPer1kViews, setCostPer1kViews] = useState(0.5); // Start at minimum $0.50 per 1k views
+    const [showCampaignTypeModal, setShowCampaignTypeModal] = useState(false);
+
+    const CAMPAIGN_TYPES = [
+        { value: 'service', label: t('campaignCreate.service') },
+        { value: 'physical_product', label: t('campaignCreate.physical_product') },
+        { value: 'app', label: t('campaignCreate.app') },
+        { value: 'local_business', label: t('campaignCreate.local_business') },
+        { value: 'event', label: t('campaignCreate.event') },
+        { value: 'content', label: t('campaignCreate.content') },
+        { value: 'brand_awareness', label: t('campaignCreate.brand_awareness') },
+    ];
 
 
     // Calculate slider range and values
@@ -118,6 +138,17 @@ const CreateCampaign = () => {
             return;
         }
 
+        if (campaignType === 'physical_product') {
+            if (!productUrl.trim()) {
+                Alert.alert(t('campaignCreate.validation_error'), t('campaignCreate.enter_product_url'));
+                return;
+            }
+            if (!productImageUri) {
+                Alert.alert(t('campaignCreate.validation_error'), t('campaignCreate.upload_product_image'));
+                return;
+            }
+        }
+
         setSaving(true);
 
         const wantsActive = status === 'active';
@@ -136,6 +167,11 @@ const CreateCampaign = () => {
             target_audience_locations: selectedLocations.length > 0 ? selectedLocations : null,
             target_audience_age: targetAudienceAge.trim() || null,
             start_date: startDate?.toISOString() || null,
+            campaign_type: campaignType,
+            product_url: productUrl.trim() || null,
+            discount_code: discountCode.trim() || null,
+            product_image_url: productImageUri,
+            return_policy_details: returnPolicy.trim() || null,
         };
 
         const { data, error } = await supabase
@@ -172,7 +208,6 @@ const CreateCampaign = () => {
         }
     };
 
-
     const toggleNiche = (niche: string) => {
         setSelectedNiches(prev =>
             prev.includes(niche) ? prev.filter(n => n !== niche) : [...prev, niche]
@@ -191,6 +226,91 @@ const CreateCampaign = () => {
         );
     };
 
+    const pickProductImage = async () => {
+        try {
+            const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+            if (status !== 'granted') {
+                Alert.alert(t('campaignCreate.permission_needed'), t('campaignCreate.photo_permission_message'));
+                return;
+            }
+
+            const result = await ImagePicker.launchImageLibraryAsync({
+                mediaTypes: ['images'],
+                allowsEditing: true,
+                aspect: [1, 1],
+                quality: 0.8,
+                base64: true,
+            });
+
+            if (!result.canceled && result.assets[0]) {
+                const asset = result.assets[0];
+                if (asset.fileSize && asset.fileSize > 50 * 1024 * 1024) {
+                    Alert.alert(t('campaignCreate.file_too_large'), t('campaignCreate.file_size_message'));
+                    return;
+                }
+                await uploadProductImage(asset);
+            }
+        } catch (error) {
+            console.error('Error picking image:', error);
+            Alert.alert(t('campaignCreate.error'), t('campaignCreate.pick_image_error'));
+        }
+    };
+
+    const uploadProductImage = async (asset: ImagePicker.ImagePickerAsset) => {
+        if (!profile || !asset.uri) {
+            Alert.alert(t('campaignCreate.error'), t('campaignCreate.no_image_selected'));
+            return;
+        }
+
+        setUploadingImage(true);
+
+        try {
+            const response = await fetch(asset.uri);
+            const arrayBuffer = await response.arrayBuffer();
+            const fileExtension = asset.uri.split('.').pop()?.toLowerCase() || 'jpg';
+            const timestamp = Date.now();
+            const filePath = `${profile.id}/product_${timestamp}.${fileExtension}`;
+
+            const { error } = await supabase.storage
+                .from('products')
+                .upload(filePath, arrayBuffer, {
+                    contentType: asset.mimeType || `image/${fileExtension}`,
+                    upsert: true,
+                });
+
+            if (error) throw error;
+
+            const { data: publicUrlData } = supabase.storage
+                .from('products')
+                .getPublicUrl(filePath);
+
+            setProductImageUri(publicUrlData.publicUrl);
+            Alert.alert(t('campaignCreate.success'), t('campaignCreate.image_uploaded'));
+        } catch (err) {
+            const error = err as Error;
+            console.error('Error uploading product image:', error.message);
+            Alert.alert(t('campaignCreate.error'), t('campaignCreate.upload_image_error'));
+        } finally {
+            setUploadingImage(false);
+        }
+    };
+
+    const removeProductImage = () => {
+        Alert.alert(
+            t('campaignCreate.remove_image'),
+            t('campaignCreate.remove_image_confirm'),
+            [
+                { text: t('campaignCreate.cancel'), style: 'cancel' },
+                {
+                    text: t('campaignCreate.remove'),
+                    style: 'destructive',
+                    onPress: () => setProductImageUri(null)
+                }
+            ]
+        );
+    };
+
+
     return (
         <SafeAreaView className="flex-1" style={{ backgroundColor: theme.background }}>
             <ScrollView className="flex-1" contentContainerStyle={{ padding: 16, paddingBottom: 100 }}>
@@ -200,6 +320,78 @@ const CreateCampaign = () => {
                         {t('campaignCreate.setup_campaign')}
                     </Text>
                 </View>
+
+                {/* Campaign Type Selector */}
+                <View className="mb-4">
+                    <Text className="text-sm font-semibold mb-2" style={{ color: theme.textSecondary }}>
+                        {t('campaignCreate.campaign_type')} <Text style={{ color: theme.error }}>*</Text>
+                    </Text>
+                    <TouchableOpacity
+                        onPress={() => setShowCampaignTypeModal(true)}
+                        className="border rounded-lg px-4 py-3 flex-row justify-between items-center"
+                        style={{ backgroundColor: theme.surface, borderColor: theme.borderLight }}
+                    >
+                        <Text className="text-base" style={{ color: theme.text }}>
+                            {CAMPAIGN_TYPES.find(type => type.value === campaignType)?.label || t('campaignCreate.select_campaign_type')}
+                        </Text>
+                        <AntDesign name="down" size={16} color={theme.textSecondary} />
+                    </TouchableOpacity>
+                </View>
+
+                {/* Campaign Type Modal */}
+                <Modal
+                    visible={showCampaignTypeModal}
+                    transparent
+                    animationType="slide"
+                    onRequestClose={() => setShowCampaignTypeModal(false)}
+                >
+                    <TouchableOpacity
+                        activeOpacity={1}
+                        onPress={() => setShowCampaignTypeModal(false)}
+                        className="flex-1 justify-end"
+                        style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
+                    >
+                        <TouchableOpacity activeOpacity={1}>
+                            <View className="rounded-t-3xl p-6" style={{ backgroundColor: theme.surface }}>
+                                <View className="flex-row justify-between items-center mb-4">
+                                    <Text className="text-lg font-bold" style={{ color: theme.text }}>
+                                        {t('campaignCreate.select_campaign_type')}
+                                    </Text>
+                                    <TouchableOpacity onPress={() => setShowCampaignTypeModal(false)}>
+                                        <AntDesign name="close" size={24} color={theme.textSecondary} />
+                                    </TouchableOpacity>
+                                </View>
+
+                                <ScrollView style={{ maxHeight: 400 }}>
+                                    {CAMPAIGN_TYPES.map((type) => (
+                                        <TouchableOpacity
+                                            key={type.value}
+                                            onPress={() => {
+                                                setCampaignType(type.value as CampaignType);
+                                                setShowCampaignTypeModal(false);
+                                            }}
+                                            className="py-4 border-b flex-row justify-between items-center"
+                                            style={{ borderColor: theme.border }}
+                                        >
+                                            <Text
+                                                className="text-base"
+                                                style={{
+                                                    color: campaignType === type.value ? theme.primary : theme.text,
+                                                    fontWeight: campaignType === type.value ? '600' : '400'
+                                                }}
+                                            >
+                                                {type.label}
+                                            </Text>
+                                            {campaignType === type.value && (
+                                                <AntDesign name="check" size={20} color={theme.primary} />
+                                            )}
+                                        </TouchableOpacity>
+                                    ))}
+                                </ScrollView>
+                            </View>
+                        </TouchableOpacity>
+                    </TouchableOpacity>
+                </Modal>
 
                 {/* Title */}
                 <View className="mb-4">
@@ -247,6 +439,104 @@ const CreateCampaign = () => {
                         numberOfLines={4}
                     />
                 </View>
+
+                {/* Physical Product Fields */}
+                {campaignType === 'physical_product' && (
+                    <>
+                        {/* Product URL */}
+                        <View className="mb-4">
+                            <Text className="text-sm font-semibold mb-2" style={{ color: theme.textSecondary }}>
+                                {t('campaignCreate.product_url')} <Text style={{ color: theme.error }}>*</Text>
+                            </Text>
+                            <TextInput
+                                className="border rounded-lg px-4 py-3 text-base"
+                                style={{ backgroundColor: theme.surface, borderColor: theme.borderLight, color: theme.text }}
+                                value={productUrl}
+                                onChangeText={setProductUrl}
+                                placeholder={t('campaignCreate.enter_product_url')}
+                                placeholderTextColor={theme.textTertiary}
+                                keyboardType="url"
+                                autoCapitalize="none"
+                            />
+                        </View>
+
+                        {/* Discount Code */}
+                        <View className="mb-4">
+                            <Text className="text-sm font-semibold mb-2" style={{ color: theme.textSecondary }}>
+                                {t('campaignCreate.discount_code')}
+                            </Text>
+                            <TextInput
+                                className="border rounded-lg px-4 py-3 text-base"
+                                style={{ backgroundColor: theme.surface, borderColor: theme.borderLight, color: theme.text }}
+                                value={discountCode}
+                                onChangeText={setDiscountCode}
+                                placeholder={t('campaignCreate.enter_discount_code')}
+                                placeholderTextColor={theme.textTertiary}
+                                autoCapitalize="characters"
+                            />
+                        </View>
+
+                        {/* Product Image */}
+                        <View className="mb-4">
+                            <Text className="text-sm font-semibold mb-2" style={{ color: theme.textSecondary }}>
+                                {t('campaignCreate.product_image')} <Text style={{ color: theme.error }}>*</Text>
+                            </Text>
+                            {productImageUri ? (
+                                <View>
+                                    <Image
+                                        source={{ uri: productImageUri }}
+                                        className="w-full h-48 rounded-lg"
+                                        resizeMode="cover"
+                                    />
+                                    <TouchableOpacity
+                                        onPress={removeProductImage}
+                                        className="absolute top-2 right-2 bg-red-500 rounded-full p-2"
+                                    >
+                                        <AntDesign name="close" size={20} color="white" />
+                                    </TouchableOpacity>
+                                </View>
+                            ) : (
+                                <TouchableOpacity
+                                    onPress={pickProductImage}
+                                    disabled={uploadingImage}
+                                    className="border-2 border-dashed rounded-lg p-8 items-center justify-center"
+                                    style={{
+                                        backgroundColor: theme.surface,
+                                        borderColor: theme.borderLight,
+                                    }}
+                                >
+                                    {uploadingImage ? (
+                                        <ActivityIndicator color={theme.primary} />
+                                    ) : (
+                                        <>
+                                            <AntDesign name="camera" size={32} color={theme.textTertiary} />
+                                            <Text className="mt-2 text-sm text-center" style={{ color: theme.textTertiary }}>
+                                                {t('campaignCreate.tap_upload_product')}
+                                            </Text>
+                                        </>
+                                    )}
+                                </TouchableOpacity>
+                            )}
+                        </View>
+
+                        {/* Return Policy */}
+                        <View className="mb-4">
+                            <Text className="text-sm font-semibold mb-2" style={{ color: theme.textSecondary }}>
+                                {t('campaignCreate.return_policy')}
+                            </Text>
+                            <TextInput
+                                className="border rounded-lg px-4 py-3 text-base"
+                                style={{ backgroundColor: theme.surface, borderColor: theme.borderLight, color: theme.text, height: 100, textAlignVertical: 'top' }}
+                                value={returnPolicy}
+                                onChangeText={setReturnPolicy}
+                                placeholder={t('campaignCreate.return_policy_placeholder')}
+                                placeholderTextColor={theme.textTertiary}
+                                multiline
+                                numberOfLines={4}
+                            />
+                        </View>
+                    </>
+                )}
 
                 {/* Status */}
                 <View className="mb-4">

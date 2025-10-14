@@ -20,7 +20,6 @@ import { Profile as ProfileData } from '@/lib/db_interface';
 import { useRouter } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
-import { registerForPushNotifications } from '@/hooks/usePushNotifications';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import LanguageSwitcher from '@/components/LanguageSwitcher';

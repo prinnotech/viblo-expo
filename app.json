@@ -8,8 +8,8 @@
         "orientation": "default",
         "icon": "./assets/icon.png",
         "splash": {
-            "image": "./assets/splash.png",
-            "resizeMode": "contain",
+            "image": "./assets/adaptive-icon.png",
+            "resizeMode": "cover",
             "backgroundColor": "#4A90E2"
         },
         "plugins": [
@@ -63,6 +63,7 @@
         "android": {
             "package": "io.viblo.app",
             "versionCode": 1,
+            "googleServicesFile": "./google-services.json",
             "permissions": [
                 "android.permission.RECORD_AUDIO",
                 "android.permission.POST_NOTIFICATIONS",
@@ -75,14 +76,14 @@
                 "backgroundColor": "#4A90E2"
             },
             "splash": {
-                "image": "./assets/splash.png",
-                "resizeMode": "contain",
+                "image": "./assets/adaptive-icon.png",
+                "resizeMode": "cover",
                 "backgroundColor": "#4A90E2",
-                "mdpi": "./assets/splash.png",
-                "hdpi": "./assets/splash.png",
-                "xhdpi": "./assets/splash.png",
-                "xxhdpi": "./assets/splash.png",
-                "xxxhdpi": "./assets/splash.png"
+                "mdpi": "./assets/adaptive-icon.png",
+                "hdpi": "./assets/adaptive-icon.png",
+                "xhdpi": "./assets/adaptive-icon.png",
+                "xxhdpi": "./assets/adaptive-icon.png",
+                "xxxhdpi": "./assets/adaptive-icon.png"
             }
         },
         "ios": {

@@ -79,3 +79,6 @@ export interface Influencer {
     total_views: number;
     total_likes: number;
 }
+
+
+export type CampaignType = 'service' | 'physical_product' | 'app' | 'local_business' | 'event' | 'content' | 'brand_awareness';

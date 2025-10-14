@@ -174,77 +174,6 @@ const ProfileCreatorForm = ({ profile }: { profile: Profile }) => {
         }
     };
 
-    const handleNotificationToggle = async (value: boolean) => {
-        if (value) {
-            // Check current permission state first
-            const { granted, canAskAgain } = await checkNotificationPermissions();
-
-            if (!granted && !canAskAgain) {
-                // Permission was permanently denied, show dialog to go to settings
-                Alert.alert(
-                    t('profileSettings.permission_denied'),
-                    t('profileSettings.notification_permission_settings'),
-                    [
-                        { text: t('profileSettings.cancel'), style: 'cancel' },
-                        {
-                            text: t('profileSettings.open_settings'),
-                            onPress: () => openAppSettings()
-                        }
-                    ]
-                );
-                return;
-            }
-
-            const token = await registerForPushNotifications();
-
-            if (token === 'PERMISSION_DENIED_GO_TO_SETTINGS') {
-                // User denied and can't be asked again
-                Alert.alert(
-                    t('profileSettings.permission_denied'),
-                    t('profileSettings.notification_permission_settings'),
-                    [
-                        { text: t('profileSettings.cancel'), style: 'cancel' },
-                        {
-                            text: t('profileSettings.open_settings'),
-                            onPress: () => openAppSettings()
-                        }
-                    ]
-                );
-                setNotificationsEnabled(false);
-                return;
-            }
-
-            if (token) {
-                const { error } = await supabase
-                    .from('profiles')
-                    .update({ push_token: token })
-                    .eq('id', session?.user?.id);
-
-                if (error) {
-                    Alert.alert(t('profileSettings.error'), t('profileSettings.failed_enable_notifications'));
-                    setNotificationsEnabled(false);
-                } else {
-                    Alert.alert(t('profileSettings.success'), t('profileSettings.notifications_enabled'));
-                    setNotificationsEnabled(true);
-                }
-            } else {
-                Alert.alert(t('profileSettings.permission_denied'), t('profileSettings.enable_notifications_settings'));
-                setNotificationsEnabled(false);
-            }
-        } else {
-            const { error } = await supabase
-                .from('profiles')
-                .update({ push_token: null })
-                .eq('id', session?.user?.id);
-
-            if (error) {
-                console.error('Error clearing push token:', error);
-            } else {
-                Alert.alert(t('profileSettings.success'), t('profileSettings.notifications_disabled'));
-                setNotificationsEnabled(false);
-            }
-        }
-    };
 
     return (
         <SafeAreaView className="flex-1" style={{ backgroundColor: theme.background }}>
@@ -318,24 +247,6 @@ const ProfileCreatorForm = ({ profile }: { profile: Profile }) => {
                                 </TouchableOpacity>
                             );
                         })}
-                    </View>
-                </View>
-
-                {/* Notifications Toggle */}
-                <View className="mb-6 rounded-lg px-4 py-4" style={{ backgroundColor: theme.surface, borderColor: theme.borderLight, borderWidth: 1 }}>
-                    <View className="flex-row justify-between items-center">
-                        <View className="flex-1 mr-4">
-                            <Text className="text-base font-semibold" style={{ color: theme.text }}>{t('profileCreatorForm.push_notifications')}</Text>
-                            <Text className="text-sm mt-1" style={{ color: theme.textSecondary }}>
-                                {t('profileCreatorForm.push_notifications_description')}
-                            </Text>
-                        </View>
-                        <Switch
-                            value={notificationsEnabled}
-                            onValueChange={handleNotificationToggle}
-                            trackColor={{ false: theme.border, true: theme.primaryLight }}
-                            thumbColor={notificationsEnabled ? theme.primary : theme.borderLight}
-                        />
                     </View>
                 </View>
 

@@ -18,6 +18,8 @@ export type Campaign = {
     rate_per_view: number;
     target_niches: string[] | null;
     status: string;
+    campaign_type: 'service' | 'physical_product' | 'app' | 'local_business' | 'event' | 'content' | 'brand_awareness'; // Add this
+
 };
 
 // --- New Progress Bar Component ---
@@ -48,6 +50,22 @@ const BudgetProgressBar = ({ total, paid }: { total: number; paid: number }) => 
             </View>
         </View>
     );
+};
+
+const getCampaignTypeInfo = (type: string) => {
+    const { t } = useLanguage();
+
+    const typeMap: Record<string, { label: string; icon: string; color: string }> = {
+        service: { label: t('campaignCard.service'), icon: '🔧', color: '#3B82F6' },
+        physical_product: { label: t('campaignCard.physical_product'), icon: '📦', color: '#8B5CF6' },
+        app: { label: t('campaignCard.app'), icon: '📱', color: '#10B981' },
+        local_business: { label: t('campaignCard.local_business'), icon: '🏪', color: '#F59E0B' },
+        event: { label: t('campaignCard.event'), icon: '🎉', color: '#EF4444' },
+        content: { label: t('campaignCard.content'), icon: '📚', color: '#6366F1' },
+        brand_awareness: { label: t('campaignCard.brand_awareness'), icon: '📢', color: '#EC4899' },
+    };
+
+    return typeMap[type] || typeMap.service;
 };
 
 
@@ -112,6 +130,27 @@ const CampaignCard = ({ campaign }: { campaign: Campaign }) => {
 
                 {/* Card Body */}
                 <View className="p-4">
+
+                    {/* Campaign Type Badge */}
+                    {campaign.campaign_type && (
+                        <View className="mb-3 self-start">
+                            <View
+                                className="px-3 py-1.5 rounded-full flex-row items-center gap-1.5"
+                                style={{ backgroundColor: `${getCampaignTypeInfo(campaign.campaign_type).color}15` }}
+                            >
+                                <Text className="text-xs">
+                                    {getCampaignTypeInfo(campaign.campaign_type).icon}
+                                </Text>
+                                <Text
+                                    className="text-xs font-semibold"
+                                    style={{ color: getCampaignTypeInfo(campaign.campaign_type).color }}
+                                >
+                                    {getCampaignTypeInfo(campaign.campaign_type).label}
+                                </Text>
+                            </View>
+                        </View>
+                    )}
+
                     <Text className="text-base mb-4" style={{ color: theme.textSecondary }} numberOfLines={2}>
                         {campaign.description || t('campaignCard.no_description')}
                     </Text>
