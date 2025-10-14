@@ -5,6 +5,7 @@ import {
     ActivityIndicator,
     Alert,
     ScrollView,
+    TextInput,
 } from 'react-native';
 import React, { useState, useEffect } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -30,35 +31,24 @@ const PaymentPage = () => {
     const [loading, setLoading] = useState(true);
     const [processing, setProcessing] = useState(false);
     const [campaign, setCampaign] = useState<any>(null);
-    const [ready, setReady] = useState(false);
-    const [paymentDetails, setPaymentDetails] = useState<any>(null);
+    const [couponCode, setCouponCode] = useState('');
+    const [validatingCoupon, setValidatingCoupon] = useState(false);
+    const [validatedCoupon, setValidatedCoupon] = useState<any>(null);
 
     const campaignId = Array.isArray(id) ? id[0] : id;
 
-    console.log("campaign id: ", campaignId)
-
     useEffect(() => {
-        fetchCampaignAndInitPayment();
+        fetchCampaign();
     }, [campaignId]);
 
-    const fetchCampaignAndInitPayment = async () => {
-
-        console.log('=== PAYMENT DEBUG ===');
-        console.log('Raw id param:', id);
-        console.log('Extracted campaignId:', campaignId);
-        console.log('Profile ID:', profile?.id);
-
+    const fetchCampaign = async () => {
         setLoading(true);
-
         try {
-            // Fetch campaign details
             const { data: campaignData, error } = await supabase
                 .from('campaigns')
                 .select('*')
                 .eq('id', campaignId)
                 .single();
-
-            console.log('Campaign query result:', { campaignData, error }); // ADD THIS LINE
 
             if (error || !campaignData) {
                 Alert.alert(t('campaignIdPayment.error'), t('campaignIdPayment.campaign_not_found'));
@@ -67,15 +57,62 @@ const PaymentPage = () => {
             }
 
             setCampaign(campaignData);
+        } catch (err: any) {
+            console.error('Campaign fetch error:', err);
+            Alert.alert(t('campaignIdPayment.error'), 'Failed to load campaign');
+        }
+        setLoading(false);
+    };
 
-            console.log('About to call backend:', {
-                url: `${BACKEND_URL}/api/payments/create-intent`,
-                campaignId,
-                userId: profile?.id,
+    const handleValidateCoupon = async () => {
+        if (!couponCode.trim()) {
+            Alert.alert(t('campaignIdPayment.error'), 'Please enter a coupon code');
+            return;
+        }
+
+        setValidatingCoupon(true);
+
+        try {
+            const validateResponse = await fetch(`${BACKEND_URL}/api/payments/validate-coupon`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-api-key': API_KEY!,
+                },
+                body: JSON.stringify({
+                    couponCode: couponCode.trim().toUpperCase(),
+                }),
             });
 
+            const contentType = validateResponse.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                const text = await validateResponse.text();
+                console.error('Non-JSON response:', text);
+                throw new Error('Server error');
+            }
 
-            // Create payment intent via your backend
+            const validateData = await validateResponse.json();
+
+            if (!validateResponse.ok) {
+                throw new Error(validateData.error || 'Invalid coupon code');
+            }
+
+            setValidatedCoupon(validateData);
+            Alert.alert('Success!', `Coupon applied: ${validateData.percentOff ? validateData.percentOff + '% off' : '$' + (validateData.amountOff / 100) + ' off'}`);
+        } catch (err: any) {
+            console.error('Coupon validation error:', err);
+            Alert.alert(t('campaignIdPayment.error'), err.message || 'Invalid coupon code');
+            setValidatedCoupon(null);
+        } finally {
+            setValidatingCoupon(false);
+        }
+    };
+
+    const handlePayment = async () => {
+        setProcessing(true);
+
+        try {
+            // Create payment intent with optional coupon
             const response = await fetch(`${BACKEND_URL}/api/payments/create-intent`, {
                 method: 'POST',
                 headers: {
@@ -85,18 +122,15 @@ const PaymentPage = () => {
                 body: JSON.stringify({
                     campaignId: campaignId,
                     userId: profile?.id,
+                    couponCode: validatedCoupon?.couponId || undefined,
                 }),
             });
 
-            console.log('Backend response status:', response.status);
             const data = await response.json();
-            console.log('Backend response data:', data);
 
             if (!response.ok) {
                 throw new Error(data.error || t('campaignIdPayment.failed_initialize'));
             }
-
-            setPaymentDetails(data);
 
             // Initialize Stripe Payment Sheet
             const { error: initError } = await initPaymentSheet({
@@ -118,28 +152,15 @@ const PaymentPage = () => {
                 },
             });
 
-            if (!initError) {
-                setReady(true);
-            } else {
+            if (initError) {
                 throw new Error(initError.message);
             }
-        } catch (err: any) {
-            console.error('Payment initialization error:', err);
-            Alert.alert(t('campaignIdPayment.error'), err.message || t('campaignIdPayment.failed_initialize'));
-        }
 
-        setLoading(false);
-    };
-
-    const handlePayment = async () => {
-        setProcessing(true);
-
-        try {
             // Present the payment sheet
-            const { error } = await presentPaymentSheet();
+            const { error: presentError } = await presentPaymentSheet();
 
-            if (error) {
-                Alert.alert(t('campaignIdPayment.payment_cancelled'), error.message);
+            if (presentError) {
+                Alert.alert(t('campaignIdPayment.payment_cancelled'), presentError.message);
                 setProcessing(false);
                 return;
             }
@@ -153,7 +174,7 @@ const PaymentPage = () => {
                 },
                 body: JSON.stringify({
                     campaignId: campaignId,
-                    paymentIntentId: paymentDetails.paymentIntent.split('_secret_')[0],
+                    paymentIntentId: data.paymentIntent.split('_secret_')[0],
                 }),
             });
 
@@ -191,11 +212,21 @@ const PaymentPage = () => {
         );
     }
 
-    if (!campaign || !paymentDetails) return null;
+    if (!campaign) return null;
 
-    const subtotal = parseFloat(paymentDetails.subtotal);
-    const processingFee = parseFloat(paymentDetails.processingFee);
-    const total = parseFloat(paymentDetails.total);
+    // Calculate amounts
+    const subtotal = parseFloat(campaign.total_budget);
+    let discount = 0;
+    if (validatedCoupon) {
+        if (validatedCoupon.percentOff) {
+            discount = subtotal * (validatedCoupon.percentOff / 100);
+        } else if (validatedCoupon.amountOff) {
+            discount = validatedCoupon.amountOff / 100;
+        }
+    }
+    const subtotalAfterDiscount = subtotal - discount;
+    const processingFee = subtotalAfterDiscount * 0.03;
+    const total = subtotalAfterDiscount + processingFee;
 
     return (
         <SafeAreaView className="flex-1" style={{ backgroundColor: theme.background }}>
@@ -224,7 +255,6 @@ const PaymentPage = () => {
                         </View>
                     </View>
 
-                    {/* Rate Details */}
                     <View className="p-3 rounded-lg" style={{ backgroundColor: theme.primaryLight }}>
                         <Text className="text-xs" style={{ color: theme.primaryDark }}>
                             ${(campaign.rate_per_view * 1000).toFixed(2)} {t('campaignIdPayment.per_1k_views')}
@@ -232,17 +262,65 @@ const PaymentPage = () => {
                     </View>
                 </View>
 
-                {/* Payment Method Info */}
+                {/* Coupon Code Section */}
                 <View className="rounded-2xl p-4 mb-6 border" style={{ backgroundColor: theme.surface, borderColor: theme.border }}>
-                    <View className="flex-row items-center">
-                        <AntDesign name="credit-card" size={24} color={theme.textSecondary} />
+                    <View className="flex-row items-center mb-3">
+                        <AntDesign name="tags" size={24} color={theme.textSecondary} />
                         <Text className="text-base font-semibold ml-3" style={{ color: theme.text }}>
-                            {t('campaignIdPayment.payment_method')}
+                            {t('campaignIdPayment.discountTitle')}
                         </Text>
                     </View>
-                    <Text className="text-sm mt-2" style={{ color: theme.textTertiary }}>
-                        {t('campaignIdPayment.payment_secure_message')}
+                    <Text className="text-sm mb-3" style={{ color: theme.textTertiary }}>
+                        {t('campaignIdPayment.discountMessage')}
                     </Text>
+
+                    <View className="flex-row items-center">
+                        <TextInput
+                            value={couponCode}
+                            onChangeText={(text) => setCouponCode(text.toUpperCase())}
+                            placeholder="Enter coupon code"
+                            placeholderTextColor={theme.textTertiary}
+                            editable={!validatedCoupon && !validatingCoupon}
+                            autoCapitalize="characters"
+                            className="flex-1 p-3 rounded-lg text-base font-semibold"
+                            style={{
+                                backgroundColor: theme.surfaceSecondary,
+                                color: theme.text,
+                                borderWidth: 1,
+                                borderColor: validatedCoupon ? theme.primary : theme.border,
+                            }}
+                        />
+                        <TouchableOpacity
+                            onPress={handleValidateCoupon}
+                            disabled={validatingCoupon || !!validatedCoupon || !couponCode.trim()}
+                            className="ml-2 px-4 py-3 rounded-lg"
+                            style={{
+                                backgroundColor: validatedCoupon
+                                    ? theme.primary
+                                    : (!couponCode.trim() || validatingCoupon)
+                                        ? theme.textTertiary
+                                        : theme.primary
+                            }}
+                        >
+                            {validatingCoupon ? (
+                                <ActivityIndicator size="small" color={theme.surface} />
+                            ) : (
+                                <Text className="text-sm font-semibold" style={{ color: theme.surface }}>
+                                    {validatedCoupon ? '✓' : 'Apply'}
+                                </Text>
+                            )}
+                        </TouchableOpacity>
+                    </View>
+
+                    {validatedCoupon && discount > 0 && (
+                        <View className="mt-3 p-2 rounded-lg" style={{ backgroundColor: theme.primaryLight }}>
+                            <Text className="text-sm font-semibold" style={{ color: theme.primary }}>
+                                ✓ {validatedCoupon.percentOff
+                                    ? `${validatedCoupon.percentOff}% off`
+                                    : `$${discount.toFixed(2)} off`} applied
+                            </Text>
+                        </View>
+                    )}
                 </View>
 
                 {/* Cost Breakdown */}
@@ -257,6 +335,15 @@ const PaymentPage = () => {
                             ${subtotal.toFixed(2)}
                         </Text>
                     </View>
+
+                    {discount > 0 && (
+                        <View className="flex-row justify-between items-center mb-3">
+                            <Text className="text-base" style={{ color: theme.primary }}>Discount</Text>
+                            <Text className="text-base font-semibold" style={{ color: theme.primary }}>
+                                -${discount.toFixed(2)}
+                            </Text>
+                        </View>
+                    )}
 
                     <View className="flex-row justify-between items-center mb-3 pb-3 border-b" style={{ borderColor: theme.border }}>
                         <Text className="text-base" style={{ color: theme.textSecondary }}>{t('campaignIdPayment.processing_fee')}</Text>
@@ -290,9 +377,9 @@ const PaymentPage = () => {
             <View className="p-4 border-t" style={{ backgroundColor: theme.surface, borderColor: theme.border }}>
                 <TouchableOpacity
                     onPress={handlePayment}
-                    disabled={!ready || processing}
+                    disabled={processing}
                     className="py-4 rounded-xl items-center justify-center"
-                    style={{ backgroundColor: ready && !processing ? theme.primary : theme.textTertiary }}
+                    style={{ backgroundColor: processing ? theme.textTertiary : theme.primary }}
                 >
                     {processing ? (
                         <View className="flex-row items-center">

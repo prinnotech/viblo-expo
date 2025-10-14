@@ -382,7 +382,9 @@
         "success": "¡Éxito!",
         "campaign_active_message": "Tu campaña está ahora activa y lista para recibir solicitudes de influencers.",
         "view_campaign": "Ver Campaña",
-        "payment_failed": "Pago fallido"
+        "payment_failed": "Pago fallido",
+        "discountTitle": "Descuentos y Cupones",
+        "discountMessage": "¿Tienes un código de descuento o un cupón?"
     },
     "inboxIndex": {
         "seconds_ago": "hace {{seconds}}s",

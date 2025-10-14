@@ -404,7 +404,9 @@
         "success": "Success!",
         "campaign_active_message": "Your campaign is now active and ready to receive applications from influencers.",
         "view_campaign": "View Campaign",
-        "payment_failed": "Payment failed"
+        "payment_failed": "Payment failed",
+        "discountTitle": " Discount & Coupons",
+        "discountMessage": "Do you have a discount code or coupon?"
     },
     "inboxIndex": {
         "seconds_ago": "{{seconds}}s ago",

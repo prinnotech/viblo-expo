@@ -1,5 +1,5 @@
 import { Alert, Image, View, TextInput, Text, TouchableOpacity, ActivityIndicator, KeyboardAvoidingView, Platform } from 'react-native'
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { supabase } from '@/lib/supabase'
 import { useRouter } from 'expo-router'
@@ -13,7 +13,7 @@ const imageFavicon = require('@/../assets/favicon.png')
 const ResetPassword = () => {
     const { theme } = useTheme();
     const { t } = useLanguage();
-    const { user, getProfile } = useAuth();
+    const { user, profile, getProfile } = useAuth();
     const router = useRouter();
 
     const [password, setPassword] = useState('')
@@ -21,6 +21,9 @@ const ResetPassword = () => {
     const [loading, setLoading] = useState(false)
 
     const email = user?.email || '';
+
+    // Check if user needs onboarding
+    const hasProfile = profile && profile?.username && profile?.user_type;
 
     async function updatePassword() {
         if (password !== confirmPassword) {
@@ -53,10 +56,13 @@ const ResetPassword = () => {
                     {
                         text: 'OK',
                         onPress: () => {
-                            // Use replace with a small delay to ensure auth state is updated
-                            setTimeout(() => {
+                            setLoading(false);
+                            // Navigate based on profile completion
+                            if (hasProfile) {
                                 router.replace('/(tabs)');
-                            }, 100);
+                            } else {
+                                router.replace('/onboarding');
+                            }
                         }
                     }
                 ]
@@ -64,7 +70,6 @@ const ResetPassword = () => {
         } catch (error) {
             console.error('Error updating password:', error);
             Alert.alert(t('reset_password.error_title'), 'An unexpected error occurred');
-        } finally {
             setLoading(false);
         }
     }

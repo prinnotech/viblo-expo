@@ -182,11 +182,6 @@ const CreateCampaign = () => {
 
         setSaving(false);
 
-        console.log('=== CREATE DEBUG ===');
-        console.log('Created campaign:', data);
-        console.log('Error:', error);
-        console.log('Campaign ID:', data?.id);
-
 
         if (error) {
             console.error('Error creating campaign:', error);

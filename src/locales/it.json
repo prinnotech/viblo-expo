@@ -382,7 +382,9 @@
         "success": "Successo!",
         "campaign_active_message": "La tua campagna è ora attiva e pronta a ricevere candidature dagli influencer.",
         "view_campaign": "Visualizza Campagna",
-        "payment_failed": "Pagamento non riuscito"
+        "payment_failed": "Pagamento non riuscito",
+        "discountTitle": "Sconti e Coupon",
+        "discountMessage": "Hai un codice sconto o un coupon?"
     },
     "inboxIndex": {
         "seconds_ago": "{{seconds}}s fa",
