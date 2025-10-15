@@ -6,7 +6,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { ResizeMode, Video } from 'expo-av';
 import { Feather } from '@expo/vector-icons';
 import { ContentSubmission } from '@/lib/db_interface';
-import { SubmissionStatus } from '@/lib/enum_types';
+import { SocialLink, SubmissionStatus } from '@/lib/enum_types';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import { Campaign } from '@/lib/db_interface';
@@ -39,6 +39,7 @@ const ApplyPage = () => {
 
     const [campaign, setCampaign] = useState<Campaign | null>(null);
     const [submission, setSubmission] = useState<ContentSubmission | null>(null);
+    const [socialConnections, setSocialConnections] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
@@ -91,6 +92,17 @@ const ApplyPage = () => {
             if (submissionData) {
                 setSubmission(submissionData);
                 setPublicPostUrl(submissionData.public_post_url || '');
+            }
+
+            //check social connections
+            const { data: socialPlatforms, error: socialPlatformsError } = await supabase
+                .from('social_links')
+                .select('id, platform')
+                .eq('user_id', profile?.id)
+
+            if (socialPlatforms) {
+                setSocialConnections(socialPlatforms);
+                //console.log("platforms", socialPlatforms)
             }
 
             setLoading(false);
@@ -323,6 +335,25 @@ const ApplyPage = () => {
         return <View className="flex-1 justify-center items-center p-4"><Text className="text-lg" style={{ color: theme.text }}>{t('campaignIdApply.brands_cannot_apply')}</Text></View>
     }
 
+    const hasPlatformConnection = () => {
+        if (!socialConnections || !campaign?.target_platforms) return false;
+
+        const userPlatforms = socialConnections.map((link: any) => link.platform);
+        return campaign.target_platforms.some((platform: string) =>
+            userPlatforms.includes(platform)
+        );
+    };
+
+    const getMissingPlatforms = () => {
+        if (!socialConnections || !campaign?.target_platforms) return campaign?.target_platforms || [];
+
+        const userPlatforms = socialConnections.map((link: any) => link.platform);
+        return campaign.target_platforms.filter((platform: string) =>
+            !userPlatforms.includes(platform)
+        );
+    };
+
+
     // Render based on submission status
     const renderContent = () => {
         if (!submission) {
@@ -332,8 +363,41 @@ const ApplyPage = () => {
                     <Text className="text-2xl font-bold mb-1" style={{ color: theme.text }}>{t('campaignIdApply.submitting_for')}</Text>
                     <Text className="text-3xl font-extrabold mb-6" style={{ color: theme.primary }}>{campaign.title}</Text>
 
+                    {/* Show warning if no platform connection */}
+                    {!hasPlatformConnection() && (
+                        <View className="border rounded-lg p-4 mb-4" style={{ backgroundColor: theme.warningLight, borderColor: theme.warning }}>
+                            <View className="flex-row items-center mb-2">
+                                <Feather name="alert-triangle" size={20} color={theme.warning} />
+                                <Text className="text-sm font-semibold ml-2" style={{ color: theme.text }}>
+                                    {t('campaignIdApply.platformConnectionError')}
+                                </Text>
+                            </View>
+                            <Text className="text-sm mb-3" style={{ color: theme.textSecondary }}>
+                                {t('campaignIdApply.connectionMessage')}
+                            </Text>
+                            <View className="flex-row flex-wrap gap-2">
+                                {getMissingPlatforms().map((platform) => (
+                                    <View key={platform} className="px-3 py-1 rounded-full" style={{ backgroundColor: theme.warning + '20' }}>
+                                        <Text className="text-sm font-medium capitalize" style={{ color: theme.warning }}>
+                                            {platform}
+                                        </Text>
+                                    </View>
+                                ))}
+                            </View>
+                            <Pressable
+                                onPress={() => router.push('/profile/connections')}
+                                className="mt-3 py-2 rounded-lg"
+                                style={{ backgroundColor: theme.warning }}
+                            >
+                                <Text className="text-center font-semibold" style={{ color: theme.surface }}>
+                                    {t('campaignIdApply.connectionCta')}
+                                </Text>
+                            </Pressable>
+                        </View>
+                    )}
+
                     <View className="items-center justify-center w-full h-64 border-2 border-dashed rounded-lg" style={{ backgroundColor: theme.surfaceSecondary, borderColor: theme.border }}>
-                        {selectedVideo ? (
+                        {selectedVideo && hasPlatformConnection() ? (
                             <View className="w-full h-full rounded-lg overflow-hidden">
                                 <Video
                                     source={{ uri: selectedVideo.uri }}
@@ -703,7 +767,7 @@ const ApplyPage = () => {
     };
 
     return (
-        <SafeAreaView className="flex-1" style={{ backgroundColor: theme.background }} edges={['bottom']}>
+        <View className="flex-1" style={{ backgroundColor: theme.background }}>
             <ScrollView className="flex-1" contentContainerStyle={{ padding: 16 }}>
                 {renderContent()}
             </ScrollView>
@@ -713,7 +777,7 @@ const ApplyPage = () => {
                     {renderButton()}
                 </View>
             )}
-        </SafeAreaView>
+        </View>
     );
 };
 

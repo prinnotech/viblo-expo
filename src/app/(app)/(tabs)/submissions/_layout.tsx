@@ -23,9 +23,10 @@ function Layout() {
             <Stack.Screen
                 name="[id]/index"
                 options={{
-                    presentation: 'modal',
+                    presentation: 'card',
                     headerShown: true,
                     title: t('submissionsLayout.loading_campaign'),
+                    headerBackButtonDisplayMode: 'minimal'
                 }}
             />
         </Stack>

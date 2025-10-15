@@ -77,7 +77,7 @@ const CreatorProfile = () => {
     return (
         <ScrollView className="flex-1" style={{ backgroundColor: theme.background }}>
             {/* Header with Back Button */}
-            <View className="px-5 pt-12 pb-4 border-b" style={{ backgroundColor: theme.surface, borderColor: theme.border }}>
+            <View className="px-5 pt-16 pb-4 border-b" style={{ backgroundColor: theme.surface, borderColor: theme.border }}>
                 <TouchableOpacity onPress={() => router.back()} className="mb-4">
                     <Ionicons name="arrow-back" size={24} color={theme.text} />
                 </TouchableOpacity>
@@ -110,11 +110,11 @@ const CreatorProfile = () => {
                     )}
 
                     {/* Profile Info */}
-                    <View className="flex-row flex-wrap justify-center items-center mt-4 gap-4">
+                    <View className="flex-row flex-wrap justify-center items-center mt-4" style={{ gap: 16 }}>
                         {profile.location && (
                             <View className="flex-row items-center">
-                                <Ionicons name="location" size={16} color={theme.textSecondary} />
-                                <Text className="text-sm ml-1" style={{ color: theme.textSecondary }}>{profile.location}</Text>
+                                <Ionicons name="location" size={16} color={theme.textSecondary} style={{ marginRight: 4 }} />
+                                <Text className="text-sm" style={{ color: theme.textSecondary }}>{profile.location}</Text>
                             </View>
                         )}
                         {profile.website_url && (
@@ -122,8 +122,8 @@ const CreatorProfile = () => {
                                 onPress={() => openURL(profile.website_url!)}
                                 className="flex-row items-center"
                             >
-                                <Ionicons name="globe" size={16} color={theme.primary} />
-                                <Text className="text-sm ml-1 underline" style={{ color: theme.primary }}>
+                                <Ionicons name="globe" size={16} color={theme.primary} style={{ marginRight: 4 }} />
+                                <Text className="text-sm underline" style={{ color: theme.primary }}>
                                     {profile.website_url}
                                 </Text>
                             </TouchableOpacity>
@@ -133,6 +133,7 @@ const CreatorProfile = () => {
             </View>
 
             <View className="p-5">
+                
                 {/* Stats Overview */}
                 <View className="rounded-2xl p-5 mb-4 shadow-sm" style={{ backgroundColor: theme.surface }}>
                     <Text className="text-lg font-bold mb-4" style={{ color: theme.text }}>{t('creatorsId.stats_overview')}</Text>
@@ -141,9 +142,10 @@ const CreatorProfile = () => {
                             <View className="flex-row items-center mb-2">
                                 <LinearGradient
                                     colors={['#f59e0b', '#f97316']}
-                                    className="w-10 h-10 rounded-lg justify-center items-center mr-3"
+                                    className="w-10 h-10 rounded-lg justify-center items-center"
+                                    style={{ marginRight: 12 }}
                                 >
-                                    <Ionicons name="people" size={20} color="#fff" />
+                                    <Ionicons name="people" size={20} color="#fff" style={{padding: 6}}/>
                                 </LinearGradient>
                                 <View>
                                     <Text className="text-2xl font-bold" style={{ color: theme.text }}>
@@ -158,9 +160,10 @@ const CreatorProfile = () => {
                             <View className="flex-row items-center mb-2">
                                 <LinearGradient
                                     colors={['#3b82f6', '#2563eb']}
-                                    className="w-10 h-10 rounded-lg justify-center items-center mr-3"
+                                    className="w-10 h-10 rounded-lg justify-center items-center"
+                                    style={{ marginRight: 12 }}
                                 >
-                                    <Ionicons name="eye" size={20} color="#fff" />
+                                    <Ionicons name="eye" size={20} color="#fff" style={{padding: 6}}/>
                                 </LinearGradient>
                                 <View>
                                     <Text className="text-2xl font-bold" style={{ color: theme.text }}>
@@ -175,9 +178,10 @@ const CreatorProfile = () => {
                             <View className="flex-row items-center mb-2">
                                 <LinearGradient
                                     colors={['#ec4899', '#db2777']}
-                                    className="w-10 h-10 rounded-lg justify-center items-center mr-3"
+                                    className="w-10 h-10 rounded-lg justify-center items-center"
+                                    style={{ marginRight: 12 }}
                                 >
-                                    <Ionicons name="heart" size={20} color="#fff" />
+                                    <Ionicons name="heart" size={20} color="#fff" style={{padding: 6}}/>
                                 </LinearGradient>
                                 <View>
                                     <Text className="text-2xl font-bold" style={{ color: theme.text }}>
@@ -192,9 +196,10 @@ const CreatorProfile = () => {
                             <View className="flex-row items-center mb-2">
                                 <LinearGradient
                                     colors={['#8b5cf6', '#7c3aed']}
-                                    className="w-10 h-10 rounded-lg justify-center items-center mr-3"
+                                    className="w-10 h-10 rounded-lg justify-center items-center"
+                                    style={{ marginRight: 12 }}
                                 >
-                                    <Ionicons name="chatbubble" size={20} color="#fff" />
+                                    <Ionicons name="chatbubble" size={20} color="#fff" style={{padding: 6}}/>
                                 </LinearGradient>
                                 <View>
                                     <Text className="text-2xl font-bold" style={{ color: theme.text }}>
@@ -212,7 +217,7 @@ const CreatorProfile = () => {
 
                 {data.platforms.length === 0 ? (
                     <View className="rounded-2xl p-8 items-center shadow-sm" style={{ backgroundColor: theme.surface }}>
-                        <Ionicons name="link-outline" size={48} color={theme.textTertiary} />
+                        <Ionicons name="link-outline" size={48} color={theme.textTertiary} style={{padding: 6}}/>
                         <Text className="mt-4 text-base font-semibold" style={{ color: theme.textSecondary }}>
                             {t('creatorsId.no_platforms_connected')}
                         </Text>
@@ -229,19 +234,19 @@ const CreatorProfile = () => {
                                 colors={getPlatformColors(platform.platform)}
                                 start={{ x: 0, y: 0 }}
                                 end={{ x: 1, y: 1 }}
-                                className="p-4"
+                                style={{padding: 12}}
                             >
                                 <View className="flex-row items-center justify-between">
                                     <View className="flex-row items-center flex-1">
                                         <SocialIcon platform={platform.platform} color="white" />
-                                        <View className="ml-3 flex-1">
+                                        <View style={{ marginLeft: 12, flex: 1 }}>
                                             <Text className="text-base font-bold text-white">
                                                 {platform.platform.charAt(0).toUpperCase() + platform.platform.slice(1)}
                                             </Text>
                                             <Text className="text-sm" style={{ color: 'rgba(255,255,255,0.9)' }}>{platform.handle}</Text>
                                         </View>
                                     </View>
-                                    <Ionicons name="arrow-forward" size={20} color="white" />
+                                    <Ionicons name="arrow-forward" size={20} color="white" style={{padding: 6}}/>
                                 </View>
                             </LinearGradient>
 

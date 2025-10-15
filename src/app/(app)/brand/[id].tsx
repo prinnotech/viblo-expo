@@ -74,7 +74,7 @@ const BrandPublicPage = () => {
             // Fetch only ACTIVE campaigns for display
             const { data: activeCampaignsData, error: activeCampaignsError } = await supabase
                 .from('campaigns')
-                .select('id, brand_id, title, description, total_budget, total_paid, rate_per_view, target_niches, status')
+                .select('*')
                 .eq('brand_id', brandId)
                 .eq('status', 'active')
                 .order('created_at', { ascending: false });
@@ -157,7 +157,7 @@ const BrandPublicPage = () => {
     return (
         <ScrollView className="flex-1" style={{ backgroundColor: theme.background }}>
             {/* Header with Back Button */}
-            <View className="px-5 pt-12 pb-4 border-b" style={{ backgroundColor: theme.surface, borderColor: theme.border }}>
+            <View className="px-5 pt-16 pb-4 border-b" style={{ backgroundColor: theme.surface, borderColor: theme.border }}>
                 <TouchableOpacity onPress={() => router.back()} className="mb-4">
                     <Ionicons name="arrow-back" size={24} color={theme.text} />
                 </TouchableOpacity>
@@ -174,7 +174,7 @@ const BrandPublicPage = () => {
                         />
                     ) : (
                         <View className="w-32 h-32 rounded-full border-4 shadow-lg items-center justify-center" style={{ borderColor: theme.surface, backgroundColor: theme.surfaceSecondary }}>
-                            <Ionicons name="business" size={48} color={theme.primary} />
+                            <Ionicons name="business" size={48} color={theme.primary} style={{padding: 6}}/>
                         </View>
                     )}
 
@@ -183,7 +183,7 @@ const BrandPublicPage = () => {
                             {brand.company_name || brand.username}
                         </Text>
                         {brand.is_verified && (
-                            <Ionicons name="checkmark-circle" size={24} color={theme.primary} className="ml-2" />
+                            <Ionicons name="checkmark-circle" size={24} color={theme.primary} className="ml-2" style={{padding: 6}}/>
                         )}
                     </View>
 
@@ -206,7 +206,7 @@ const BrandPublicPage = () => {
                             onPress={() => openURL(brand.website_url!)}
                             className="flex-row items-center mt-3"
                         >
-                            <Ionicons name="globe" size={16} color={theme.primary} />
+                            <Ionicons name="globe" size={16} color={theme.primary} style={{padding: 6}}/>
                             <Text className="text-sm ml-1 underline" style={{ color: theme.primary }}>
                                 {brand.website_url}
                             </Text>
@@ -224,9 +224,10 @@ const BrandPublicPage = () => {
                             <View className="flex-row items-center mb-2">
                                 <LinearGradient
                                     colors={['#3b82f6', '#2563eb']}
-                                    className="w-10 h-10 rounded-lg justify-center items-center mr-3"
+                                    className="w-10 h-10 rounded-lg justify-center items-center"
+                                    style={{marginRight: 12}}
                                 >
-                                    <Ionicons name="megaphone" size={20} color="#fff" />
+                                    <Ionicons name="megaphone" size={20} color="#fff" style={{padding: 6}}/>
                                 </LinearGradient>
                                 <View>
                                     <Text className="text-2xl font-bold" style={{ color: theme.text }}>
@@ -241,9 +242,10 @@ const BrandPublicPage = () => {
                             <View className="flex-row items-center mb-2">
                                 <LinearGradient
                                     colors={['#10b981', '#059669']}
-                                    className="w-10 h-10 rounded-lg justify-center items-center mr-3"
+                                    className="w-10 h-10 rounded-lg justify-center items-center"
+                                    style={{marginRight: 12}}
                                 >
-                                    <Ionicons name="checkmark-circle" size={20} color="#fff" />
+                                    <Ionicons name="checkmark-circle" size={20} color="#fff" style={{padding: 6}}/>
                                 </LinearGradient>
                                 <View>
                                     <Text className="text-2xl font-bold" style={{ color: theme.text }}>
@@ -258,9 +260,10 @@ const BrandPublicPage = () => {
                             <View className="flex-row items-center mb-2">
                                 <LinearGradient
                                     colors={['#f59e0b', '#f97316']}
-                                    className="w-10 h-10 rounded-lg justify-center items-center mr-3"
+                                    className="w-10 h-10 rounded-lg justify-center items-center"
+                                    style={{marginRight: 12}}
                                 >
-                                    <Ionicons name="people" size={20} color="#fff" />
+                                    <Ionicons name="people" size={20} color="#fff" style={{padding: 6}}/>
                                 </LinearGradient>
                                 <View>
                                     <Text className="text-2xl font-bold" style={{ color: theme.text }}>
@@ -275,9 +278,10 @@ const BrandPublicPage = () => {
                             <View className="flex-row items-center mb-2">
                                 <LinearGradient
                                     colors={['#8b5cf6', '#7c3aed']}
-                                    className="w-10 h-10 rounded-lg justify-center items-center mr-3"
+                                    className="w-10 h-10 rounded-lg justify-center items-center"
+                                    style={{marginRight: 12}}
                                 >
-                                    <Ionicons name="cash" size={20} color="#fff" />
+                                    <Ionicons name="cash" size={20} color="#fff" style={{padding: 6}}/>
                                 </LinearGradient>
                                 <View>
                                     <Text className="text-2xl font-bold" style={{ color: theme.text }}>
@@ -296,7 +300,7 @@ const BrandPublicPage = () => {
                     </Text>
                     {campaigns.length === 0 ? (
                         <View className="rounded-2xl p-4 items-center shadow-sm" style={{ backgroundColor: theme.surface }}>
-                            <Ionicons name="megaphone-outline" size={48} color={theme.textTertiary} />
+                            <Ionicons name="megaphone-outline" size={48} color={theme.textTertiary} style={{padding: 6}}/>
                             <Text className="mt-4 text-base font-semibold" style={{ color: theme.textSecondary }}>
                                 {t('brandId.no_active_campaigns')}
                             </Text>

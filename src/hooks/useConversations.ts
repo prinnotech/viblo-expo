@@ -58,7 +58,7 @@ export const useConversations = () => {
                 { event: '*', schema: 'public', table: 'messages' },
                 (payload) => {
                     // Refetch all conversations to get the latest message ordering and read status
-                    console.log('Message change detected, refetching conversations...');
+                    //console.log('Message change detected, refetching conversations...');
                     fetchConversations();
                 }
             )

@@ -24,27 +24,30 @@ function Layout() {
             <Stack.Screen
                 name="connect/index"
                 options={{
-                    presentation: 'modal',
+                    presentation: 'card',
                     headerShown: false,
                     title: t('walletLayout.loading_payments'),
+                    headerBackButtonDisplayMode: 'minimal'
                 }}
             />
 
             <Stack.Screen
                 name="new/index"
                 options={{
-                    presentation: 'modal',
+                    presentation: 'card',
                     headerShown: true,
                     title: t('walletLayout.new_payment_method'),
+                    headerBackButtonDisplayMode: 'minimal'
                 }}
             />
 
             <Stack.Screen
                 name="[id]/index"
                 options={{
-                    presentation: 'modal',
+                    presentation: 'card',
                     headerShown: true,
                     title: t('walletLayout.edit_payment_method'),
+                    headerBackButtonDisplayMode: 'minimal'
                 }}
             />
         </Stack>

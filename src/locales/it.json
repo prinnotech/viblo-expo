@@ -358,7 +358,10 @@
         "post_submitted": "Il tuo post è stato inviato ed è ora live!",
         "video_selection_failed": "Selezione del video non riuscita",
         "update_failed": "Aggiornamento Non Riuscito",
-        "update_error": "Si è verificato un errore. Riprova."
+        "update_error": "Si è verificato un errore. Riprova.",
+        "platformConnectionError": "Connessione alla Piattaforma Richiesta",
+        "connectionMessage": "Devi connettere almeno una delle seguenti piattaforme per candidarti:",
+        "connectionCta": "Connetti Piattaforme"
     },
     "campaignIdPayment": {
         "setting_up_payment": "Impostazione del pagamento...",

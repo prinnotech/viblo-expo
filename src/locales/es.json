@@ -358,7 +358,10 @@
         "post_submitted": "¡Tu publicación ha sido enviada y ahora está en vivo!",
         "video_selection_failed": "Selección de video fallida",
         "update_failed": "Actualización Fallida",
-        "update_error": "Hubo un error. Por favor intenta de nuevo."
+        "update_error": "Hubo un error. Por favor intenta de nuevo.",
+        "platformConnectionError": "Conexión a la Plataforma Requerida",
+        "connectionMessage": "Necesitas conectar al menos una de las siguientes plataformas para aplicar:",
+        "connectionCta": "Conectar Plataformas"
     },
     "campaignIdPayment": {
         "setting_up_payment": "Configurando pago...",

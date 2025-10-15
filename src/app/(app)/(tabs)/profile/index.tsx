@@ -125,17 +125,24 @@ const ProfileScreen = () => {
                         </>
                     )}
 
+                    {/* brand only */}
+                    {isBrand && (
+                        <>
+                            <MenuItem
+                                icon="credit-card"
+                                text={t('profileIndex.payments')}
+                                onPress={() => router.push('/profile/payments')}
+                            />
+                        </>
+                    )}
+
                     {/* Both */}
                     <MenuItem
                         icon="eye"
                         text={t('profileIndex.view_public_profile')}
                         onPress={() => router.push(isBrand ? `/brand/${profile?.id}` : `/creators/${profile?.id}`)}
                     />
-                    <MenuItem
-                        icon="credit-card"
-                        text={t('profileIndex.payments')}
-                        onPress={() => router.push('/profile/payments')}
-                    />
+
                     <MenuItem
                         icon="settings"
                         text={t('profileIndex.settings')}

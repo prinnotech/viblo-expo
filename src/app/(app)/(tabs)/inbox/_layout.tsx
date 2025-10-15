@@ -30,26 +30,28 @@ function Layout() {
                 name="[id]/index"
                 options={{
                     // This makes the screen slide up from the bottom
-                    presentation: 'modal',
+                    presentation: 'card',
 
                     // This ensures the header is visible
                     headerShown: true,
 
                     // Set a default title that shows while data is loading
                     title: t('inboxLayout.loading_messages'),
+                    headerBackButtonDisplayMode: 'minimal'
                 }}
             />
             <Stack.Screen
                 name="new/index"
                 options={{
                     // This makes the screen slide up from the bottom
-                    presentation: 'modal',
+                    presentation: 'card',
 
                     // This ensures the header is visible
                     headerShown: true,
 
                     // Set a default title that shows while data is loading
                     title: t('inboxLayout.create_new_message'),
+                    headerBackButtonDisplayMode: 'minimal'
                 }}
             />
         </Stack>

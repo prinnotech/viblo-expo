@@ -9,7 +9,8 @@ import {
     Image,
     KeyboardAvoidingView,
     Platform,
-    RefreshControl
+    RefreshControl,
+    Keyboard
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
@@ -22,7 +23,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 const ChatScreen = () => {
     const { id } = useLocalSearchParams();
     const conversationId = Array.isArray(id) ? id[0] : id;
-    const { session } = useAuth(); // Get current user's session
+    const { session } = useAuth();
     const { messages, otherParticipant, loading, error, sendMessage, refetch } = useMessages(conversationId);
     const [newMessage, setNewMessage] = useState('');
     const [refreshing, setRefreshing] = useState(false);
@@ -33,12 +34,9 @@ const ChatScreen = () => {
     const { t } = useLanguage();
 
     useEffect(() => {
-        // Scroll to bottom when new messages arrive
         if (messages.length > 0) {
             flatListRef.current?.scrollToEnd({ animated: true });
         }
-
-        // Dynamically set the header title
         navigation.setOptions({ title: otherParticipant?.username || t('inboxId.chat') });
     }, [messages, otherParticipant, navigation, t]);
 
@@ -46,6 +44,7 @@ const ChatScreen = () => {
         if (newMessage.trim()) {
             sendMessage(newMessage);
             setNewMessage('');
+            Keyboard.dismiss(); // Dismiss keyboard after sending
         }
     };
 
@@ -64,11 +63,11 @@ const ChatScreen = () => {
     }
 
     return (
-        <SafeAreaView edges={['bottom']} className="flex-1" style={{ backgroundColor: theme.surface }}>
+        <View className="flex-1" style={{ backgroundColor: theme.background }}>
             <KeyboardAvoidingView
-                behavior={Platform.OS === "ios" ? "padding" : "height"}
+                behavior={Platform.OS === "ios" ? "padding" : undefined}
                 className="flex-1"
-                keyboardVerticalOffset={90}
+                keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 0}
             >
                 <FlatList
                     ref={flatListRef}
@@ -94,7 +93,8 @@ const ChatScreen = () => {
                             </View>
                         );
                     }}
-                    contentContainerStyle={{ paddingVertical: 10, backgroundColor: theme.background }}
+                    contentContainerStyle={{ paddingVertical: 10 }}
+                    style={{ backgroundColor: theme.background }}
                     refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[theme.primary]} tintColor={theme.primary} />}
                 />
 
@@ -107,14 +107,16 @@ const ChatScreen = () => {
                         placeholderTextColor={theme.textTertiary}
                         className="flex-1 rounded-full h-10 px-4"
                         style={{ backgroundColor: theme.surfaceSecondary, color: theme.text }}
-                        multiline
+                        onSubmitEditing={handleSend}
+                        blurOnSubmit={false}
+                        returnKeyType="send"
                     />
                     <TouchableOpacity onPress={handleSend} className="p-2 ml-2">
                         <Feather name="send" size={24} color={theme.primary} />
                     </TouchableOpacity>
                 </View>
             </KeyboardAvoidingView>
-        </SafeAreaView>
+        </View>
     );
 };
 

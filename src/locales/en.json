@@ -380,7 +380,10 @@
         "post_submitted": "Your post has been submitted and is now live!",
         "video_selection_failed": "Video selection failed",
         "update_failed": "Update Failed",
-        "update_error": "There was an error. Please try again."
+        "update_error": "There was an error. Please try again.",
+        "platformConnectionError": "Platform Connection Required",
+        "connectionMessage": "You need to connect at least one of the following platforms to apply:",
+        "connectionCta": "Connect Platforms"
     },
     "campaignIdPayment": {
         "setting_up_payment": "Setting up payment...",

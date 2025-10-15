@@ -27,45 +27,50 @@ function Layout() {
             <Stack.Screen
                 name="edit/index"
                 options={{
-                    presentation: 'modal',
+                    presentation: 'card',
                     headerShown: true,
                     title: t('profileLayout.edit_profile'),
+                    headerBackButtonDisplayMode: 'minimal'
                 }}
             />
 
             <Stack.Screen
                 name="connections/index"
                 options={{
-                    presentation: 'modal',
+                    presentation: 'card',
                     headerShown: true,
                     title: t('profileLayout.connected_accounts'),
+                    headerBackButtonDisplayMode: 'minimal'
                 }}
             />
 
             <Stack.Screen
                 name="analytics/index"
                 options={{
-                    presentation: 'modal',
+                    presentation: 'card',
                     headerShown: true,
                     title: t('profileLayout.your_stats'),
+                    headerBackButtonDisplayMode: 'minimal'
                 }}
             />
 
             <Stack.Screen
                 name="payments"
                 options={{
-                    presentation: 'modal',
+                    presentation: 'card',
                     headerShown: true,
                     title: t('profileLayout.payments'),
+                    headerBackButtonDisplayMode: 'minimal'
                 }}
             />
 
             <Stack.Screen
                 name="settings/index"
                 options={{
-                    presentation: 'modal',
+                    presentation: 'card',
                     headerShown: true,
                     title: t('profileLayout.settings'),
+                    headerBackButtonDisplayMode: 'minimal'
                 }}
             />
         </Stack>

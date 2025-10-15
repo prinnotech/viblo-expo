@@ -27,9 +27,10 @@ export default function CampaignsLayout() {
             <Stack.Screen
                 name="[id]/index"
                 options={{
-                    presentation: 'modal',
+                    presentation: 'card',
                     headerShown: true,
                     title: t('campaignsLayout.loading_campaign'),
+                    headerBackButtonDisplayMode: 'minimal'
                 }}
             />
 
@@ -37,9 +38,10 @@ export default function CampaignsLayout() {
             <Stack.Screen
                 name="[id]/apply"
                 options={{
-                    presentation: 'modal',
+                    presentation: 'card',
                     headerShown: true,
                     title: t('campaignsLayout.apply_to_campaign'),
+                    headerBackButtonDisplayMode: 'minimal'
                 }}
             />
 
@@ -47,9 +49,10 @@ export default function CampaignsLayout() {
             <Stack.Screen
                 name="[id]/edit"
                 options={{
-                    presentation: 'modal',
+                    presentation: 'card',
                     headerShown: true,
                     title: t('campaignsLayout.edit_campaign'),
+                    headerBackButtonDisplayMode: 'minimal'
                 }}
             />
 
@@ -57,9 +60,10 @@ export default function CampaignsLayout() {
             <Stack.Screen
                 name="create/index"
                 options={{
-                    presentation: 'modal',
+                    presentation: 'card',
                     headerShown: true,
                     title: t('campaignsLayout.create_campaign'),
+                    headerBackButtonDisplayMode: 'minimal'
                 }}
             />
 
@@ -67,9 +71,10 @@ export default function CampaignsLayout() {
             <Stack.Screen
                 name="[id]/payment"
                 options={{
-                    presentation: 'modal',
+                    presentation: 'card',
                     headerShown: false,
                     title: t('campaignsLayout.checkout'),
+                    headerBackButtonDisplayMode: 'minimal'
                 }}
             />
         </Stack>
