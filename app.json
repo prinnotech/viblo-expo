@@ -41,13 +41,6 @@
                     "enableGooglePay": true
                 }
             ],
-            [
-                "@stripe/stripe-react-native",
-                {
-                    "merchantIdentifier": "merchant.io.viblo",
-                    "enableGooglePay": true
-                }
-            ],
             "@react-native-google-signin/google-signin",
             "expo-localization",
             "expo-web-browser"
@@ -97,10 +90,10 @@
                 ]
             },
             "splash": {
-                "image": "./assets/splash.png",
+                "image": "./assets/adaptive-icon.png",
                 "resizeMode": "contain",
                 "backgroundColor": "#4A90E2",
-                "tabletImage": "./assets/splash.png"
+                "tabletImage": "./assets/adaptive-icon.png"
             }
         }
     }
