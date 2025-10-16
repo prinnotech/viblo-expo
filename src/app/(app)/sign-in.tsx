@@ -1,5 +1,5 @@
 import { Alert, Image, View, AppState, TextInput, Text, TouchableOpacity, ActivityIndicator, KeyboardAvoidingView, Platform } from 'react-native'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { supabase } from '@/lib/supabase'
 import { Link } from 'expo-router'
@@ -7,6 +7,8 @@ import PasswordInput from '@/components/PasswordInput'
 import { useTheme } from '@/contexts/ThemeContext'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { Feather } from '@expo/vector-icons'
+import AppleAuthButton from '@/components/AppleAuthButton'
+import * as AppleAuthentication from 'expo-apple-authentication';
 
 const imageFavicon = require('@/../assets/favicon.png')
 
@@ -37,6 +39,19 @@ const SignIn = () => {
     const [password, setPassword] = useState('')
     const [loading, setLoading] = useState(false)
     const [googleLoading, setGoogleLoading] = useState(false)
+    const [appleLoading, setAppleLoading] = useState(false)
+    const [isAppleAuthAvailable, setIsAppleAuthAvailable] = useState(false);
+
+    // NEW: Check if Apple Sign In is available on component mount
+    useEffect(() => {
+        const checkAvailability = async () => {
+            if (Platform.OS === 'ios') {
+                const available = await AppleAuthentication.isAvailableAsync();
+                setIsAppleAuthAvailable(available);
+            }
+        };
+        checkAvailability();
+    }, []);
 
     async function signInWithEmail() {
         setLoading(true)
@@ -79,6 +94,43 @@ const SignIn = () => {
         }
     }
 
+    // NEW: Function to handle Apple Sign In
+    async function signInWithApple() {
+        try {
+            setAppleLoading(true);
+            const credential = await AppleAuthentication.signInAsync({
+                requestedScopes: [
+                    AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
+                    AppleAuthentication.AppleAuthenticationScope.EMAIL,
+                ],
+            });
+
+            if (credential.identityToken) {
+                const { error } = await supabase.auth.signInWithIdToken({
+                    provider: 'apple',
+                    token: credential.identityToken,
+                });
+
+                if (error) {
+                    Alert.alert('Error', `Failed to sign in with Apple: ${error.message}`);
+                }
+                // Successful sign-in will be handled by Supabase's auth listener
+            } else {
+                Alert.alert('Error', 'No identity token received from Apple.');
+            }
+
+        } catch (e: any) {
+            if (e.code === 'ERR_REQUEST_CANCELED') {
+                console.log('User cancelled Apple Sign In.');
+            } else {
+                console.error('Apple Sign-In Error:', e);
+                Alert.alert('Error', 'An unexpected error occurred during sign-in.');
+            }
+        } finally {
+            setAppleLoading(false);
+        }
+    }
+
     return (
         <SafeAreaView className="flex-1" style={{ backgroundColor: theme.background }}>
             <KeyboardAvoidingView
@@ -97,6 +149,14 @@ const SignIn = () => {
                     <Text className="text-3xl font-bold text-center mb-6" style={{ color: theme.text }}>
                         {t('signin.welcome_back')}
                     </Text>
+
+                    {/* NEW: Render Apple Button if available */}
+                    {isAppleAuthAvailable && (
+                        <AppleAuthButton 
+                            isLoading={appleLoading}
+                            onPress={signInWithApple}
+                        />
+                    )}
 
                     {/* Only show Google button if module is available */}
                     {isGoogleSignInAvailable && (
