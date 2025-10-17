@@ -19,6 +19,7 @@ import { SocialIcon } from '@/components/getSocialIcons';
 import { SocialPlatform } from '@/lib/enum_types';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { makeRedirectUri } from 'expo-auth-session';
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -98,6 +99,14 @@ const ConnectionsPage = () => {
         try {
             const backendUrl = process.env.EXPO_PUBLIC_BACKEND_URL || 'https://viblo-backend-production.up.railway.app';
 
+            // Create dynamic redirect URI based on environment
+            const redirectUri = __DEV__
+                ? 'exp://192.168.1.214:8081' // Development - goes back to app root
+                : makeRedirectUri({
+                    scheme: 'viblo',
+                    path: 'profile/connections' // Will create: viblo://profile/connections
+                });
+
             let authUrl = '';
 
             switch (platformId) {
@@ -118,7 +127,7 @@ const ConnectionsPage = () => {
 
             const result = await WebBrowser.openAuthSessionAsync(
                 authUrl,
-                'exp://192.168.1.214:8081'
+                redirectUri
             );
 
             if (result.type === 'success' || result.type === 'dismiss') {

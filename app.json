@@ -58,7 +58,6 @@
             "versionCode": 2,
             "googleServicesFile": "./google-services.json",
             "permissions": [
-                "android.permission.RECORD_AUDIO",
                 "android.permission.POST_NOTIFICATIONS",
                 "android.permission.RECEIVE_BOOT_COMPLETED",
                 "android.permission.VIBRATE",
@@ -78,7 +77,24 @@
                 "xhdpi": "./assets/adaptive-icon.png",
                 "xxhdpi": "./assets/adaptive-icon.png",
                 "xxxhdpi": "./assets/adaptive-icon.png"
-            }
+            },
+            "intentFilters": [
+                {
+                    "action": "VIEW",
+                    "autoVerify": true,
+                    "data": [
+                        {
+                            "scheme": "https",
+                            "host": "viblo.io",
+                            "pathPrefix": "/auth"
+                        }
+                    ],
+                    "category": [
+                        "BROWSABLE",
+                        "DEFAULT"
+                    ]
+                }
+            ]
         },
         "ios": {
             "bundleIdentifier": "io.viblo.app",
@@ -95,7 +111,10 @@
                 "resizeMode": "contain",
                 "backgroundColor": "#4A90E2",
                 "tabletImage": "./assets/adaptive-icon.png"
-            }
+            },
+            "associatedDomains": [
+                "applinks:viblo.io"
+            ]
         }
     }
 }
