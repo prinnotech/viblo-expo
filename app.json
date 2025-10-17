@@ -86,7 +86,7 @@
                         {
                             "scheme": "https",
                             "host": "viblo.io",
-                            "pathPrefix": "/auth"
+                            "pathPrefix": "/profile/connections"
                         }
                     ],
                     "category": [
