@@ -55,7 +55,7 @@
         },
         "android": {
             "package": "io.viblo.app",
-            "versionCode": 2,
+            "versionCode": 3,
             "googleServicesFile": "./google-services.json",
             "permissions": [
                 "android.permission.POST_NOTIFICATIONS",
@@ -98,7 +98,7 @@
         },
         "ios": {
             "bundleIdentifier": "io.viblo.app",
-            "buildNumber": "6",
+            "buildNumber": "8",
             "icon": "./assets/icon.png",
             "infoPlist": {
                 "ITSAppUsesNonExemptEncryption": false,
