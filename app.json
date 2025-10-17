@@ -82,7 +82,7 @@
         },
         "ios": {
             "bundleIdentifier": "io.viblo.app",
-            "buildNumber": "1",
+            "buildNumber": "6",
             "icon": "./assets/icon.png",
             "infoPlist": {
                 "ITSAppUsesNonExemptEncryption": false,
