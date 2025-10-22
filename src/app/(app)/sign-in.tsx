@@ -51,6 +51,14 @@ const SignIn = () => {
             }
         };
         checkAvailability();
+
+        if (isGoogleSignInAvailable && GoogleSignin) {
+            GoogleSignin.configure({
+                webClientId: '86938027732-sn679b2rmn87291offtgsij7ktueldgr.apps.googleusercontent.com',
+                offlineAccess: true,
+            });
+        }
+
     }, []);
 
     async function signInWithEmail() {
@@ -152,7 +160,7 @@ const SignIn = () => {
 
                     {/* NEW: Render Apple Button if available */}
                     {isAppleAuthAvailable && (
-                        <AppleAuthButton 
+                        <AppleAuthButton
                             isLoading={appleLoading}
                             onPress={signInWithApple}
                         />

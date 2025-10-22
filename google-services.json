@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "86938027732",
+    "project_id": "viblo-472617",
+    "storage_bucket": "viblo-472617.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:86938027732:android:1a653cfdb2d68c8a5b5d41",
+        "android_client_info": {
+          "package_name": "io.viblo.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "86938027732-fs2unc6qgklic9rep2s58ci30hk235lk.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "io.viblo.app",
+            "certificate_hash": "a16c3c58ca8736edd88dbdcbadd00451cc112891"
+          }
+        },
+        {
+          "client_id": "86938027732-gbhqrbghn4do6et0648g3mcpu3hq2d49.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "io.viblo.app",
+            "certificate_hash": "d531fd1cab541df969f8f577b359f14332a929a2"
+          }
+        },
+        {
+          "client_id": "86938027732-krdo9eg2pbldgarekfct9mcfgj2evm5e.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCTno013yXeGqawDB7aDxlDlGZbytrWP7w"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "86938027732-krdo9eg2pbldgarekfct9mcfgj2evm5e.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
